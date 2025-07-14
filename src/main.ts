@@ -1,3 +1,5 @@
+import { parseFrames, Frame } from './frame-utils';
+
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
 
@@ -5,9 +7,8 @@ const spriteSheet = new Image();
 spriteSheet.src = '/Overlord.png';
 
 const background = new Image();
-background.src = '/0_cryoroom.png';
 
-type Frame = { x: number; y: number; w: number; h: number; duration: number };
+background.src = '/0_cryoroom.png';
 
 let frames: Frame[] = [];
 let frameIndex = 0;
@@ -40,16 +41,7 @@ Promise.all([
     background.onload = () => resolve();
   })
 ]).then(([data]) => {
-  frames = Object.keys(data.frames).map(key => {
-    const frame = data.frames[key];
-    return {
-      x: frame.frame.x,
-      y: frame.frame.y,
-      w: frame.frame.w,
-      h: frame.frame.h,
-      duration: frame.duration
-    } as Frame;
-  });
+  frames = parseFrames(data);
   canvas.width = background.width;
   canvas.height = background.height;
   function resizeCanvas() {
