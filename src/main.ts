@@ -1,4 +1,5 @@
 import { parseFrames, Frame } from './frame-utils';
+import overlordData from '../public/Overlord.json';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -33,15 +34,14 @@ function draw(timestamp: number) {
 }
 
 Promise.all([
-  fetch('/Overlord.json').then(r => r.json()),
   new Promise<void>(resolve => {
     spriteSheet.onload = () => resolve();
   }),
   new Promise<void>(resolve => {
     background.onload = () => resolve();
   })
-]).then(([data]) => {
-  frames = parseFrames(data);
+]).then(() => {
+  frames = parseFrames(overlordData);
   canvas.width = background.width;
   canvas.height = background.height;
   function resizeCanvas() {
