@@ -4,30 +4,40 @@ const ctx = canvas.getContext('2d');
 const spriteSheet = new Image();
 spriteSheet.src = 'Overlord.png';
 
-const frameWidth = 256;
-const frameHeight = 256;
-const frames = [
-  {x: 0, y: 0},
-  {x: frameWidth, y: 0}
-];
-
+let frames = [];
 let frameIndex = 0;
 let lastSwitch = 0;
-const frameInterval = 500; // ms
 
 function draw(timestamp) {
-  if (timestamp - lastSwitch > frameInterval) {
+  const f = frames[frameIndex];
+  if (timestamp - lastSwitch > f.duration) {
     frameIndex = (frameIndex + 1) % frames.length;
     lastSwitch = timestamp;
   }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const f = frames[frameIndex];
-  ctx.drawImage(spriteSheet,
-    f.x, f.y, frameWidth, frameHeight,
-    0, 0, frameWidth, frameHeight);
+  ctx.drawImage(
+    spriteSheet,
+    f.x, f.y, f.w, f.h,
+    0, 0, f.w, f.h
+  );
   requestAnimationFrame(draw);
 }
 
-spriteSheet.onload = () => {
+Promise.all([
+  fetch('Overlord.json').then(r => r.json()),
+  new Promise(resolve => spriteSheet.onload = resolve)
+]).then(([data]) => {
+  frames = Object.keys(data.frames).map(key => {
+    const frame = data.frames[key];
+    return {
+      x: frame.frame.x,
+      y: frame.frame.y,
+      w: frame.frame.w,
+      h: frame.frame.h,
+      duration: frame.duration
+    };
+  });
+  canvas.width = frames[0].w;
+  canvas.height = frames[0].h;
   requestAnimationFrame(draw);
-};
+});
