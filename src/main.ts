@@ -1,17 +1,19 @@
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('game') as HTMLCanvasElement;
+const ctx = canvas.getContext('2d')!;
 
 const spriteSheet = new Image();
-spriteSheet.src = 'Overlord.png';
+spriteSheet.src = '/Overlord.png';
 
 const background = new Image();
-background.src = '0_cryoroom.png';
+background.src = '/0_cryoroom.png';
 
-let frames = [];
+type Frame = { x: number; y: number; w: number; h: number; duration: number };
+
+let frames: Frame[] = [];
 let frameIndex = 0;
 let lastSwitch = 0;
 
-function draw(timestamp) {
+function draw(timestamp: number) {
   const f = frames[frameIndex];
   if (timestamp - lastSwitch > f.duration) {
     frameIndex = (frameIndex + 1) % frames.length;
@@ -20,7 +22,6 @@ function draw(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   const x = (canvas.width - f.w) / 2;
-  // Position Overlord so its bottom sits at the vertical center of the canvas
   const y = (canvas.height / 2) - f.h;
   ctx.drawImage(
     spriteSheet,
@@ -31,9 +32,13 @@ function draw(timestamp) {
 }
 
 Promise.all([
-  fetch('Overlord.json').then(r => r.json()),
-  new Promise(resolve => spriteSheet.onload = resolve),
-  new Promise(resolve => background.onload = resolve)
+  fetch('/Overlord.json').then(r => r.json()),
+  new Promise<void>(resolve => {
+    spriteSheet.onload = () => resolve();
+  }),
+  new Promise<void>(resolve => {
+    background.onload = () => resolve();
+  })
 ]).then(([data]) => {
   frames = Object.keys(data.frames).map(key => {
     const frame = data.frames[key];
@@ -43,7 +48,7 @@ Promise.all([
       w: frame.frame.w,
       h: frame.frame.h,
       duration: frame.duration
-    };
+    } as Frame;
   });
   canvas.width = background.width;
   canvas.height = background.height;

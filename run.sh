@@ -1,13 +1,12 @@
-python3 -m http.server 8000 &             # start server in background
+npm run dev &
 PID=$!
 
 sleep 1
 
-# Detect macOS vs. everything else
-if [[ "$(uname)" == "Darwin" ]]; then     # or: [[ "$OSTYPE" == darwin* ]]
-  open "http://localhost:8000"            # macOS: launch default browser
+if [[ "$(uname)" == "Darwin" ]]; then
+  open "http://localhost:5173"
 else
-  xdg-open "http://localhost:8000"        # Linux/BSD desktops
+  xdg-open "http://localhost:5173"
 fi
 
-wait $PID                                 # keep script alive until server exits
+wait $PID
