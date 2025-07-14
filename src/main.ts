@@ -52,5 +52,15 @@ Promise.all([
   });
   canvas.width = background.width;
   canvas.height = background.height;
+  function resizeCanvas() {
+    const scale = Math.min(
+      window.innerWidth / canvas.width,
+      window.innerHeight / canvas.height
+    );
+    canvas.style.width = canvas.width * scale + 'px';
+    canvas.style.height = canvas.height * scale + 'px';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();  
   requestAnimationFrame(draw);
 });
