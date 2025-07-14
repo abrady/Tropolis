@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 188, "h": 1024 },
     "sourceSize": { "w": 188, "h": 1024 },
-    "duration": 2000
+    "duration": 5000
    },
    "Overlord 1.aseprite": {
     "frame": { "x": 188, "y": 0, "w": 188, "h": 1024 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 188, "h": 1024 },
     "sourceSize": { "w": 188, "h": 1024 },
-    "duration": 50
+    "duration": 30
    }
  },
  "meta": {
