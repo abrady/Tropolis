@@ -1,0 +1,42 @@
+{ "frames": {
+   "Overlord 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 188, "h": 1024 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 188, "h": 1024 },
+    "sourceSize": { "w": 188, "h": 1024 },
+    "duration": 2000
+   },
+   "Overlord 1.aseprite": {
+    "frame": { "x": 188, "y": 0, "w": 188, "h": 1024 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 188, "h": 1024 },
+    "sourceSize": { "w": 188, "h": 1024 },
+    "duration": 50
+   },
+   "Overlord 2.aseprite": {
+    "frame": { "x": 376, "y": 0, "w": 188, "h": 1024 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 188, "h": 1024 },
+    "sourceSize": { "w": 188, "h": 1024 },
+    "duration": 50
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.14.4-arm64",
+  "image": "Overlord.png",
+  "format": "RGBA8888",
+  "size": { "w": 564, "h": 1024 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Sprite Sheet", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
