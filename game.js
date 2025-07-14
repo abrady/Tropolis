@@ -20,7 +20,8 @@ function draw(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   const x = (canvas.width - f.w) / 2;
-  const y = canvas.height - f.h;
+  // Position Overlord so its bottom sits at the vertical center of the canvas
+  const y = (canvas.height / 2) - f.h;
   ctx.drawImage(
     spriteSheet,
     f.x, f.y, f.w, f.h,
