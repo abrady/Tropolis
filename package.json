@@ -11,6 +11,9 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "typescript": "^5.8.3",
     "vite": "^7.0.4",
