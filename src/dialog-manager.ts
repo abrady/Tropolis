@@ -5,10 +5,16 @@ export interface DialogueOption {
   detour?: boolean;
 }
 
+export interface DialogueCommand {
+  name: string;
+  args: string[];
+}
+
 export interface DialogueContent {
   lines: string[];
   options: DialogueOption[];
   next: string | null;
+  command?: DialogueCommand | null;
 }
 
 import { parseYarn, YarnNode } from './yarn-utils';
@@ -37,7 +43,7 @@ export class DialogManager {
   }
 
   getCurrent(): DialogueContent {
-    if (!this.current) return { lines: [], options: [], next: null };
+    if (!this.current) return { lines: [], options: [], next: null, command: null };
     const content = parseNodeBody(this.nodes[this.current].body, this.visited);
     if (!content.next && content.options.length === 0 && this.returnStack.length > 0) {
       return { ...content, next: '__return__' };
@@ -77,6 +83,7 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
   const texts: string[] = [];
   const options: DialogueOption[] = [];
   let next: string | null = null;
+  let command: DialogueCommand | null = null;
   let i = 0;
 
   // gather dialogue lines until options or jump
@@ -87,6 +94,14 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
       const m = trimmed.match(/<<\s*jump\s+([A-Za-z0-9_]+)\s*>>/);
       if (m) {
         next = m[1];
+        i++;
+        continue;
+      }
+      const puzzleMatch = trimmed.match(/<<\s*loadPuzzle\s+([A-Za-z0-9_]+)\s*>>/);
+      if (puzzleMatch) {
+        command = { name: 'loadPuzzle', args: [puzzleMatch[1]] };
+        i++;
+        continue;
       }
       i++;
       continue;
@@ -126,6 +141,6 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
       options.push({ text, target, visited: target ? visitedNodes.has(target) : false, detour });
     }
   }
-  return { lines: texts, options, next };
+  return { lines: texts, options, next, command };
 }
 
