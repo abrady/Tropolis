@@ -1,0 +1,41 @@
+title: CryoRoom_Intro
+tags: cryo, intro
+---
+Overlord: Wake up 11235.
+Overlord: Wake up 11235. The city needs you.
+<<jump CryoRoom_Branch>>
+===
+
+title: CryoRoom_Branch
+You: *groan* 
+---
+-> Where am I?
+    <<jump WhereAmI>>
+-> What's going on?
+<<jump CryoRoom_WhatGoingOn>>
+-> {CryoRoom_WhatGoingOn} Let's continue
+<<jump LetsContinue>>
+===
+
+title: WhereAmI
+---
+Overlord: You are in the cryo room. You were put into stasis to protect you from the chaos outside.
+Overlord: You were one of the few people selected to be preserved for the rebuilding of the city.
+    <<jump CryoRoom>>
+===
+
+title: CryoRoom_WhatGoingOn
+---
+Overlord: The city needs you to repair critical systems that have started to fail.
+Overlord: You were selected because of your skills.
+
+<<jump CryoRoom_Branch>>
+===
+
+title: LetsContinue
+---
+Overlord: Good. Your first task is to repair the power grid in Sector 7.
+Overlord: The maintenance tunnels will take you there safely.
+Overlord: Be careful - some areas may still be unstable.
+You: Understood. I'm ready.
+===
