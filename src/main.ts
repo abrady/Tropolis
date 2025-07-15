@@ -1,15 +1,17 @@
 import { parseFrames, Frame } from './frame-utils';
-import overlordData from '../public/Overlord.json';
+import overlordData from './data/Overlord.json';
+import overlordImg from './data/Overlord.png';
+import cryoroomImg from './data/0_cryoroom.png';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
 
 const spriteSheet = new Image();
-spriteSheet.src = '/Overlord.png';
+spriteSheet.src = overlordImg;
 
 const background = new Image();
 
-background.src = '/0_cryoroom.png';
+background.src = cryoroomImg;
 
 let frames: Frame[] = [];
 let frameIndex = 0;
