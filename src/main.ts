@@ -149,6 +149,10 @@ Promise.all([
         buttons.push(btn);
       });
       let selected = 0;
+      const firstUnvisited = content.options.findIndex(o => !o.visited);
+      if (firstUnvisited >= 0) {
+        selected = firstUnvisited;
+      }
       const updateSelected = () => {
         buttons.forEach((b, i) => {
           if (i === selected) {
