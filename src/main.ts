@@ -98,6 +98,9 @@ Promise.all([
       content.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.textContent = opt.text;
+        if (opt.visited) {
+          btn.classList.add('visited');
+        }
         btn.onclick = () => {
           manager.choose(idx);
           renderDialog();

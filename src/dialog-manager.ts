@@ -1,6 +1,7 @@
 export interface DialogueOption {
   text: string;
   target: string | null;
+  visited?: boolean;
 }
 
 export interface DialogueContent {
@@ -54,7 +55,7 @@ export class DialogManager {
   }
 }
 
-function parseNodeBody(body: string, visited: Set<string>): DialogueContent {
+function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent {
   const lines = body.split(/\r?\n/);
   const texts: string[] = [];
   const options: DialogueOption[] = [];
@@ -88,7 +89,7 @@ function parseNodeBody(body: string, visited: Set<string>): DialogueContent {
       if (gateMatch) {
         const condition = gateMatch[1];
         text = gateMatch[2].trim();
-        if (!visited.has(condition)) {
+        if (!visitedNodes.has(condition)) {
           // skip option if condition not met
           // also skip the following line with jump
           if (i + 1 < lines.length && lines[i + 1].trim().startsWith('<<')) i++;
@@ -103,7 +104,7 @@ function parseNodeBody(body: string, visited: Set<string>): DialogueContent {
           i++; // consume jump line
         }
       }
-      options.push({ text, target });
+      options.push({ text, target, visited: target ? visitedNodes.has(target) : false });
     }
   }
   return { lines: texts, options, next };
