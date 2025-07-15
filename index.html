@@ -8,17 +8,23 @@
       margin: 0;
       background: #000;
     }
+    #game-container {
+      position: relative;
+      width: fit-content;
+      margin: auto;
+    }
     canvas {
       display: block;
-      margin: auto;
     }
   </style>
 </head>
 <body>
-  <canvas id="game"></canvas>
-  <div id="dialogue" style="position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.8);color:#fff;font-family:sans-serif;padding:10px;">
-    <div id="dialogue-text"></div>
-    <div id="dialogue-options" style="margin-top:8px;"></div>
+  <div id="game-container">
+    <canvas id="game"></canvas>
+    <div id="dialogue" style="position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.8);color:#fff;font-family:sans-serif;padding:10px;">
+      <div id="dialogue-text"></div>
+      <div id="dialogue-options" style="margin-top:8px;"></div>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

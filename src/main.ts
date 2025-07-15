@@ -6,6 +6,7 @@ import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
 import { DialogManager } from './dialog-manager';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
+const container = document.getElementById('game-container') as HTMLDivElement;
 const ctx = canvas.getContext('2d')!;
 
 const spriteSheet = new Image();
@@ -53,8 +54,12 @@ Promise.all([
       window.innerWidth / canvas.width,
       window.innerHeight / canvas.height
     );
-    canvas.style.width = canvas.width * scale + 'px';
-    canvas.style.height = canvas.height * scale + 'px';
+    const w = canvas.width * scale;
+    const h = canvas.height * scale;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    container.style.width = w + 'px';
+    container.style.height = h + 'px';
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
