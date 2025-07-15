@@ -51,3 +51,124 @@ export function parseYarn(content: string): YarnNode[] {
   }
   return nodes;
 }
+
+interface NodeEdges {
+  targets: { target: string; detour: boolean }[];
+  command: string | null;
+}
+
+function parseEdges(body: string): NodeEdges {
+  const lines = body.split(/\r?\n/);
+  const targets: { target: string; detour: boolean }[] = [];
+  let command: string | null = null;
+  let i = 0;
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('->')) break;
+    const cmdMatch = trimmed.match(/<<\s*(jump|detour)\s+([A-Za-z0-9_]+)\s*>>/);
+    if (cmdMatch) {
+      targets.push({ target: cmdMatch[2], detour: cmdMatch[1] === 'detour' });
+      i++;
+      continue;
+    }
+    const puzzleMatch = trimmed.match(/<<\s*loadPuzzle\s+([A-Za-z0-9_]+)\s*>>/);
+    if (puzzleMatch) {
+      command = 'loadPuzzle';
+      i++;
+      continue;
+    }
+    i++;
+  }
+
+  for (; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (!trimmed) continue;
+    if (trimmed.startsWith('->')) {
+      if (i + 1 < lines.length) {
+        const nextCmd = lines[i + 1].trim().match(/<<\s*(jump|detour)\s+([A-Za-z0-9_]+)\s*>>/);
+        if (nextCmd) {
+          targets.push({ target: nextCmd[2], detour: nextCmd[1] === 'detour' });
+          i++;
+        }
+      }
+    }
+  }
+  return { targets, command };
+}
+
+export interface YarnValidationResult {
+  unreachable: string[];
+  nonterminating: string[];
+}
+
+export function validateYarn(nodes: YarnNode[], start: string, terminatingCommands: string[] = ['loadPuzzle']): YarnValidationResult {
+  const nodeMap = new Map<string, YarnNode>();
+  for (const n of nodes) nodeMap.set(n.title, n);
+
+  const edges = new Map<string, string[]>();
+  const finalNodes = new Set<string>();
+
+  const addEdge = (from: string, to: string) => {
+    if (!edges.has(from)) edges.set(from, []);
+    edges.get(from)!.push(to);
+  };
+
+  for (const n of nodes) {
+    const { targets, command } = parseEdges(n.body);
+    if (command && terminatingCommands.includes(command)) {
+      finalNodes.add(n.title);
+    }
+    for (const t of targets) {
+      addEdge(n.title, t.target);
+      if (t.detour) addEdge(t.target, n.title);
+    }
+  }
+
+  const reachable = new Set<string>();
+  const queue: string[] = [];
+  if (nodeMap.has(start)) queue.push(start);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (reachable.has(cur)) continue;
+    reachable.add(cur);
+    for (const to of edges.get(cur) ?? []) {
+      if (!reachable.has(to)) queue.push(to);
+    }
+  }
+
+  const unreachable: string[] = [];
+  for (const n of nodes) {
+    const tags = n.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    if (!reachable.has(n.title) && !tags.includes('disabled')) {
+      unreachable.push(n.title);
+    }
+    if (tags.includes('final')) finalNodes.add(n.title);
+  }
+
+  const reverse = new Map<string, string[]>();
+  for (const [from, tos] of edges) {
+    for (const to of tos) {
+      if (!reverse.has(to)) reverse.set(to, []);
+      reverse.get(to)!.push(from);
+    }
+  }
+
+  const canReachFinal = new Set<string>(finalNodes);
+  const q = Array.from(finalNodes);
+  while (q.length) {
+    const cur = q.shift()!;
+    for (const prev of reverse.get(cur) ?? []) {
+      if (!canReachFinal.has(prev)) {
+        canReachFinal.add(prev);
+        q.push(prev);
+      }
+    }
+  }
+
+  const nonterminating: string[] = [];
+  for (const n of reachable) {
+    if (!canReachFinal.has(n)) nonterminating.push(n);
+  }
+
+  return { unreachable, nonterminating };
+}
