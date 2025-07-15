@@ -10,22 +10,21 @@ title: CryoRoom_Branch
 You: *groan* 
 ---
 -> Where am I?
-    <<jump WhereAmI>>
+    <<detour WhereAmI>>
 -> What's going on?
-<<jump CryoRoom_WhatGoingOn>>
+<<detour CryoRoom_WhatGoingOn>>
 -> {WhereAmI} The city?
-    <<jump TheCity>>
+    <<detour TheCity>>
 -> {WhereAmI} Why can't I remember any of this?
-    <<jump WhyCantRemember>>
+    <<detour WhyCantRemember>>
 -> {CryoRoom_WhatGoingOn} Let's continue
-<<jump LetsContinue>>
+<<detour LetsContinue>>
 ===
 
 title: WhereAmI
 ---
 Overlord: You are in the cryo room. You were put into stasis to protect you from the chaos outside.
 Overlord: You were one of the few people selected to be preserved for the rebuilding of the city.
-<<jump CryoRoom_Branch>>
 ===
 
 title: CryoRoom_WhatGoingOn
@@ -33,7 +32,6 @@ title: CryoRoom_WhatGoingOn
 Overlord: The city needs you to repair critical systems that have started to fail.
 Overlord: You were selected because of your skills.
 
-<<jump CryoRoom_Branch>>
 ===
 
 title: LetsContinue
@@ -48,7 +46,6 @@ title: TheCity
 Overlord: The city is the last remnant of civilization after the Great Collapse.
 Overlord: It is a sprawling metropolis, but many areas have fallen into disrepair.
 Overlord: With your help, we can restore it to its former glory.
-<<jump CryoRoom_Branch>>
 ===
 
 title: WhyCantRemember
@@ -56,10 +53,8 @@ title: WhyCantRemember
 Overlord: The stasis process can cause temporary memory fragmentation.
 Overlord: Your memories should return gradually as your neural pathways reestablish themselves.
 Overlord: The important thing is that your skills and knowledge remain intact.
-<<jump CryoRoom_Branch>>
 ===
 
 title: MemoryQuestionAvailable
 ---
-<<jump CryoRoom_Branch>>
 ===

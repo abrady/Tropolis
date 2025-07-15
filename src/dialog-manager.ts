@@ -2,6 +2,7 @@ export interface DialogueOption {
   text: string;
   target: string | null;
   visited?: boolean;
+  detour?: boolean;
 }
 
 export interface DialogueContent {
@@ -16,6 +17,7 @@ export class DialogManager {
   private nodes: Record<string, YarnNode> = {};
   private visited = new Set<string>();
   private current: string | null = null;
+  private returnStack: string[] = [];
 
   constructor(yarnText: string) {
     const nodes = parseYarn(yarnText);
@@ -36,13 +38,20 @@ export class DialogManager {
 
   getCurrent(): DialogueContent {
     if (!this.current) return { lines: [], options: [], next: null };
-    return parseNodeBody(this.nodes[this.current].body, this.visited);
+    const content = parseNodeBody(this.nodes[this.current].body, this.visited);
+    if (!content.next && content.options.length === 0 && this.returnStack.length > 0) {
+      return { ...content, next: '__return__' };
+    }
+    return content;
   }
 
   choose(index: number) {
     const content = this.getCurrent();
     const opt = content.options[index];
     if (opt) {
+      if (opt.detour && this.current) {
+        this.returnStack.push(this.current);
+      }
       this.goto(opt.target);
     }
   }
@@ -50,7 +59,15 @@ export class DialogManager {
   follow() {
     const content = this.getCurrent();
     if (content.next) {
-      this.goto(content.next);
+      if (content.next === '__return__') {
+        const ret = this.returnStack.pop();
+        if (ret) this.goto(ret);
+      } else {
+        this.goto(content.next);
+      }
+    } else if (this.returnStack.length > 0) {
+      const ret = this.returnStack.pop();
+      if (ret) this.goto(ret);
     }
   }
 }
@@ -97,14 +114,16 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
         }
       }
       let target: string | null = null;
+      let detour = false;
       if (i + 1 < lines.length) {
-        const jumpMatch = lines[i + 1].trim().match(/<<\s*jump\s+([A-Za-z0-9_]+)\s*>>/);
-        if (jumpMatch) {
-          target = jumpMatch[1];
-          i++; // consume jump line
+        const cmdMatch = lines[i + 1].trim().match(/<<\s*(jump|detour)\s+([A-Za-z0-9_]+)\s*>>/);
+        if (cmdMatch) {
+          detour = cmdMatch[1] === 'detour';
+          target = cmdMatch[2];
+          i++; // consume command line
         }
       }
-      options.push({ text, target, visited: target ? visitedNodes.has(target) : false });
+      options.push({ text, target, visited: target ? visitedNodes.has(target) : false, detour });
     }
   }
   return { lines: texts, options, next };
