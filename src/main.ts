@@ -50,18 +50,21 @@ Promise.all([
   canvas.width = background.width;
   canvas.height = background.height;
   function resizeCanvas() {
+    const vw = window.visualViewport?.width ?? window.innerWidth;
+    const vh = window.visualViewport?.height ?? window.innerHeight;
     const scale = Math.min(
-      window.innerWidth / canvas.width,
-      window.innerHeight / canvas.height
+      vw / canvas.width,
+      vh / canvas.height
     );
-    const w = canvas.width * scale;
-    const h = canvas.height * scale;
+    const w = Math.floor(canvas.width * scale);
+    const h = Math.floor(canvas.height * scale);
     canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
     container.style.width = w + 'px';
     container.style.height = h + 'px';
   }
   window.addEventListener('resize', resizeCanvas);
+  window.visualViewport?.addEventListener('resize', resizeCanvas);
   resizeCanvas();
   requestAnimationFrame(draw);
 
