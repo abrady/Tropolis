@@ -72,7 +72,13 @@ Promise.all([
   const manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
 
+  let nextKeyHandler: ((ev: KeyboardEvent) => void) | null = null;
+
   async function renderDialog() {
+    if (nextKeyHandler) {
+      window.removeEventListener('keydown', nextKeyHandler);
+      nextKeyHandler = null;
+    }
     const content = manager.getCurrent();
     if (content.lines.length === 0 && !content.next && content.options.length === 0) {
       dialogBox.classList.remove('visible');
@@ -123,6 +129,13 @@ Promise.all([
         renderDialog();
       };
       optionsEl.appendChild(btn);
+      nextKeyHandler = (ev: KeyboardEvent) => {
+        if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          btn.click();
+        }
+      };
+      window.addEventListener('keydown', nextKeyHandler);
     }
   }
 
