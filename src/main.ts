@@ -97,6 +97,7 @@ Promise.all([
     optionsEl.innerHTML = '';
     overlayEl.innerHTML = '';
     overlayEl.classList.remove('visible');
+    overlayEl.classList.remove('leaving');
     overlayEl.style.display = 'none';
     speakerEl.textContent = '';
 
@@ -118,6 +119,7 @@ Promise.all([
     const lastLine = textEl.lastElementChild?.textContent ?? '';
 
     if (content.options.length > 0) {
+      overlayEl.classList.remove('leaving');
       overlayEl.style.display = 'block';
       requestAnimationFrame(() => overlayEl.classList.add('visible'));
       if (lastLine) {
@@ -133,10 +135,15 @@ Promise.all([
           btn.classList.add('visited');
         }
         btn.onclick = () => {
-          overlayEl.classList.remove('visible');
-          overlayEl.style.display = 'none';
-          manager.choose(idx);
-          renderDialog();
+          btn.classList.add('selected');
+          overlayEl.classList.add('leaving');
+          setTimeout(() => {
+            overlayEl.classList.remove('visible');
+            overlayEl.classList.remove('leaving');
+            overlayEl.style.display = 'none';
+            manager.choose(idx);
+            renderDialog();
+          }, 200);
         };
         overlayEl.appendChild(btn);
         buttons.push(btn);
