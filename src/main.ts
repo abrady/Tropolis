@@ -68,6 +68,7 @@ Promise.all([
   const dialogBox = document.getElementById('dialogue') as HTMLDivElement;
   const textEl = document.getElementById('dialogue-text') as HTMLDivElement;
   const optionsEl = document.getElementById('dialogue-options') as HTMLDivElement;
+  const speakerEl = document.getElementById('dialogue-speaker') as HTMLDivElement;
   const manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
 
@@ -84,10 +85,17 @@ Promise.all([
 
     textEl.innerHTML = '';
     optionsEl.innerHTML = '';
+    speakerEl.textContent = '';
 
     for (const line of content.lines) {
+      let text = line;
+      const m = line.match(/^(.*?):\s*(.*)$/);
+      if (m) {
+        speakerEl.textContent = m[1];
+        text = m[2];
+      }
       const p = document.createElement('p');
-      p.textContent = line;
+      p.textContent = text;
       textEl.appendChild(p);
       // allow CSS transition
       requestAnimationFrame(() => p.classList.add('visible'));
