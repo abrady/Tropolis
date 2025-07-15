@@ -2,6 +2,8 @@ import { parseFrames, Frame } from './frame-utils';
 import overlordData from './data/Overlord.json';
 import overlordImg from './data/Overlord.png';
 import cryoroomImg from './data/0_cryoroom.png';
+import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
+import { DialogManager } from './dialog-manager';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -55,6 +57,40 @@ Promise.all([
     canvas.style.height = canvas.height * scale + 'px';
   }
   window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();  
+  resizeCanvas();
   requestAnimationFrame(draw);
+
+  const dialogBox = document.getElementById('dialogue') as HTMLDivElement;
+  const textEl = document.getElementById('dialogue-text') as HTMLDivElement;
+  const optionsEl = document.getElementById('dialogue-options') as HTMLDivElement;
+  const manager = new DialogManager(cryoDialogue);
+  manager.start('CryoRoom_Intro');
+
+  function renderDialog() {
+    const content = manager.getCurrent();
+    textEl.innerHTML = content.lines.map(l => `<p>${l}</p>`).join('');
+    optionsEl.innerHTML = '';
+    if (content.options.length > 0) {
+      content.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+          manager.choose(idx);
+          renderDialog();
+        };
+        optionsEl.appendChild(btn);
+      });
+    } else if (content.next) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Next';
+      btn.onclick = () => {
+        manager.follow();
+        renderDialog();
+      };
+      optionsEl.appendChild(btn);
+    }
+    dialogBox.style.display = content.lines.length === 0 && !content.next && content.options.length === 0 ? 'none' : 'block';
+  }
+
+  renderDialog();
 });
