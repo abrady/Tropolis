@@ -68,6 +68,7 @@ Promise.all([
   const dialogBox = document.getElementById('dialogue') as HTMLDivElement;
   const textEl = document.getElementById('dialogue-text') as HTMLDivElement;
   const optionsEl = document.getElementById('dialogue-options') as HTMLDivElement;
+  const overlayEl = document.getElementById('choice-overlay') as HTMLDivElement;
   const speakerEl = document.getElementById('dialogue-speaker') as HTMLDivElement;
   const manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
@@ -85,6 +86,9 @@ Promise.all([
 
     textEl.innerHTML = '';
     optionsEl.innerHTML = '';
+    overlayEl.innerHTML = '';
+    overlayEl.classList.remove('visible');
+    overlayEl.style.display = 'none';
     speakerEl.textContent = '';
 
     for (const line of content.lines) {
@@ -103,14 +107,18 @@ Promise.all([
     }
 
     if (content.options.length > 0) {
+      overlayEl.style.display = 'block';
+      requestAnimationFrame(() => overlayEl.classList.add('visible'));
       content.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.textContent = opt.text;
         btn.onclick = () => {
+          overlayEl.classList.remove('visible');
+          overlayEl.style.display = 'none';
           manager.choose(idx);
           renderDialog();
         };
-        optionsEl.appendChild(btn);
+        overlayEl.appendChild(btn);
       });
     } else if (content.next) {
       const btn = document.createElement('button');
