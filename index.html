@@ -18,7 +18,7 @@
     }
     #dialogue {
       position: absolute;
-      bottom: 0;
+      bottom: 10px;
       left: 0;
       width: 100%;
       background: rgba(0,0,0,0.8);
@@ -42,12 +42,21 @@
     #dialogue-options {
       margin-top: 8px;
     }
+    #dialogue-speaker {
+      border: 2px solid #fff;
+      display: inline-block;
+      padding: 2px 6px;
+      margin-bottom: 6px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
   <div id="game-container">
     <canvas id="game"></canvas>
     <div id="dialogue">
+      <div id="dialogue-speaker"></div>
       <div id="dialogue-text"></div>
       <div id="dialogue-options"></div>
     </div>
