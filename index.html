@@ -102,6 +102,34 @@
     #choice-overlay button.selected {
       box-shadow: inset 0 0 0 2px #fff;
     }
+    #puzzle-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .peg {
+      position: relative;
+      width: 20%;
+      height: 80%;
+      border-bottom: 4px solid #fff;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+    }
+    .disk {
+      height: 20px;
+      margin: 2px 0;
+      background: #888;
+      border: 1px solid #fff;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -113,6 +141,7 @@
       <div id="dialogue-options"></div>
     </div>
     <div id="choice-overlay"></div>
+    <div id="puzzle-container" style="display:none;"></div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

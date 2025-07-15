@@ -39,6 +39,8 @@ title: LetsContinue
 Overlord: Good. Your first task is to repair the power grid in Sector 7.
 Overlord: The maintenance tunnels will take you there safely.
 Overlord: Be careful - some areas may still be unstable.
+Overlord: Before you go, prove your focus with a simple test.
+Overlord: Move all five rings to the far right peg without placing a larger ring on top of a smaller one.
 <<loadPuzzle TowerOfHanoi>>
 ===
 
