@@ -112,9 +112,16 @@ Promise.all([
       await new Promise(res => setTimeout(res, 600));
     }
 
+    const lastLine = textEl.lastElementChild?.textContent ?? '';
+
     if (content.options.length > 0) {
       overlayEl.style.display = 'block';
       requestAnimationFrame(() => overlayEl.classList.add('visible'));
+      if (lastLine) {
+        const p = document.createElement('p');
+        p.textContent = lastLine;
+        overlayEl.appendChild(p);
+      }
       content.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.textContent = opt.text;
