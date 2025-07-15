@@ -69,9 +69,15 @@
       text-align: center;
       display: none;
       width: 100%;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
     #choice-overlay.visible {
       display: block;
+      opacity: 1;
+    }
+    #choice-overlay.leaving {
+      opacity: 0;
     }
     #choice-overlay p {
       margin-bottom: 12px;
