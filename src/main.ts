@@ -71,10 +71,29 @@ Promise.all([
   const manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
 
-  function renderDialog() {
+  async function renderDialog() {
     const content = manager.getCurrent();
-    textEl.innerHTML = content.lines.map(l => `<p>${l}</p>`).join('');
+    if (content.lines.length === 0 && !content.next && content.options.length === 0) {
+      dialogBox.classList.remove('visible');
+      dialogBox.style.display = 'none';
+      return;
+    }
+
+    dialogBox.style.display = 'block';
+    requestAnimationFrame(() => dialogBox.classList.add('visible'));
+
+    textEl.innerHTML = '';
     optionsEl.innerHTML = '';
+
+    for (const line of content.lines) {
+      const p = document.createElement('p');
+      p.textContent = line;
+      textEl.appendChild(p);
+      // allow CSS transition
+      requestAnimationFrame(() => p.classList.add('visible'));
+      await new Promise(res => setTimeout(res, 600));
+    }
+
     if (content.options.length > 0) {
       content.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
@@ -94,7 +113,6 @@ Promise.all([
       };
       optionsEl.appendChild(btn);
     }
-    dialogBox.style.display = content.lines.length === 0 && !content.next && content.options.length === 0 ? 'none' : 'block';
   }
 
   renderDialog();
