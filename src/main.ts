@@ -122,6 +122,7 @@ Promise.all([
         p.textContent = lastLine;
         overlayEl.appendChild(p);
       }
+      const buttons: HTMLButtonElement[] = [];
       content.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.textContent = opt.text;
@@ -135,7 +136,35 @@ Promise.all([
           renderDialog();
         };
         overlayEl.appendChild(btn);
+        buttons.push(btn);
       });
+      let selected = 0;
+      const updateSelected = () => {
+        buttons.forEach((b, i) => {
+          if (i === selected) {
+            b.classList.add('selected');
+            b.focus();
+          } else {
+            b.classList.remove('selected');
+          }
+        });
+      };
+      updateSelected();
+      nextKeyHandler = (ev: KeyboardEvent) => {
+        if (ev.key === 'ArrowUp') {
+          ev.preventDefault();
+          selected = (selected + buttons.length - 1) % buttons.length;
+          updateSelected();
+        } else if (ev.key === 'ArrowDown') {
+          ev.preventDefault();
+          selected = (selected + 1) % buttons.length;
+          updateSelected();
+        } else if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          buttons[selected].click();
+        }
+      };
+      window.addEventListener('keydown', nextKeyHandler);
     } else if (content.next) {
       const btn = document.createElement('button');
       btn.textContent = 'Next';
