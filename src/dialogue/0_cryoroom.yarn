@@ -17,8 +17,8 @@ You: *groan*
     <<detour TheCity>>
 -> {WhereAmI} Why can't I remember any of this?
     <<detour WhyCantRemember>>
--> {CryoRoom_WhatGoingOn} Let's continue
-<<detour LetsContinue>>
+-> {WhyCantRemember} If the city needs me, let's go
+<<jump LetsContinue>>
 ===
 
 title: WhereAmI
@@ -39,6 +39,7 @@ title: LetsContinue
 Overlord: Good. Your first task is to repair the power grid in Sector 7.
 Overlord: The maintenance tunnels will take you there safely.
 Overlord: Be careful - some areas may still be unstable.
+<<loadPuzzle TowerOfHanoi>>
 ===
 
 title: TheCity
