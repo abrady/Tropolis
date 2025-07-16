@@ -136,6 +136,31 @@
       border: 1px solid #fff;
       box-sizing: border-box;
     }
+    #cheat-toggle {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+    #cheat-menu {
+      position: absolute;
+      bottom: 50px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 10px;
+      display: none;
+    }
+    #cheat-menu button {
+      display: block;
+      width: 100%;
+      margin-top: 5px;
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
@@ -148,6 +173,10 @@
     </div>
     <div id="choice-overlay"></div>
     <div id="puzzle-container" style="display:none;"></div>
+    <button id="cheat-toggle">⚡</button>
+    <div id="cheat-menu">
+      <button id="cheat-complete-puzzle">Complete Puzzle</button>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
