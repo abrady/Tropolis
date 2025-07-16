@@ -1,4 +1,4 @@
-export function startTowerOfHanoi(container: HTMLElement, count = 5) {
+export function startTowerOfHanoi(container: HTMLElement, count = 4) {
   container.innerHTML = '';
   container.style.display = 'flex';
 

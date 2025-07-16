@@ -203,7 +203,7 @@ Promise.all([
         puzzleEl.style.display = 'flex';
         dialogBox.style.display = 'none';
         if (content.command.args[0] === 'TowerOfHanoi') {
-          startTowerOfHanoi(puzzleEl, 5);
+          startTowerOfHanoi(puzzleEl, 4);
         }
       }
     }
