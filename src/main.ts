@@ -78,6 +78,7 @@ Promise.all([
   const speakerEl = document.getElementById('dialogue-speaker') as HTMLDivElement;
   let manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
+  let lineIndex = 0;
 
   let nextKeyHandler: ((ev: KeyboardEvent) => void) | null = null;
 
@@ -104,11 +105,28 @@ Promise.all([
     overlayEl.style.display = 'none';
     speakerEl.textContent = '';
 
-    for (const line of content.lines) {
+    const linesToShow: string[] = [];
+    if (lineIndex < content.lines.length) {
+      let currentSpeaker: string | null = null;
+      const first = content.lines[lineIndex];
+      const firstMatch = first.match(/^(.*?):\s*(.*)$/);
+      if (firstMatch) currentSpeaker = firstMatch[1];
+      for (; lineIndex < content.lines.length; lineIndex++) {
+        const l = content.lines[lineIndex];
+        const m = l.match(/^(.*?):\s*(.*)$/);
+        if (linesToShow.length > 0 && m && currentSpeaker && m[1] !== currentSpeaker) {
+          break;
+        }
+        linesToShow.push(l);
+        if (m && linesToShow.length === 1) currentSpeaker = m[1];
+      }
+      if (currentSpeaker) speakerEl.textContent = currentSpeaker;
+    }
+
+    for (const line of linesToShow) {
       let text = line;
       const m = line.match(/^(.*?):\s*(.*)$/);
       if (m) {
-        speakerEl.textContent = m[1];
         text = m[2];
       }
       const p = document.createElement('p');
@@ -117,6 +135,23 @@ Promise.all([
       // allow CSS transition
       requestAnimationFrame(() => p.classList.add('visible'));
       await new Promise(res => setTimeout(res, 600));
+    }
+
+    if (lineIndex < content.lines.length) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Next';
+      btn.onclick = () => {
+        renderDialog();
+      };
+      optionsEl.appendChild(btn);
+      nextKeyHandler = (ev: KeyboardEvent) => {
+        if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          btn.click();
+        }
+      };
+      window.addEventListener('keydown', nextKeyHandler);
+      return;
     }
 
     const lastLine = textEl.lastElementChild?.textContent ?? '';
@@ -144,6 +179,7 @@ Promise.all([
             overlayEl.classList.remove('visible');
             overlayEl.classList.remove('leaving');
             overlayEl.style.display = 'none';
+            lineIndex = 0;
             manager.choose(idx);
             renderDialog();
           }, 200);
@@ -187,6 +223,7 @@ Promise.all([
       btn.textContent = 'Next';
       btn.id = 'dialogue-next';
       btn.onclick = () => {
+        lineIndex = 0;
         manager.follow();
         renderDialog();
       };
@@ -210,6 +247,7 @@ Promise.all([
             dialogBox.style.display = 'block';
             manager = new DialogManager(cryoAfterPuzzleDialogue);
             manager.start('CryoRoom_AfterPuzzle_Start');
+            lineIndex = 0;
             renderDialog();
           });
         }
