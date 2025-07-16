@@ -79,7 +79,12 @@ Promise.all([
   const cheatButton = document.getElementById('cheat-toggle') as HTMLButtonElement;
   const cheatMenu = document.getElementById('cheat-menu') as HTMLDivElement;
   const cheatCompleteBtn = document.getElementById('cheat-complete-puzzle') as HTMLButtonElement;
+  const cheatSkipBtn = document.getElementById('cheat-skip-dialog') as HTMLButtonElement;
   let puzzleComplete: (() => void) | null = null;
+
+  function updateCheatButtons() {
+    cheatSkipBtn.disabled = dialogBox.style.display === 'none';
+  }
 
   cheatButton.onclick = () => {
     cheatMenu.style.display = cheatMenu.style.display === 'block' ? 'none' : 'block';
@@ -91,6 +96,21 @@ Promise.all([
       cb();
       cheatMenu.style.display = 'none';
     }
+  };
+  cheatSkipBtn.onclick = () => {
+    if (dialogBox.style.display === 'none') return;
+    let content = manager.getCurrent();
+    while (true) {
+      lineIndex = content.lines.length;
+      if (!content.options.length && !content.command && content.next) {
+        manager.follow();
+        content = manager.getCurrent();
+        continue;
+      }
+      break;
+    }
+    renderDialog();
+    cheatMenu.style.display = 'none';
   };
   let manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
@@ -107,11 +127,13 @@ Promise.all([
     if (content.lines.length === 0 && !content.next && content.options.length === 0) {
       dialogBox.classList.remove('visible');
       dialogBox.style.display = 'none';
+      updateCheatButtons();
       return;
     }
 
     dialogBox.style.display = 'block';
     requestAnimationFrame(() => dialogBox.classList.add('visible'));
+    updateCheatButtons();
 
     textEl.innerHTML = '';
     optionsEl.innerHTML = '';
@@ -254,18 +276,20 @@ Promise.all([
     }
 
     if (content.command) {
-      if (content.command.name === 'loadPuzzle') {
-        puzzleEl.style.display = 'flex';
-        dialogBox.style.display = 'none';
-        if (content.command.args[0] === 'TowerOfHanoi') {
-          puzzleComplete = () => {
-            puzzleEl.style.display = 'none';
-            dialogBox.style.display = 'block';
-            manager = new DialogManager(cryoAfterPuzzleDialogue);
-            manager.start('CryoRoom_AfterPuzzle_Start');
-            lineIndex = 0;
-            renderDialog();
-          };
+        if (content.command.name === 'loadPuzzle') {
+          puzzleEl.style.display = 'flex';
+          dialogBox.style.display = 'none';
+          updateCheatButtons();
+          if (content.command.args[0] === 'TowerOfHanoi') {
+            puzzleComplete = () => {
+              puzzleEl.style.display = 'none';
+              dialogBox.style.display = 'block';
+              updateCheatButtons();
+              manager = new DialogManager(cryoAfterPuzzleDialogue);
+              manager.start('CryoRoom_AfterPuzzle_Start');
+              lineIndex = 0;
+              renderDialog();
+            };
           startTowerOfHanoi(puzzleEl, 4, () => {
             const cb = puzzleComplete;
             puzzleComplete = null;
