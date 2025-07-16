@@ -3,6 +3,7 @@ import overlordData from './data/Overlord.json';
 import overlordImg from './data/Overlord.png';
 import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
+import cryoAfterPuzzleDialogue from './dialogue/0_cryoroom_afterpuzzle.yarn?raw';
 import { DialogManager } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
 
@@ -75,7 +76,7 @@ Promise.all([
   const overlayEl = document.getElementById('choice-overlay') as HTMLDivElement;
   const puzzleEl = document.getElementById('puzzle-container') as HTMLDivElement;
   const speakerEl = document.getElementById('dialogue-speaker') as HTMLDivElement;
-  const manager = new DialogManager(cryoDialogue);
+  let manager = new DialogManager(cryoDialogue);
   manager.start('CryoRoom_Intro');
 
   let nextKeyHandler: ((ev: KeyboardEvent) => void) | null = null;
@@ -203,7 +204,13 @@ Promise.all([
         puzzleEl.style.display = 'flex';
         dialogBox.style.display = 'none';
         if (content.command.args[0] === 'TowerOfHanoi') {
-          startTowerOfHanoi(puzzleEl, 5);
+          startTowerOfHanoi(puzzleEl, 5, () => {
+            puzzleEl.style.display = 'none';
+            dialogBox.style.display = 'block';
+            manager = new DialogManager(cryoAfterPuzzleDialogue);
+            manager.start('CryoRoom_AfterPuzzle_Start');
+            renderDialog();
+          });
         }
       }
     }
