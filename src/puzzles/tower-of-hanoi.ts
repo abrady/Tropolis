@@ -1,6 +1,6 @@
 export function startTowerOfHanoi(
   container: HTMLElement,
-  count = 5,
+  count = 4,
   onComplete?: () => void
 ) {
   container.innerHTML = '';
