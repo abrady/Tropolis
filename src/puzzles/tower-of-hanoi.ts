@@ -1,4 +1,8 @@
-export function startTowerOfHanoi(container: HTMLElement, count = 4) {
+export function startTowerOfHanoi(
+  container: HTMLElement,
+  count = 4,
+  onComplete?: () => void
+) {
   container.innerHTML = '';
   container.style.display = 'flex';
 
@@ -36,7 +40,11 @@ export function startTowerOfHanoi(container: HTMLElement, count = 4) {
         selected.disk = null;
         selected.from = null;
         if (pegs[2].length === count) {
-          alert('Puzzle complete!');
+          if (onComplete) {
+            onComplete();
+          } else {
+            alert('Puzzle complete!');
+          }
         }
       } else if (selected.from !== null) {
         pegs[selected.from].push(selected.disk);
