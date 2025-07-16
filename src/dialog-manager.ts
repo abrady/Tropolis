@@ -103,6 +103,12 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
         i++;
         continue;
       }
+      const levelMatch = trimmed.match(/<<\s*loadLevel\s+([A-Za-z0-9_]+)\s*>>/);
+      if (levelMatch) {
+        command = { name: 'loadLevel', args: [levelMatch[1]] };
+        i++;
+        continue;
+      }
       i++;
       continue;
     }

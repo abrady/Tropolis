@@ -4,6 +4,8 @@ import overlordImg from './data/Overlord.png';
 import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
 import cryoAfterPuzzleDialogue from './dialogue/0_cryoroom_afterpuzzle.yarn?raw';
+import sector7Img from './data/1_sector7.png';
+import sector7Dialogue from './dialogue/1_sector7.yarn?raw';
 import { DialogManager } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
 
@@ -14,9 +16,22 @@ const ctx = canvas.getContext('2d')!;
 const spriteSheet = new Image();
 spriteSheet.src = overlordImg;
 
-const background = new Image();
+interface LevelData {
+  image: HTMLImageElement;
+  dialogue: string;
+  start: string;
+}
 
-background.src = cryoroomImg;
+const levels: Record<string, LevelData> = {
+  CryoRoom: { image: new Image(), dialogue: cryoDialogue, start: 'CryoRoom_Intro' },
+  Sector7: { image: new Image(), dialogue: sector7Dialogue, start: 'Sector7_Start' }
+};
+
+levels.CryoRoom.image.src = cryoroomImg;
+levels.Sector7.image.src = sector7Img;
+
+let currentLevel = levels.CryoRoom;
+let background = currentLevel.image;
 
 let frames: Frame[] = [];
 let frameIndex = 0;
@@ -44,9 +59,9 @@ Promise.all([
   new Promise<void>(resolve => {
     spriteSheet.onload = () => resolve();
   }),
-  new Promise<void>(resolve => {
-    background.onload = () => resolve();
-  })
+  ...Object.values(levels).map(l => new Promise<void>(res => {
+    l.image.onload = () => res();
+  }))
 ]).then(() => {
   frames = parseFrames(overlordData);
   canvas.width = background.width;
@@ -112,9 +127,23 @@ Promise.all([
     renderDialog();
     cheatMenu.style.display = 'none';
   };
-  let manager = new DialogManager(cryoDialogue);
-  manager.start('CryoRoom_Intro');
+  let manager = new DialogManager(currentLevel.dialogue);
+  manager.start(currentLevel.start);
   let lineIndex = 0;
+
+  function changeLevel(name: string) {
+    const lvl = levels[name];
+    if (!lvl) return;
+    currentLevel = lvl;
+    background = currentLevel.image;
+    canvas.width = background.width;
+    canvas.height = background.height;
+    resizeCanvas();
+    manager = new DialogManager(lvl.dialogue);
+    manager.start(lvl.start);
+    lineIndex = 0;
+    renderDialog();
+  }
 
   let nextKeyHandler: ((ev: KeyboardEvent) => void) | null = null;
 
@@ -296,6 +325,10 @@ Promise.all([
             cb?.();
           });
         }
+      } else if (content.command.name === 'loadLevel') {
+        dialogBox.style.display = 'none';
+        updateCheatButtons();
+        changeLevel(content.command.args[0]);
       }
     }
   }
