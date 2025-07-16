@@ -185,6 +185,7 @@ Promise.all([
     } else if (content.next) {
       const btn = document.createElement('button');
       btn.textContent = 'Next';
+      btn.id = 'dialogue-next';
       btn.onclick = () => {
         manager.follow();
         renderDialog();
