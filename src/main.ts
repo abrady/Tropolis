@@ -42,7 +42,7 @@ function setAnimation(name: string) {
   if (!anim) throw new Error(`Unknown animation ${name}`);
   currentFrames = anim;
   frameIndex = 0;
-  lastSwitch = 0;
+  lastSwitch = performance.now();
 }
 
 function draw(timestamp: number) {
