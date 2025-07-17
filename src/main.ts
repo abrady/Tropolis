@@ -3,7 +3,6 @@ import overlordData from './data/Overlord.json';
 import overlordImg from './data/Overlord.png';
 import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
-import cryoAfterPuzzleDialogue from './dialogue/0_cryoroom_afterpuzzle.yarn?raw';
 import sector7Img from './data/1_sector7.png';
 import sector7Dialogue from './dialogue/1_sector7.yarn?raw';
 import { DialogManager } from './dialog-manager';
@@ -33,14 +32,23 @@ levels.Sector7.image.src = sector7Img;
 let currentLevel = levels.CryoRoom;
 let background = currentLevel.image;
 
-let frames: Frame[] = [];
+let currentFrames: Frame[] = [];
 let frameIndex = 0;
 let lastSwitch = 0;
+const animations: Record<string, Frame[]> = {};
+
+function setAnimation(name: string) {
+  const anim = animations[name];
+  if (!anim) throw new Error(`Unknown animation ${name}`);
+  currentFrames = anim;
+  frameIndex = 0;
+  lastSwitch = 0;
+}
 
 function draw(timestamp: number) {
-  const f = frames[frameIndex];
+  const f = currentFrames[frameIndex];
   if (timestamp - lastSwitch > f.duration) {
-    frameIndex = (frameIndex + 1) % frames.length;
+    frameIndex = (frameIndex + 1) % currentFrames.length;
     lastSwitch = timestamp;
   }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -63,7 +71,11 @@ Promise.all([
     l.image.onload = () => res();
   }))
 ]).then(() => {
-  frames = parseFrames(overlordData);
+  const allFrames = parseFrames(overlordData);
+  animations['overlord'] = allFrames;
+  animations['overlordTalk'] = allFrames.slice(1);
+  animations['overlordIdle'] = [allFrames[0]];
+  setAnimation('overlordIdle');
   canvas.width = background.width;
   canvas.height = background.height;
   function resizeCanvas() {
@@ -187,7 +199,11 @@ Promise.all([
         linesToShow.push(l);
         if (m && linesToShow.length === 1) currentSpeaker = m[1];
       }
-      if (currentSpeaker) speakerEl.textContent = currentSpeaker;
+      if (currentSpeaker) {
+        speakerEl.textContent = currentSpeaker;
+        const anim = manager.getAnimationForSpeaker(currentSpeaker);
+        if (anim) setAnimation(anim);
+      }
     }
 
     for (const line of linesToShow) {
@@ -314,7 +330,7 @@ Promise.all([
               puzzleEl.style.display = 'none';
               dialogBox.style.display = 'block';
               updateCheatButtons();
-              manager = new DialogManager(cryoAfterPuzzleDialogue);
+              manager = new DialogManager(cryoDialogue);
               manager.start('CryoRoom_AfterPuzzle_Start');
               lineIndex = 0;
               renderDialog();

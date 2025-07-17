@@ -17,19 +17,31 @@ export interface DialogueContent {
   command?: DialogueCommand | null;
 }
 
-import { parseYarn, YarnNode } from './yarn-utils';
+import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
 
 export class DialogManager {
   private nodes: Record<string, YarnNode> = {};
+  private speakerInfo: Record<string, Speaker> = {};
   private visited = new Set<string>();
   private current: string | null = null;
   private returnStack: string[] = [];
 
   constructor(yarnText: string) {
-    const nodes = parseYarn(yarnText);
+    const { nodes, speakers } = parseYarnFile(yarnText);
+    this.speakerInfo = speakers;
     for (const n of nodes) {
       this.nodes[n.title] = n;
     }
+  }
+
+  getAnimationForSpeaker(name: string): string | undefined {
+    const info = this.speakerInfo[name];
+    if (!info) {
+      throw new Error(`No animation defined for speaker ${name}`);
+    }
+    const anim = info.talkAnim;
+    if (!anim || anim === 'none' || anim === '') return undefined;
+    return anim;
   }
 
   start(startNode: string) {
