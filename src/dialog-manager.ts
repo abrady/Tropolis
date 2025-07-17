@@ -5,8 +5,13 @@ export interface DialogueOption {
   detour?: boolean;
 }
 
+export type CommandHandlers = {
+  loadPuzzle(args: string[]): void;
+  loadLevel(args: string[]): void;
+};
+
 export interface DialogueCommand {
-  name: string;
+  name: keyof CommandHandlers;
   args: string[];
 }
 
@@ -25,13 +30,18 @@ export class DialogManager {
   private visited = new Set<string>();
   private current: string | null = null;
   private returnStack: string[] = [];
+  private lineIndex = 0;
+  private commandHandled = false;
+  public currentSpeaker: string | null = null;
+  private commandHandlers: CommandHandlers;
 
-  constructor(yarnText: string) {
+  constructor(yarnText: string, handlers: CommandHandlers) {
     const { nodes, speakers } = parseYarnFile(yarnText);
     this.speakerInfo = speakers;
     for (const n of nodes) {
       this.nodes[n.title] = n;
     }
+    this.commandHandlers = handlers;
   }
 
   getAnimationForSpeaker(name: string): string | undefined {
@@ -52,6 +62,7 @@ export class DialogManager {
     if (!nodeName || !this.nodes[nodeName]) return;
     this.current = nodeName;
     this.visited.add(nodeName);
+    this.resetLineState();
   }
 
   getCurrent(): DialogueContent {
@@ -86,6 +97,60 @@ export class DialogManager {
     } else if (this.returnStack.length > 0) {
       const ret = this.returnStack.pop();
       if (ret) this.goto(ret);
+    }
+  }
+
+  private resetLineState() {
+    this.lineIndex = 0;
+    this.commandHandled = false;
+    this.currentSpeaker = null;
+  }
+
+  /**
+   * Returns the next block of dialogue lines for the current node. The returned
+   * lines all share the same speaker. If no more lines remain, null is
+   * returned and any command on the node will be triggered.
+   */
+  nextLines(): { lines: string[]; speaker: string | null } | null {
+    const content = this.getCurrent();
+    if (this.lineIndex >= content.lines.length) {
+      this.handleCommand(content);
+      return null;
+    }
+    const linesToShow: string[] = [];
+    let currentSpeaker: string | null = null;
+    const first = content.lines[this.lineIndex];
+    const firstMatch = first.match(/^(.*?):\s*(.*)$/);
+    if (firstMatch) currentSpeaker = firstMatch[1];
+    for (; this.lineIndex < content.lines.length; this.lineIndex++) {
+      const l = content.lines[this.lineIndex];
+      const m = l.match(/^(.*?):\s*(.*)$/);
+      if (linesToShow.length > 0 && m && currentSpeaker && m[1] !== currentSpeaker) {
+        break;
+      }
+      linesToShow.push(l);
+      if (m && linesToShow.length === 1) currentSpeaker = m[1];
+    }
+    this.currentSpeaker = currentSpeaker;
+    if (this.lineIndex >= content.lines.length) this.handleCommand(content);
+    return { lines: linesToShow, speaker: currentSpeaker };
+  }
+
+  hasMoreLines(): boolean {
+    const content = this.getCurrent();
+    return this.lineIndex < content.lines.length;
+  }
+
+  skipToEnd() {
+    const content = this.getCurrent();
+    this.lineIndex = content.lines.length;
+  }
+
+  private handleCommand(content: DialogueContent) {
+    if (content.command && !this.commandHandled) {
+      const handler = this.commandHandlers[content.command.name];
+      handler(content.command.args);
+      this.commandHandled = true;
     }
   }
 }

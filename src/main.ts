@@ -5,7 +5,7 @@ import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
 import sector7Img from './data/1_sector7.png';
 import sector7Dialogue from './dialogue/1_sector7.yarn?raw';
-import { DialogManager } from './dialog-manager';
+import { DialogManager, CommandHandlers } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -109,6 +109,38 @@ Promise.all([
   const cheatSkipBtn = document.getElementById('cheat-skip-dialog') as HTMLButtonElement;
   let puzzleComplete: (() => void) | null = null;
 
+  function handleLoadPuzzle(args: string[]) {
+    puzzleEl.style.display = 'flex';
+    dialogBox.style.display = 'none';
+    updateCheatButtons();
+    if (args[0] === 'TowerOfHanoi') {
+      puzzleComplete = () => {
+        puzzleEl.style.display = 'none';
+        dialogBox.style.display = 'block';
+        updateCheatButtons();
+        manager = new DialogManager(cryoDialogue, commandHandlers);
+        manager.start('CryoRoom_AfterPuzzle_Start');
+        renderDialog();
+      };
+      startTowerOfHanoi(puzzleEl, 4, () => {
+        const cb = puzzleComplete;
+        puzzleComplete = null;
+        cb?.();
+      });
+    }
+  }
+
+  function handleLoadLevel(args: string[]) {
+    dialogBox.style.display = 'none';
+    updateCheatButtons();
+    changeLevel(args[0]);
+  }
+
+  const commandHandlers: CommandHandlers = {
+    loadPuzzle: handleLoadPuzzle,
+    loadLevel: handleLoadLevel
+  };
+
   function updateCheatButtons() {
     cheatSkipBtn.disabled = dialogBox.style.display === 'none';
   }
@@ -128,7 +160,7 @@ Promise.all([
     if (dialogBox.style.display === 'none') return;
     let content = manager.getCurrent();
     while (true) {
-      lineIndex = content.lines.length;
+      manager.skipToEnd();
       if (!content.options.length && !content.command && content.next) {
         manager.follow();
         content = manager.getCurrent();
@@ -139,9 +171,8 @@ Promise.all([
     renderDialog();
     cheatMenu.style.display = 'none';
   };
-  let manager = new DialogManager(currentLevel.dialogue);
+  let manager = new DialogManager(currentLevel.dialogue, commandHandlers);
   manager.start(currentLevel.start);
-  let lineIndex = 0;
 
   function changeLevel(name: string) {
     const lvl = levels[name];
@@ -151,9 +182,8 @@ Promise.all([
     canvas.width = background.width;
     canvas.height = background.height;
     resizeCanvas();
-    manager = new DialogManager(lvl.dialogue);
+    manager = new DialogManager(lvl.dialogue, commandHandlers);
     manager.start(lvl.start);
-    lineIndex = 0;
     renderDialog();
   }
 
@@ -184,26 +214,13 @@ Promise.all([
     overlayEl.style.display = 'none';
     speakerEl.textContent = '';
 
-    const linesToShow: string[] = [];
-    if (lineIndex < content.lines.length) {
-      let currentSpeaker: string | null = null;
-      const first = content.lines[lineIndex];
-      const firstMatch = first.match(/^(.*?):\s*(.*)$/);
-      if (firstMatch) currentSpeaker = firstMatch[1];
-      for (; lineIndex < content.lines.length; lineIndex++) {
-        const l = content.lines[lineIndex];
-        const m = l.match(/^(.*?):\s*(.*)$/);
-        if (linesToShow.length > 0 && m && currentSpeaker && m[1] !== currentSpeaker) {
-          break;
-        }
-        linesToShow.push(l);
-        if (m && linesToShow.length === 1) currentSpeaker = m[1];
-      }
-      if (currentSpeaker) {
-        speakerEl.textContent = currentSpeaker;
-        const anim = manager.getAnimationForSpeaker(currentSpeaker);
-        if (anim) setAnimation(anim);
-      }
+    const result = manager.nextLines();
+    const linesToShow: string[] = result ? result.lines : [];
+    const currentSpeaker = result ? result.speaker : null;
+    if (currentSpeaker) {
+      speakerEl.textContent = currentSpeaker;
+      const anim = manager.getAnimationForSpeaker(currentSpeaker);
+      if (anim) setAnimation(anim);
     }
 
     for (const line of linesToShow) {
@@ -220,7 +237,7 @@ Promise.all([
       await new Promise(res => setTimeout(res, 600));
     }
 
-    if (lineIndex < content.lines.length) {
+    if (manager.hasMoreLines()) {
       const btn = document.createElement('button');
       btn.textContent = 'Next';
       btn.onclick = () => {
@@ -262,7 +279,6 @@ Promise.all([
             overlayEl.classList.remove('visible');
             overlayEl.classList.remove('leaving');
             overlayEl.style.display = 'none';
-            lineIndex = 0;
             manager.choose(idx);
             renderDialog();
           }, 200);
@@ -306,7 +322,6 @@ Promise.all([
       btn.textContent = 'Next';
       btn.id = 'dialogue-next';
       btn.onclick = () => {
-        lineIndex = 0;
         manager.follow();
         renderDialog();
       };
@@ -320,33 +335,6 @@ Promise.all([
       window.addEventListener('keydown', nextKeyHandler);
     }
 
-    if (content.command) {
-        if (content.command.name === 'loadPuzzle') {
-          puzzleEl.style.display = 'flex';
-          dialogBox.style.display = 'none';
-          updateCheatButtons();
-          if (content.command.args[0] === 'TowerOfHanoi') {
-            puzzleComplete = () => {
-              puzzleEl.style.display = 'none';
-              dialogBox.style.display = 'block';
-              updateCheatButtons();
-              manager = new DialogManager(cryoDialogue);
-              manager.start('CryoRoom_AfterPuzzle_Start');
-              lineIndex = 0;
-              renderDialog();
-            };
-          startTowerOfHanoi(puzzleEl, 4, () => {
-            const cb = puzzleComplete;
-            puzzleComplete = null;
-            cb?.();
-          });
-        }
-      } else if (content.command.name === 'loadLevel') {
-        dialogBox.style.display = 'none';
-        updateCheatButtons();
-        changeLevel(content.command.args[0]);
-      }
-    }
   }
 
   renderDialog();
