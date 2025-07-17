@@ -25,4 +25,5 @@ Overlord: It may be simple, but it confirms your cognitive functions survived cr
 title: CryoRoom_AfterPuzzle_End
 ---
 Overlord: Now, let's proceed to Sector 7.
+<<loadLevel Sector7>>
 ===

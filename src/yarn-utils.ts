@@ -77,6 +77,12 @@ function parseEdges(body: string): NodeEdges {
       i++;
       continue;
     }
+    const levelMatch = trimmed.match(/<<\s*loadLevel\s+([A-Za-z0-9_]+)\s*>>/);
+    if (levelMatch) {
+      command = 'loadLevel';
+      i++;
+      continue;
+    }
     i++;
   }
 
@@ -101,7 +107,7 @@ export interface YarnValidationResult {
   nonterminating: string[];
 }
 
-export function validateYarn(nodes: YarnNode[], start: string, terminatingCommands: string[] = ['loadPuzzle']): YarnValidationResult {
+export function validateYarn(nodes: YarnNode[], start: string, terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']): YarnValidationResult {
   const nodeMap = new Map<string, YarnNode>();
   for (const n of nodes) nodeMap.set(n.title, n);
 
