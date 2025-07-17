@@ -13,6 +13,15 @@ Overlord: Proceed
 <<loadLevel Sector7>>
 ===`;
 
+const sampleAnim = `speaker: Overlord
+---
+talkAnim overlordTalk
+===
+title: AnimNode
+---
+Overlord: Hi
+===`;
+
 describe('DialogManager loadPuzzle command', () => {
   it('parses loadPuzzle command from yarn node', () => {
     const dm = new DialogManager(sample);
@@ -28,5 +37,17 @@ describe('DialogManager loadLevel command', () => {
     dm.start('LevelNode');
     const content = dm.getCurrent();
     expect(content.command).toEqual({ name: 'loadLevel', args: ['Sector7'] });
+  });
+});
+
+describe('speaker animation definitions', () => {
+  it('loads talk animation for speaker', () => {
+    const dm = new DialogManager(sampleAnim);
+    dm.start('AnimNode');
+    expect(dm.getAnimationForSpeaker('Overlord')).toBe('overlordTalk');
+  });
+  it('throws if speaker not defined', () => {
+    const dm = new DialogManager(sampleAnim);
+    expect(() => dm.getAnimationForSpeaker('Unknown')).toThrow();
   });
 });

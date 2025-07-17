@@ -1,3 +1,11 @@
+speaker: Overlord
+---
+talkAnim overlordTalk
+===
+speaker: You
+---
+talkAnim none
+===
 title: CryoRoom_Intro
 tags: cryo, intro
 ---
@@ -42,6 +50,7 @@ Overlord: Be careful - some areas may still be unstable.
 Overlord: Before you go, prove your focus with a simple test.
 Overlord: Move all five rings to the far right peg without placing a larger ring on top of a smaller one.
 <<loadPuzzle TowerOfHanoi>>
+<<jump CryoRoom_AfterPuzzle_Start>>
 ===
 
 title: TheCity
@@ -61,4 +70,34 @@ Overlord: The important thing is that your skills and knowledge remain intact.
 title: MemoryQuestionAvailable
 tags: disabled
 ---
+===
+
+title: CryoRoom_AfterPuzzle_Start
+tags: cryo
+---
+Overlord: Well done. You solved the test.
+-> Thanks, that was fun
+    <<jump CryoRoom_AfterPuzzle_Pleased>>
+-> That's a child's toy
+    <<jump CryoRoom_AfterPuzzle_Toy>>
+===
+
+title: CryoRoom_AfterPuzzle_Pleased
+---
+You: Thanks, that was fun.
+Overlord: I'm glad your mind is sharp after cryostasis.
+<<jump CryoRoom_AfterPuzzle_End>>
+===
+
+title: CryoRoom_AfterPuzzle_Toy
+---
+You: That's a child's toy.
+Overlord: It may be simple, but it confirms your cognitive functions survived cryostasis.
+<<jump CryoRoom_AfterPuzzle_End>>
+===
+
+title: CryoRoom_AfterPuzzle_End
+---
+Overlord: Now, let's proceed to Sector 7.
+<<loadLevel Sector7>>
 ===

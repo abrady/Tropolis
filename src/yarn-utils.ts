@@ -52,6 +52,47 @@ export function parseYarn(content: string): YarnNode[] {
   return nodes;
 }
 
+export interface Speaker {
+  talkAnim?: string;
+}
+
+export interface YarnFile {
+  nodes: YarnNode[];
+  speakers: Record<string, Speaker>;
+}
+
+export function parseYarnFile(content: string): YarnFile {
+  const speakers: Record<string, Speaker> = {};
+  const lines = content.split(/\r?\n/);
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].trim();
+    if (line.startsWith('title:')) break;
+    if (line.startsWith('speaker:')) {
+      const name = line.slice('speaker:'.length).trim();
+      const data: Speaker = {};
+      i++;
+      if (i < lines.length && lines[i].trim() === '---') i++;
+      while (i < lines.length && lines[i].trim() !== '===') {
+        const l = lines[i].trim();
+        if (l) {
+          const parts = l.split(/\s+/);
+          const key = parts[0];
+          const value = parts.slice(1).join(' ');
+          if (key === 'talkAnim') data.talkAnim = value;
+        }
+        i++;
+      }
+      if (i < lines.length && lines[i].trim() === '===') i++;
+      speakers[name] = data;
+      continue;
+    }
+    i++;
+  }
+  const nodes = parseYarn(lines.slice(i).join('\n'));
+  return { nodes, speakers };
+}
+
 interface NodeEdges {
   targets: { target: string; detour: boolean }[];
   command: string | null;
