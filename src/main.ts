@@ -1,6 +1,5 @@
-import { parseFrames, Frame } from './frame-utils';
-import overlordData from './data/characters/Overlord/Idle.anim';
-import overlordImg from './data/characters/Overlord/Overlord.png';
+import { Frame } from './frame-utils';
+import { Overlord } from './characters';
 import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
 import sector7Img from './data/1_sector7.png';
@@ -12,8 +11,7 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 const container = document.getElementById('game-container') as HTMLDivElement;
 const ctx = canvas.getContext('2d')!;
 
-const spriteSheet = new Image();
-spriteSheet.src = overlordImg;
+const spriteSheet = Overlord.image;
 
 interface LevelData {
   image: HTMLImageElement;
@@ -71,10 +69,8 @@ Promise.all([
     l.image.onload = () => res();
   }))
 ]).then(() => {
-  const allFrames = parseFrames(overlordData);
-  animations['overlord'] = allFrames;
-  animations['overlordTalk'] = allFrames.slice(1);
-  animations['overlordIdle'] = [allFrames[0]];
+  animations['overlordTalk'] = Overlord.animations.talk;
+  animations['overlordIdle'] = Overlord.animations.idle;
   setAnimation('overlordIdle');
   canvas.width = background.width;
   canvas.height = background.height;
