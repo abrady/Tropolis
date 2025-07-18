@@ -1,6 +1,6 @@
 import { parseFrames, Frame } from './frame-utils';
-import overlordData from './data/Overlord.json';
-import overlordImg from './data/Overlord.png';
+import overlordData from './data/characters/Overlord/Idle.anim';
+import overlordImg from './data/characters/Overlord/Overlord.png';
 import cryoroomImg from './data/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
 import sector7Img from './data/1_sector7.png';
