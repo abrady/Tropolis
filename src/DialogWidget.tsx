@@ -2,18 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 interface DialogWidgetProps {
   lines: string[];
-  options: { text: string; visited?: boolean }[];
   showNextButton: boolean;
   onNext: () => void;
-  onOptionClick?: (index: number) => void;
 }
 
 export default function DialogWidget({ 
   lines, 
-  options, 
   showNextButton, 
-  onNext, 
-  onOptionClick 
+  onNext
 }: DialogWidgetProps) {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
@@ -50,11 +46,6 @@ export default function DialogWidget({
       {(hasMoreLinesToShow || showNextButton) && (
         <button onClick={handleNext}>Next</button>
       )}
-      {!hasMoreLinesToShow && options.map((o, i) => (
-        <button key={i} onClick={() => onOptionClick?.(i)}>
-          {o.text}
-        </button>
-      ))}
     </div>
   );
 }

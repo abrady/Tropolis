@@ -3,8 +3,9 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
-import { DialogManager, CommandHandlers } from './dialog-manager';
+import { DialogManager, CommandHandlers, DialogueOption } from './dialog-manager';
 import DialogWidget from './DialogWidget';
+import OptionsWidget from './OptionsWidget';
 
 interface LevelData {
   image: HTMLImageElement;
@@ -51,11 +52,31 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
 export default function App() {
   const [manager, setManager] = useState<DialogManager | null>(null);
   const [lines, setLines] = useState<string[]>([]);
-  const [options, setOptions] = useState<{ text: string; visited?: boolean }[]>([]);
+  const [options, setOptions] = useState<DialogueOption[]>([]);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
   const [hasMoreLines, setHasMoreLines] = useState(false);
   const [showNextButton, setShowNextButton] = useState(true);
+
+  const handleOptionSelect = async (optionIndex: number) => {
+    if (!manager) return;
+    manager.choose(optionIndex);
+    setOptions([]);
+    const result = manager.nextLines();
+    if (result) {
+      setLines(result.lines);
+      setShowNextButton(true);
+      const speaker = result.speaker;
+      if (speaker) {
+        const animName = manager.getAnimationForSpeaker(speaker);
+        if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+          setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+        }
+      }
+    }
+    setHasMoreLines(manager.hasMoreLines());
+    setOptions(manager.getCurrent().options);
+  };
 
   const handleNext = async () => {
     if (!manager) return;
@@ -116,9 +137,12 @@ export default function App() {
       <GameCanvas frames={animation} background={background} />
       <DialogWidget
         lines={lines}
-        options={options}
         showNextButton={showNextButton}
         onNext={handleNext}
+      />
+      <OptionsWidget
+        options={options}
+        onSelect={handleOptionSelect}
       />
     </div>
   );
