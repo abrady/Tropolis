@@ -1,12 +1,12 @@
 import { CharacterDef } from '../character';
 import { parseFrames } from '../frame-utils';
-import sheetData from '../data/characters/Overlord/Idle.anim';
+import sheetDataJson from '../data/characters/Overlord/Idle.anim?raw';
 import sheetSrc from '../data/characters/Overlord/Overlord.png';
 
 const image = new Image();
 image.src = sheetSrc;
 
-const frames = parseFrames(sheetData);
+const frames = parseFrames(JSON.parse(sheetDataJson));
 
 const Overlord: CharacterDef = {
   image,
