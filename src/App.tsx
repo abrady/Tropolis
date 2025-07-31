@@ -110,17 +110,6 @@ export default function App() {
     handleNext();
   }, [manager]);
 
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
-        event.preventDefault();
-        handleNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleNext]);
 
   return (
     <div id="game-container">

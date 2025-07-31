@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface DialogWidgetProps {
   lines: string[];
@@ -15,13 +15,42 @@ export default function DialogWidget({
   onNext, 
   onOptionClick 
 }: DialogWidgetProps) {
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+
+  useEffect(() => {
+    setCurrentLineIndex(0);
+  }, [lines]);
+
+  const handleNext = () => {
+    if (currentLineIndex < lines.length - 1) {
+      setCurrentLineIndex(currentLineIndex + 1);
+    } else {
+      onNext();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleNext]);
+
+  const currentLine = lines[currentLineIndex];
+  const hasMoreLinesToShow = currentLineIndex < lines.length - 1;
+
   return (
     <div id="dialogue">
-      {lines.map((l, i) => <p key={i}>{l}</p>)}
-      {showNextButton && (
-        <button onClick={onNext}>Next (Space)</button>
+      {currentLine && <p>{currentLine}</p>}
+      {(hasMoreLinesToShow || showNextButton) && (
+        <button onClick={handleNext}>Next</button>
       )}
-      {options.map((o, i) => (
+      {!hasMoreLinesToShow && options.map((o, i) => (
         <button key={i} onClick={() => onOptionClick?.(i)}>
           {o.text}
         </button>
