@@ -113,9 +113,12 @@ Promise.all([
       puzzleComplete = () => {
         puzzleEl.style.display = 'none';
         updateCheatButtons();
+        // Tell dialog manager the command is complete
+        manager.completeCommand();
         // Continue with existing dialog flow - the jump command will handle the next node
-        manager.follow();
-        renderDialog();
+        manager.follow().then(() => {
+          renderDialog();
+        });
       };
       startTowerOfHanoi(puzzleEl, 4, () => {
         const cb = puzzleComplete;
@@ -129,6 +132,8 @@ Promise.all([
     dialogBox.style.display = 'none';
     updateCheatButtons();
     changeLevel(args[0]);
+    // Level loading is synchronous, so complete immediately
+    manager.completeCommand();
   }
 
   const commandHandlers: CommandHandlers = {
@@ -151,13 +156,13 @@ Promise.all([
       cheatMenu.style.display = 'none';
     }
   };
-  cheatSkipBtn.onclick = () => {
+  cheatSkipBtn.onclick = async () => {
     if (dialogBox.style.display === 'none') return;
     let content = manager.getCurrent();
     while (true) {
       manager.skipToEnd();
       if (!content.options.length && !content.command && content.next) {
-        manager.follow();
+        await manager.follow();
         content = manager.getCurrent();
         continue;
       }
@@ -189,6 +194,14 @@ Promise.all([
       window.removeEventListener('keydown', nextKeyHandler);
       nextKeyHandler = null;
     }
+    
+    // Hide dialog if command is running
+    if (manager.isCommandRunning()) {
+      dialogBox.style.display = 'none';
+      updateCheatButtons();
+      return;
+    }
+    
     const content = manager.getCurrent();
     if (content.lines.length === 0 && !content.next && content.options.length === 0) {
       dialogBox.classList.remove('visible');
@@ -316,8 +329,8 @@ Promise.all([
       const btn = document.createElement('button');
       btn.textContent = 'Next';
       btn.id = 'dialogue-next';
-      btn.onclick = () => {
-        manager.follow();
+      btn.onclick = async () => {
+        await manager.follow();
         renderDialog();
       };
       optionsEl.appendChild(btn);

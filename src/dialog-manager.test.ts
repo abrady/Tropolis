@@ -82,12 +82,18 @@ describe('headless dialogue stepping', () => {
     expect(done).toBeNull();
   });
 
-  it('executes command callbacks only when follow() is called', () => {
+  it('executes command callbacks only when follow() is called', async () => {
     const calls: string[] = [];
+    let manager: DialogManager;
     const dm = new DialogManager(sampleCmd, {
-      loadPuzzle: args => calls.push(args[0]),
+      loadPuzzle: args => {
+        calls.push(args[0]);
+        // Complete command immediately for test
+        setTimeout(() => manager.completeCommand(), 0);
+      },
       loadLevel: () => {}
     });
+    manager = dm;
     dm.start('CmdNode');
     
     // Commands should NOT execute during nextLines()
@@ -96,7 +102,7 @@ describe('headless dialogue stepping', () => {
     expect(calls).toEqual([]); // No commands executed yet
     
     // Commands should execute when follow() is called after all dialogue
-    dm.follow();
+    await dm.follow();
     expect(calls).toEqual(['TowerOfHanoi']);
   });
 });

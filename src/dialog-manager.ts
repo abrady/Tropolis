@@ -32,6 +32,8 @@ export class DialogManager {
   private returnStack: string[] = [];
   private lineIndex = 0;
   private commandHandled = false;
+  private commandRunning = false;
+  private currentCommandResolver: (() => void) | null = null;
   public currentSpeaker: string | null = null;
   private commandHandlers: CommandHandlers;
 
@@ -85,11 +87,14 @@ export class DialogManager {
     }
   }
 
-  follow() {
+  async follow() {
+    if (this.commandRunning) {
+      throw new Error('Cannot call follow() while command is running');
+    }
     const content = this.getCurrent();
     // Execute command if we've reached the end of dialogue
     if (this.lineIndex >= content.lines.length) {
-      this.handleCommand(content);
+      await this.handleCommand(content);
     }
     if (content.next) {
       if (content.next === '__return__') {
@@ -107,6 +112,8 @@ export class DialogManager {
   private resetLineState() {
     this.lineIndex = 0;
     this.commandHandled = false;
+    this.commandRunning = false;
+    this.currentCommandResolver = null;
     this.currentSpeaker = null;
   }
 
@@ -138,6 +145,16 @@ export class DialogManager {
     return { lines: linesToShow, speaker: currentSpeaker };
   }
 
+  isCommandRunning(): boolean {
+    return this.commandRunning;
+  }
+
+  completeCommand() {
+    if (this.currentCommandResolver) {
+      this.currentCommandResolver();
+    }
+  }
+
   hasMoreLines(): boolean {
     const content = this.getCurrent();
     return this.lineIndex < content.lines.length;
@@ -148,11 +165,23 @@ export class DialogManager {
     this.lineIndex = content.lines.length;
   }
 
-  private handleCommand(content: DialogueContent) {
+  private async handleCommand(content: DialogueContent) {
     if (content.command && !this.commandHandled) {
+      this.commandRunning = true;
+      
+      // Create promise that resolves when command finishes
+      const commandPromise = new Promise<void>(resolve => {
+        this.currentCommandResolver = resolve;
+      });
+      
       const handler = this.commandHandlers[content.command.name];
       handler(content.command.args);
       this.commandHandled = true;
+      
+      // Wait for command to complete
+      await commandPromise;
+      this.commandRunning = false;
+      this.currentCommandResolver = null;
     }
   }
 }
