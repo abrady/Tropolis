@@ -1,9 +1,9 @@
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
-import cryoroomImg from './data/0_cryoroom.png';
-import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
-import sector7Img from './data/1_sector7.png';
-import sector7Dialogue from './dialogue/1_sector7.yarn?raw';
+import cryoroomImg from './data/locations/cryoroom.png';
+import cryoDialogue from './dialogue/cryoroom.yarn?raw';
+import sector7Img from './data/locations/sector7.png';
+import sector7Dialogue from './dialogue/sector7.yarn?raw';
 import { DialogManager, CommandHandlers } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
 
@@ -156,13 +156,13 @@ Promise.all([
       cheatMenu.style.display = 'none';
     }
   };
-  cheatSkipBtn.onclick = async () => {
+  cheatSkipBtn.onclick = () => {
     if (dialogBox.style.display === 'none') return;
     let content = manager.getCurrent();
     while (true) {
       manager.skipToEnd();
       if (!content.options.length && !content.command && content.next) {
-        await manager.follow();
+        manager.follow();
         content = manager.getCurrent();
         continue;
       }
@@ -194,14 +194,6 @@ Promise.all([
       window.removeEventListener('keydown', nextKeyHandler);
       nextKeyHandler = null;
     }
-    
-    // Hide dialog if command is running
-    if (manager.isCommandRunning()) {
-      dialogBox.style.display = 'none';
-      updateCheatButtons();
-      return;
-    }
-    
     const content = manager.getCurrent();
     if (content.lines.length === 0 && !content.next && content.options.length === 0) {
       dialogBox.classList.remove('visible');
@@ -329,8 +321,8 @@ Promise.all([
       const btn = document.createElement('button');
       btn.textContent = 'Next';
       btn.id = 'dialogue-next';
-      btn.onclick = async () => {
-        await manager.follow();
+      btn.onclick = () => {
+        manager.follow();
         renderDialog();
       };
       optionsEl.appendChild(btn);
