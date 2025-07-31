@@ -4,6 +4,10 @@ import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import sector7Img from '../data/locations/sector7.png';
 import sector7Dialogue from './dialogue/sector7.yarn?raw';
+import mallImg from '../data/mall.png';
+import mallDialogue from './dialogue/mall.yarn?raw';
+import bookstoreImg from '../data/bookstore.png';
+import bookstoreDialogue from './dialogue/bookstore.yarn?raw';
 import { DialogManager, CommandHandlers } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
 
@@ -21,11 +25,15 @@ interface LevelData {
 
 const levels: Record<string, LevelData> = {
   CryoRoom: { image: new Image(), dialogue: cryoDialogue, start: 'CryoRoom_Intro' },
-  Sector7: { image: new Image(), dialogue: sector7Dialogue, start: 'Sector7_Start' }
+  Sector7: { image: new Image(), dialogue: sector7Dialogue, start: 'Sector7_Start' },
+  mall: { image: new Image(), dialogue: mallDialogue, start: 'Mall_Start' },
+  bookstore: { image: new Image(), dialogue: bookstoreDialogue, start: 'Bookstore_Start' }
 };
 
 levels.CryoRoom.image.src = cryoroomImg;
 levels.Sector7.image.src = sector7Img;
+levels.mall.image.src = mallImg;
+levels.bookstore.image.src = bookstoreImg;
 
 let currentLevel = levels.CryoRoom;
 let background = currentLevel.image;

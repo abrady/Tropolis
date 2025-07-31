@@ -97,6 +97,9 @@ Overlord: It may be simple, but it confirms your cognitive functions survived cr
 
 title: CryoRoom_AfterPuzzle_End
 ---
-Overlord: Now, let's proceed to Sector 7.
+Overlord: Excellent work. You're ready to face the challenges ahead.
+Overlord: I must remain here, but you may explore the city as you see fit.
+Overlord: Remember, your skills are vital to our survival.
+Overlord: Good luck, 11235.
 <<loadLevel Sector7>>
 ===
