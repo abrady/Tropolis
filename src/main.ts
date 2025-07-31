@@ -4,9 +4,9 @@ import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import sector7Img from '../data/locations/sector7.png';
 import sector7Dialogue from './dialogue/sector7.yarn?raw';
-import mallImg from '../data/mall.png';
+import mallImg from '../data/locations/mall.png';
 import mallDialogue from './dialogue/mall.yarn?raw';
-import bookstoreImg from '../data/bookstore.png';
+import bookstoreImg from '../data/locations/bookstore.png';
 import bookstoreDialogue from './dialogue/bookstore.yarn?raw';
 import { DialogManager, CommandHandlers } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
@@ -111,7 +111,35 @@ Promise.all([
   const cheatMenu = document.getElementById('cheat-menu') as HTMLDivElement;
   const cheatCompleteBtn = document.getElementById('cheat-complete-puzzle') as HTMLButtonElement;
   const cheatSkipBtn = document.getElementById('cheat-skip-dialog') as HTMLButtonElement;
+  const actionMenu = document.getElementById('action-menu') as HTMLDivElement;
+  const actionMoveBtn = document.getElementById('action-move') as HTMLButtonElement;
+  const actionTalkBtn = document.getElementById('action-talk') as HTMLButtonElement;
+  const actionExamineBtn = document.getElementById('action-examine') as HTMLButtonElement;
   let puzzleComplete: (() => void) | null = null;
+  let actionMenuVisible = false;
+
+  function showActionMenu() {
+    actionMenuVisible = true;
+    actionMenu.style.display = 'flex';
+    // Select Talk by default
+    updateActionMenuSelection(1);
+  }
+
+  function hideActionMenu() {
+    actionMenuVisible = false;
+    actionMenu.style.display = 'none';
+  }
+
+  function updateActionMenuSelection(selectedIndex: number) {
+    const buttons = [actionMoveBtn, actionTalkBtn, actionExamineBtn];
+    buttons.forEach((btn, i) => {
+      if (i === selectedIndex) {
+        btn.classList.add('selected');
+      } else {
+        btn.classList.remove('selected');
+      }
+    });
+  }
 
   function handleLoadPuzzle(args: string[]) {
     puzzleEl.style.display = 'flex';
@@ -178,6 +206,23 @@ Promise.all([
     }
     renderDialog();
     cheatMenu.style.display = 'none';
+  };
+
+  // Action menu button handlers
+  actionMoveBtn.onclick = () => {
+    hideActionMenu();
+    // TODO: Implement move functionality
+  };
+
+  actionTalkBtn.onclick = () => {
+    hideActionMenu();
+    // Resume dialog from where we left off
+    renderDialog();
+  };
+
+  actionExamineBtn.onclick = () => {
+    hideActionMenu();
+    // TODO: Implement examine functionality
   };
   let manager = new DialogManager(currentLevel.dialogue, commandHandlers);
   manager.start(currentLevel.start);
@@ -253,9 +298,19 @@ Promise.all([
       };
       optionsEl.appendChild(btn);
       nextKeyHandler = (ev: KeyboardEvent) => {
-        if (ev.key === ' ' || ev.key === 'Enter') {
+        if (ev.key === 'Escape') {
           ev.preventDefault();
-          btn.click();
+          if (actionMenuVisible) {
+            hideActionMenu();
+            renderDialog();
+          } else {
+            showActionMenu();
+          }
+        } else if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          if (!actionMenuVisible) {
+            btn.click();
+          }
         }
       };
       window.addEventListener('keydown', nextKeyHandler);
@@ -311,17 +366,31 @@ Promise.all([
       };
       updateSelected();
       nextKeyHandler = (ev: KeyboardEvent) => {
-        if (ev.key === 'ArrowUp') {
+        if (ev.key === 'Escape') {
           ev.preventDefault();
-          selected = (selected + buttons.length - 1) % buttons.length;
-          updateSelected();
+          if (actionMenuVisible) {
+            hideActionMenu();
+            renderDialog();
+          } else {
+            showActionMenu();
+          }
+        } else if (ev.key === 'ArrowUp') {
+          ev.preventDefault();
+          if (!actionMenuVisible) {
+            selected = (selected + buttons.length - 1) % buttons.length;
+            updateSelected();
+          }
         } else if (ev.key === 'ArrowDown') {
           ev.preventDefault();
-          selected = (selected + 1) % buttons.length;
-          updateSelected();
+          if (!actionMenuVisible) {
+            selected = (selected + 1) % buttons.length;
+            updateSelected();
+          }
         } else if (ev.key === ' ' || ev.key === 'Enter') {
           ev.preventDefault();
-          buttons[selected].click();
+          if (!actionMenuVisible) {
+            buttons[selected].click();
+          }
         }
       };
       window.addEventListener('keydown', nextKeyHandler);
@@ -335,9 +404,19 @@ Promise.all([
       };
       optionsEl.appendChild(btn);
       nextKeyHandler = (ev: KeyboardEvent) => {
-        if (ev.key === ' ' || ev.key === 'Enter') {
+        if (ev.key === 'Escape') {
           ev.preventDefault();
-          btn.click();
+          if (actionMenuVisible) {
+            hideActionMenu();
+            renderDialog();
+          } else {
+            showActionMenu();
+          }
+        } else if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          if (!actionMenuVisible) {
+            btn.click();
+          }
         }
       };
       window.addEventListener('keydown', nextKeyHandler);

@@ -161,6 +161,36 @@
       margin-top: 5px;
       padding: 5px;
     }
+    #action-menu {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 15px 25px;
+      border: 2px solid #fff;
+      border-radius: 5px;
+    }
+    #action-menu button {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+    #action-menu button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    #action-menu button.selected {
+      background: rgba(255,255,255,0.5);
+      box-shadow: inset 0 0 0 2px #fff;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +203,11 @@
     </div>
     <div id="choice-overlay"></div>
     <div id="puzzle-container" style="display:none;"></div>
+    <div id="action-menu" style="display:none;">
+      <button id="action-move">Move</button>
+      <button id="action-talk">Talk</button>
+      <button id="action-examine">Examine</button>
+    </div>
     <button id="cheat-toggle">⚡</button>
     <div id="cheat-menu">
       <button id="cheat-complete-puzzle">Complete Puzzle</button>
