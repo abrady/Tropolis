@@ -25,6 +25,12 @@ export interface DialogueContent {
 
 import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
 
+// The DialogManager class manages the flow of dialogue in a game or application,
+// - start(node): initializes the dialogue from a starting node.
+// - getCurrent(): retrieves the current dialogue content: lines, options, next node, and command.
+//     currently not having content is used on in main.ts to decide if the dialog should be shown or not.
+// - nextLines(): returns the next block of dialogue lines for the current node, sharing the same speaker
+
 export class DialogManager {
   private nodes: Record<string, YarnNode> = {};
   private speakerInfo: Record<string, Speaker> = {};
