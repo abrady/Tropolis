@@ -4,6 +4,7 @@ import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import { DialogManager, CommandHandlers } from './dialog-manager';
+import DialogWidget from './DialogWidget';
 
 interface LevelData {
   image: HTMLImageElement;
@@ -124,13 +125,12 @@ export default function App() {
   return (
     <div id="game-container">
       <GameCanvas frames={animation} background={background} />
-      <div id="dialogue">
-        {lines.map((l, i) => <p key={i}>{l}</p>)}
-        {showNextButton && (
-          <button onClick={handleNext}>Next (Space)</button>
-        )}
-        {options.map((o, i) => <button key={i}>{o.text}</button>)}
-      </div>
+      <DialogWidget
+        lines={lines}
+        options={options}
+        showNextButton={showNextButton}
+        onNext={handleNext}
+      />
     </div>
   );
 }
