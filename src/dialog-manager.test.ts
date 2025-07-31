@@ -82,15 +82,21 @@ describe('headless dialogue stepping', () => {
     expect(done).toBeNull();
   });
 
-  it('executes command callbacks', () => {
+  it('executes command callbacks only when follow() is called', () => {
     const calls: string[] = [];
     const dm = new DialogManager(sampleCmd, {
       loadPuzzle: args => calls.push(args[0]),
       loadLevel: () => {}
     });
     dm.start('CmdNode');
+    
+    // Commands should NOT execute during nextLines()
     const lines = dm.nextLines();
     expect(lines?.speaker).toBe('Overlord');
+    expect(calls).toEqual([]); // No commands executed yet
+    
+    // Commands should execute when follow() is called after all dialogue
+    dm.follow();
     expect(calls).toEqual(['TowerOfHanoi']);
   });
 });
