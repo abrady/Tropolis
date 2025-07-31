@@ -15,7 +15,6 @@ Overlord: Wake up 11235. The city needs you.
 ===
 
 title: CryoRoom_Branch
-You: *groan* 
 ---
 -> Where am I?
     <<detour WhereAmI>>

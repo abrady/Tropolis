@@ -87,6 +87,10 @@ export class DialogManager {
 
   follow() {
     const content = this.getCurrent();
+    // Execute command if we've reached the end of dialogue
+    if (this.lineIndex >= content.lines.length) {
+      this.handleCommand(content);
+    }
     if (content.next) {
       if (content.next === '__return__') {
         const ret = this.returnStack.pop();
@@ -109,12 +113,11 @@ export class DialogManager {
   /**
    * Returns the next block of dialogue lines for the current node. The returned
    * lines all share the same speaker. If no more lines remain, null is
-   * returned and any command on the node will be triggered.
+   * returned but commands are NOT triggered automatically.
    */
   nextLines(): { lines: string[]; speaker: string | null } | null {
     const content = this.getCurrent();
     if (this.lineIndex >= content.lines.length) {
-      this.handleCommand(content);
       return null;
     }
     const linesToShow: string[] = [];
@@ -132,7 +135,6 @@ export class DialogManager {
       if (m && linesToShow.length === 1) currentSpeaker = m[1];
     }
     this.currentSpeaker = currentSpeaker;
-    if (this.lineIndex >= content.lines.length) this.handleCommand(content);
     return { lines: linesToShow, speaker: currentSpeaker };
   }
 

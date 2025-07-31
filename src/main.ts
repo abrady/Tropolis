@@ -112,10 +112,9 @@ Promise.all([
     if (args[0] === 'TowerOfHanoi') {
       puzzleComplete = () => {
         puzzleEl.style.display = 'none';
-        dialogBox.style.display = 'block';
         updateCheatButtons();
-        manager = new DialogManager(cryoDialogue, commandHandlers);
-        manager.start('CryoRoom_AfterPuzzle_Start');
+        // Continue with existing dialog flow - the jump command will handle the next node
+        manager.follow();
         renderDialog();
       };
       startTowerOfHanoi(puzzleEl, 4, () => {
