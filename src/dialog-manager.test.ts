@@ -7,7 +7,8 @@ describe('DialogManager Tests', () => {
 
   const noopHandlers = {
     loadPuzzle: () => {},
-    loadLevel: () => {}
+    loadLevel: () => {},
+    return: () => {}
   };
   
   const testHandlers = {
@@ -20,6 +21,15 @@ describe('DialogManager Tests', () => {
       commandCalls.push({ name: 'loadLevel', args });
       // Simulate immediate completion for level loading
       setTimeout(() => currentManager?.completeCommand(), 0);
+    },
+    return: (args: string[]) => {
+      commandCalls.push({ name: 'return', args });
+      // Handle return command exactly like main app
+      const ret = currentManager?.popReturnStack();
+      if (ret) {
+        currentManager?.goto(ret);
+      }
+      currentManager?.completeCommand();
     }
   };
 
@@ -476,17 +486,13 @@ Guide: Going nowhere.
 <<jump NonExistent>>
 ===`;
 
-    it('should handle invalid jump targets gracefully', async () => {
+    it('should throw error for invalid jump targets', async () => {
       const dm = new DialogManager(invalidJumpYarn, testHandlers);
       currentManager = dm;
       dm.start('BadJump');
       
       dm.nextLines();
-      await expect(dm.follow()).resolves.not.toThrow();
-      
-      // Should stay in same node or handle gracefully
-      const content = dm.getCurrent();
-      expect(content).toBeDefined();
+      await expect(dm.follow()).rejects.toThrow("Node 'NonExistent' does not exist");
     });
 
     const noSpeakerYarn = `

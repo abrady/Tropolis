@@ -172,9 +172,18 @@ Promise.all([
     manager.completeCommand();
   }
 
+  function handleReturn(args: string[]) {
+    const ret = manager.popReturnStack();
+    if (ret) {
+      manager.goto(ret);
+    }
+    manager.completeCommand();
+  }
+
   const commandHandlers: CommandHandlers = {
     loadPuzzle: handleLoadPuzzle,
-    loadLevel: handleLoadLevel
+    loadLevel: handleLoadLevel,
+    return: handleReturn
   };
 
   function updateCheatButtons() {
@@ -290,33 +299,6 @@ Promise.all([
       await new Promise(res => setTimeout(res, 600));
     }
 
-    if (manager.hasMoreLines()) {
-      const btn = document.createElement('button');
-      btn.textContent = 'Next';
-      btn.onclick = () => {
-        renderDialog();
-      };
-      optionsEl.appendChild(btn);
-      nextKeyHandler = (ev: KeyboardEvent) => {
-        if (ev.key === 'Escape') {
-          ev.preventDefault();
-          if (actionMenuVisible) {
-            hideActionMenu();
-            renderDialog();
-          } else {
-            showActionMenu();
-          }
-        } else if (ev.key === ' ' || ev.key === 'Enter') {
-          ev.preventDefault();
-          if (!actionMenuVisible) {
-            btn.click();
-          }
-        }
-      };
-      window.addEventListener('keydown', nextKeyHandler);
-      return;
-    }
-
     const lastLine = textEl.lastElementChild?.textContent ?? '';
 
     if (content.options.length > 0) {
@@ -394,13 +376,17 @@ Promise.all([
         }
       };
       window.addEventListener('keydown', nextKeyHandler);
-    } else if (content.next) {
+    } else if (manager.showNext()) {
       const btn = document.createElement('button');
       btn.textContent = 'Next';
       btn.id = 'dialogue-next';
       btn.onclick = () => {
-        manager.follow();
-        renderDialog();
+        if (manager.hasMoreLines()) {
+          renderDialog();
+        } else {
+          manager.follow();
+          renderDialog();
+        }
       };
       optionsEl.appendChild(btn);
       nextKeyHandler = (ev: KeyboardEvent) => {
@@ -420,6 +406,11 @@ Promise.all([
         }
       };
       window.addEventListener('keydown', nextKeyHandler);
+    } else if (content.next && linesToShow.length === 0 && content.options.length === 0) {
+      // Auto-follow if there's a next node but no dialogue or options to show
+      manager.follow();
+      renderDialog();
+      return;
     }
 
   }

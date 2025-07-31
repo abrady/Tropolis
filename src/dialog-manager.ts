@@ -8,6 +8,7 @@ export interface DialogueOption {
 export type CommandHandlers = {
   loadPuzzle(args: string[]): void;
   loadLevel(args: string[]): void;
+  return(args: string[]): void;
 };
 
 export interface DialogueCommand {
@@ -75,9 +76,6 @@ export class DialogManager {
   getCurrent(): DialogueContent {
     if (!this.current) return { lines: [], options: [], next: null, command: null };
     const content = parseNodeBody(this.nodes[this.current].body, this.visited);
-    if (!content.next && content.options.length === 0 && this.returnStack.length > 0) {
-      return { ...content, next: '__return__' };
-    }
     return content;
   }
 
@@ -102,13 +100,9 @@ export class DialogManager {
       await this.handleCommand(content);
     }
     if (content.next) {
-      if (content.next === '__return__') {
-        const ret = this.returnStack.pop();
-        if (ret) this.goto(ret);
-      } else {
-        this.goto(content.next);
-      }
-    } else if (this.returnStack.length > 0) {
+      this.goto(content.next);
+    } else if (content.options.length === 0 && this.returnStack.length > 0) {
+      // Auto-return when there are no options and we have a return stack
       const ret = this.returnStack.pop();
       if (ret) this.goto(ret);
     }
@@ -170,6 +164,16 @@ export class DialogManager {
     this.lineIndex = content.lines.length;
   }
 
+  showNext(): boolean {
+    const content = this.getCurrent();
+    // Show Next button only if there are more lines to display OR if there's a next node and we have dialogue text
+    return this.hasMoreLines() || (content.next !== null && content.lines.length > 0 && this.lineIndex >= content.lines.length);
+  }
+
+  popReturnStack(): string | undefined {
+    return this.returnStack.pop();
+  }
+
   private async handleCommand(content: DialogueContent) {
     if (content.command && !this.commandHandled) {
       this.commandRunning = true;
@@ -219,6 +223,12 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent
       const levelMatch = trimmed.match(/<<\s*loadLevel\s+([A-Za-z0-9_]+)\s*>>/);
       if (levelMatch) {
         command = { name: 'loadLevel', args: [levelMatch[1]] };
+        i++;
+        continue;
+      }
+      const returnMatch = trimmed.match(/<<\s*return\s*>>/);
+      if (returnMatch) {
+        command = { name: 'return', args: [] };
         i++;
         continue;
       }

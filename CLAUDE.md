@@ -52,3 +52,7 @@ Tests use Vitest and focus on:
 - Yarn file integrity
 
 The project includes comprehensive validation for dialogue flow, ensuring all nodes are reachable and terminate properly.
+
+## Code Style and Best Practices
+
+- When writing code, bias towards fail fast: assert rather than protecting if it is an error. E.g., calling goto or return and there's nothing to return or a location to goto it should crash
