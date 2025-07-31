@@ -20,3 +20,7 @@ The project includes a small utility for parsing `.yarn` dialogue files from
 [Yarn Spinner](https://yarnspinner.dev/). Use `parseYarn()` from
 `src/yarn-utils.ts` to read the contents of a `.yarn` file into an array of
 nodes.
+
+## Assets
+
+Character sprites are stored in `src/data/characters` and level backgrounds in `src/data/locations`.

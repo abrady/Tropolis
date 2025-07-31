@@ -1,8 +1,8 @@
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
-import cryoroomImg from './data/0_cryoroom.png';
+import cryoroomImg from './data/locations/0_cryoroom.png';
 import cryoDialogue from './dialogue/0_cryoroom.yarn?raw';
-import sector7Img from './data/1_sector7.png';
+import sector7Img from './data/locations/1_sector7.png';
 import sector7Dialogue from './dialogue/1_sector7.yarn?raw';
 import { DialogManager, CommandHandlers } from './dialog-manager';
 import { startTowerOfHanoi } from './puzzles';
