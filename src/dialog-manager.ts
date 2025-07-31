@@ -61,7 +61,12 @@ export class DialogManager {
   }
 
   goto(nodeName: string | null) {
-    if (!nodeName || !this.nodes[nodeName]) return;
+    if (!nodeName) {
+      throw new Error('Cannot goto null or undefined node');
+    }
+    if (!this.nodes[nodeName]) {
+      throw new Error(`Node '${nodeName}' does not exist`);
+    }
     this.current = nodeName;
     this.visited.add(nodeName);
     this.resetLineState();
