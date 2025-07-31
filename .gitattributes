@@ -1,8 +1,8 @@
-src/data/**/*.png filter=lfs diff=lfs merge=lfs -text
-src/data/**/*.jpg filter=lfs diff=lfs merge=lfs -text
-src/data/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
-src/data/**/*.gif filter=lfs diff=lfs merge=lfs -text
-src/data/**/*.webp filter=lfs diff=lfs merge=lfs -text
+data/**/*.png filter=lfs diff=lfs merge=lfs -text
+data/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+data/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+data/**/*.gif filter=lfs diff=lfs merge=lfs -text
+data/**/*.webp filter=lfs diff=lfs merge=lfs -text
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text
 *.avi filter=lfs diff=lfs merge=lfs -text

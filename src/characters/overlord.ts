@@ -1,7 +1,7 @@
 import { CharacterDef } from '../character';
 import { parseFrames } from '../frame-utils';
-import sheetDataJson from '../data/characters/Overlord/Idle.anim?raw';
-import sheetSrc from '../data/characters/Overlord/Overlord.png';
+import sheetDataJson from '../../data/characters/Overlord/Idle.anim?raw';
+import sheetSrc from '../../data/characters/Overlord/Overlord.png';
 
 const image = new Image();
 image.src = sheetSrc;

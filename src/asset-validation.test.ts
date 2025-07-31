@@ -33,7 +33,7 @@ function parseDef(content: string): CharacterDef {
 }
 
 describe('character asset validation', () => {
-  const base = path.join(process.cwd(), 'src', 'data', 'characters');
+  const base = path.join(process.cwd(), 'data', 'characters');
   if (!fs.existsSync(base)) return;
   for (const char of fs.readdirSync(base)) {
     const folder = path.join(base, char);

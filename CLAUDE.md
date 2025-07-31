@@ -17,7 +17,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 
 **Character Animation System**
 - `CharacterDef` interface defines sprites with animation frames (`src/character.ts`)
-- Frame data parsed from JSON animation files in `src/data/characters/` using `parseFrames()` (`src/frame-utils.ts`)
+- Frame data parsed from JSON animation files in `data/characters/` using `parseFrames()` (`src/frame-utils.ts`)
 - Characters organized in `src/characters/` with dedicated modules (e.g., `overlord.ts`)
 
 **Dialogue System** 
@@ -38,9 +38,9 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 ### File Structure Conventions
 
 - Characters: `src/characters/` with index exports
-- Character assets: `src/data/characters/[Name]/` containing `.png`, `.anim`, `.def` files
+- Character assets: `data/characters/[Name]/` containing `.png`, `.anim`, `.def` files
 - Dialogue: `src/dialogue/` containing `.yarn` files
-- Level backgrounds: `src/data/` as `.png` files
+- Level backgrounds: `data/` as `.png` files
 - Tests: Co-located with source files as `.test.ts`
 
 ### Testing
