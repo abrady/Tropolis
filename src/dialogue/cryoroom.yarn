@@ -19,13 +19,13 @@ title: CryoRoom_Branch
 -> Where am I?
     <<detour WhereAmI>>
 -> What's going on?
-<<detour CryoRoom_WhatGoingOn>>
+    <<detour CryoRoom_WhatGoingOn>>
 -> {WhereAmI} The city?
     <<detour TheCity>>
 -> {WhereAmI} Why can't I remember any of this?
     <<detour WhyCantRemember>>
 -> {WhyCantRemember} If the city needs me, let's go
-<<jump LetsContinue>>
+    <<jump LetsContinue>>
 ===
 
 title: WhereAmI

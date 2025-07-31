@@ -186,7 +186,8 @@ Guide: Well done!
           // Complete command immediately for test
           setTimeout(() => manager.completeCommand(), 0);
         },
-        loadLevel: () => {}
+        loadLevel: () => {},
+        return: () => {}
       });
       manager = dm;
       dm.start('CmdNode');

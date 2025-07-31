@@ -11,31 +11,49 @@ export type CommandHandlers = {
   return(args: string[]): void;
 };
 
-export interface DialogueCommand {
+export interface DialogCommand {
   name: keyof CommandHandlers;
   args: string[];
 }
 
-export interface DialogueContent {
+export interface DialogNode {
   lines: string[];
   options: DialogueOption[];
   next: string | null;
-  command?: DialogueCommand | null;
+  command?: DialogCommand | null;
 }
+
+interface DialogState {
+  currentNode: string;
+  lineIndex: number;
+  currentSpeaker: string | null;
+  variables: Record<string, any>;   // e.g. { "$hasKey": true, "$score": 10 }
+  flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
+}
+
+export interface DialogLines {
+  lines: string[];
+  speaker: string | null;
+}  
 
 import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
 
 export class DialogManager {
   private nodes: Record<string, YarnNode> = {};
+  private state: DialogState = {
+    currentNode: '',
+    lineIndex: 0,
+    currentSpeaker: null,
+    variables: {},
+    flags: {},
+  };
   private speakerInfo: Record<string, Speaker> = {};
   private visited = new Set<string>();
-  private current: string | null = null;
   private returnStack: string[] = [];
-  private lineIndex = 0;
   private commandHandled = false;
   private commandRunning = false;
   private currentCommandResolver: (() => void) | null = null;
-  public currentSpeaker: string | null = null;
+
   private commandHandlers: CommandHandlers;
 
   constructor(yarnText: string, handlers: CommandHandlers) {
@@ -68,26 +86,35 @@ export class DialogManager {
     if (!this.nodes[nodeName]) {
       throw new Error(`Node '${nodeName}' does not exist`);
     }
-    this.current = nodeName;
+    this.state = {
+      currentNode: nodeName,
+      lineIndex: 0,
+      currentSpeaker: null,
+      variables: {},
+      flags: {}
+    }
     this.visited.add(nodeName);
     this.resetLineState();
   }
 
-  getCurrent(): DialogueContent {
-    if (!this.current) return { lines: [], options: [], next: null, command: null };
-    const content = parseNodeBody(this.nodes[this.current].body, this.visited);
+  getCurrent(): DialogNode {
+    if (!this.state.currentNode) {
+      throw new Error('No current node set');
+    }
+    const content = parseNodeBody(this.nodes[this.state.currentNode].body, this.visited);
     return content;
   }
 
   choose(index: number) {
     const content = this.getCurrent();
     const opt = content.options[index];
-    if (opt) {
-      if (opt.detour && this.current) {
-        this.returnStack.push(this.current);
-      }
-      this.goto(opt.target);
+    if (!opt) {
+      throw new Error(`Invalid option index ${index} for node ${this.state.currentNode}`);
     }
+    if (opt.detour && this.state.currentNode) {
+      this.returnStack.push(this.state.currentNode);
+    }
+    this.goto(opt.target);
   }
 
   async follow() {
@@ -95,10 +122,10 @@ export class DialogManager {
       throw new Error('Cannot call follow() while command is running');
     }
     const content = this.getCurrent();
-    // Execute command if we've reached the end of dialogue
-    if (this.lineIndex >= content.lines.length) {
-      await this.handleCommand(content);
+    if (this.state.lineIndex < content.lines.length) {
+      throw new Error('Cannot follow() when there are lines to display');
     }
+    await this.handleCommand(content);
     if (content.next) {
       this.goto(content.next);
     } else if (content.options.length === 0 && this.returnStack.length > 0) {
@@ -109,11 +136,10 @@ export class DialogManager {
   }
 
   private resetLineState() {
-    this.lineIndex = 0;
+    this.state.lineIndex = 0;
     this.commandHandled = false;
     this.commandRunning = false;
     this.currentCommandResolver = null;
-    this.currentSpeaker = null;
   }
 
   /**
@@ -121,18 +147,18 @@ export class DialogManager {
    * lines all share the same speaker. If no more lines remain, null is
    * returned but commands are NOT triggered automatically.
    */
-  nextLines(): { lines: string[]; speaker: string | null } | null {
+  nextLines(): DialogLines | null {
     const content = this.getCurrent();
-    if (this.lineIndex >= content.lines.length) {
+    if (this.state.lineIndex >= content.lines.length) {
       return null;
     }
     const linesToShow: string[] = [];
     let currentSpeaker: string | null = null;
-    const first = content.lines[this.lineIndex];
+    const first = content.lines[this.state.lineIndex];
     const firstMatch = first.match(/^(.*?):\s*(.*)$/);
     if (firstMatch) currentSpeaker = firstMatch[1];
-    for (; this.lineIndex < content.lines.length; this.lineIndex++) {
-      const l = content.lines[this.lineIndex];
+    for (; this.state.lineIndex < content.lines.length; this.state.lineIndex++) {
+      const l = content.lines[this.state.lineIndex];
       const m = l.match(/^(.*?):\s*(.*)$/);
       if (linesToShow.length > 0 && m && currentSpeaker && m[1] !== currentSpeaker) {
         break;
@@ -140,7 +166,7 @@ export class DialogManager {
       linesToShow.push(l);
       if (m && linesToShow.length === 1) currentSpeaker = m[1];
     }
-    this.currentSpeaker = currentSpeaker;
+    this.state.currentSpeaker = currentSpeaker;
     return { lines: linesToShow, speaker: currentSpeaker };
   }
 
@@ -156,25 +182,25 @@ export class DialogManager {
 
   hasMoreLines(): boolean {
     const content = this.getCurrent();
-    return this.lineIndex < content.lines.length;
+    return this.state.lineIndex < content.lines.length;
   }
 
   skipToEnd() {
     const content = this.getCurrent();
-    this.lineIndex = content.lines.length;
+    this.state.lineIndex = content.lines.length;
   }
 
   showNext(): boolean {
     const content = this.getCurrent();
     // Show Next button only if there are more lines to display OR if there's a next node and we have dialogue text
-    return this.hasMoreLines() || (content.next !== null && content.lines.length > 0 && this.lineIndex >= content.lines.length);
+    return this.hasMoreLines() || (content.next !== null && content.lines.length > 0 && this.state.lineIndex >= content.lines.length);
   }
 
   popReturnStack(): string | undefined {
     return this.returnStack.pop();
   }
 
-  private async handleCommand(content: DialogueContent) {
+  private async handleCommand(content: DialogNode) {
     if (content.command && !this.commandHandled) {
       this.commandRunning = true;
       
@@ -195,12 +221,12 @@ export class DialogManager {
   }
 }
 
-function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueContent {
+function parseNodeBody(body: string, visitedNodes: Set<string>): DialogNode {
   const lines = body.split(/\r?\n/);
   const texts: string[] = [];
   const options: DialogueOption[] = [];
   let next: string | null = null;
-  let command: DialogueCommand | null = null;
+  let command: DialogCommand | null = null;
   let i = 0;
 
   // gather dialogue lines until options or jump

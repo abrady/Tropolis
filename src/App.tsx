@@ -53,12 +53,51 @@ export default function App() {
   const [options, setOptions] = useState<{ text: string; visited?: boolean }[]>([]);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
+  const [hasMoreLines, setHasMoreLines] = useState(false);
+  const [showNextButton, setShowNextButton] = useState(true);
+
+  const handleNext = async () => {
+    if (!manager) return;
+    
+    if (manager.hasMoreLines()) {
+      const result = manager.nextLines();
+      if (result) {
+        setLines(result.lines);
+        const speaker = result.speaker;
+        if (speaker) {
+          const animName = manager.getAnimationForSpeaker(speaker);
+          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+          }
+        }
+      }
+    } else {
+      // No more lines, advance the dialogue flow and hide the next button
+      setShowNextButton(false);
+      await manager.follow();
+      const result = manager.nextLines();
+      if (result) {
+        setLines(result.lines);
+        setShowNextButton(true);
+        const speaker = result.speaker;
+        if (speaker) {
+          const animName = manager.getAnimationForSpeaker(speaker);
+          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+          }
+        }
+      }
+    }
+    
+    setHasMoreLines(manager.hasMoreLines());
+    setOptions(manager.getCurrent().options);
+  };
 
   useEffect(() => {
     const handlers: CommandHandlers = {
-      loadPuzzle: () => {},
-      loadLevel: () => {},
-      return: () => {}
+      loadPuzzle: (args: string[]) => {},
+      loadLevel: (args: string[]) => {},
+      return: (args: string[]) => {}
     };
     const m = new DialogManager(levels.CryoRoom.dialogue, handlers);
     m.start(levels.CryoRoom.start);
@@ -67,21 +106,29 @@ export default function App() {
 
   useEffect(() => {
     if (!manager) return;
-    const result = manager.nextLines();
-    setLines(result ? result.lines : []);
-    setOptions(manager.getCurrent().options);
-    const speaker = result ? result.speaker : null;
-    if (speaker) {
-      const anim = manager.getAnimationForSpeaker(speaker);
-      if (anim) setAnimation(anim);
-    }
+    handleNext();
   }, [manager]);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleNext]);
 
   return (
     <div id="game-container">
       <GameCanvas frames={animation} background={background} />
       <div id="dialogue">
         {lines.map((l, i) => <p key={i}>{l}</p>)}
+        {showNextButton && (
+          <button onClick={handleNext}>Next (Space)</button>
+        )}
         {options.map((o, i) => <button key={i}>{o.text}</button>)}
       </div>
     </div>
