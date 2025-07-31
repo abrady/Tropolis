@@ -194,26 +194,7 @@
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="game"></canvas>
-    <div id="dialogue">
-      <div id="dialogue-speaker"></div>
-      <div id="dialogue-text"></div>
-      <div id="dialogue-options"></div>
-    </div>
-    <div id="choice-overlay"></div>
-    <div id="puzzle-container" style="display:none;"></div>
-    <div id="action-menu" style="display:none;">
-      <button id="action-move">Move</button>
-      <button id="action-talk">Talk</button>
-      <button id="action-examine">Examine</button>
-    </div>
-    <button id="cheat-toggle">⚡</button>
-    <div id="cheat-menu">
-      <button id="cheat-complete-puzzle">Complete Puzzle</button>
-      <button id="cheat-skip-dialog">Skip Dialogue</button>
-    </div>
-  </div>
-  <script type="module" src="/src/main.ts"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
