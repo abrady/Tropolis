@@ -7,7 +7,7 @@ export interface LevelData {
 
 export type GameStateListener = (state: GameState) => void;
 
-import { DialogueManager } from './dialog-manager';
+import { DialogueManager } from './dialogue-manager';
 
 export class GameState {
   private levels: Record<string, LevelData>;
