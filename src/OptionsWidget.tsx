@@ -32,7 +32,6 @@ export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWi
           event.preventDefault();
           setSelectedIndex(prev => prev < options.length - 1 ? prev + 1 : 0);
           break;
-        case 'Space':
         case 'Enter':
           event.preventDefault();
           onChoose(selectedIndex);

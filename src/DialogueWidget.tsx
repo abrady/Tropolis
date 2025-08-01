@@ -27,7 +27,7 @@ export default function DialogueWidget({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
+      if (event.code === 'Space' && showNextButton) {
         event.preventDefault();
         handleNext();
       }
@@ -35,7 +35,7 @@ export default function DialogueWidget({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleNext]);
+  }, [handleNext, showNextButton]);
 
   const currentLine = lines[currentLineIndex];
   const hasMoreLinesToShow = currentLineIndex < lines.length - 1;
