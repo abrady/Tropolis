@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
-interface DialogWidgetProps {
+interface DialogueWidgetProps {
   lines: string[];
   showNextButton: boolean;
   onNext: () => void;
 }
 
-export default function DialogWidget({ 
+export default function DialogueWidget({ 
   lines, 
   showNextButton, 
   onNext
-}: DialogWidgetProps) {
+}: DialogueWidgetProps) {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
   useEffect(() => {

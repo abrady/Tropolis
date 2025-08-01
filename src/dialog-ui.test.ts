@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DialogManager } from './dialog-manager';
+import { DialogueManager } from './dialog-manager';
 
 // Mock DOM elements for testing UI behavior
 const mockElement = () => ({
@@ -21,7 +21,7 @@ const mockButton = () => ({
   id: ''
 });
 
-describe('Dialog UI Rendering Tests', () => {
+describe('Dialogue UI Rendering Tests', () => {
   const handlers = {
     loadPuzzle: vi.fn(),
     loadLevel: vi.fn(),
@@ -45,9 +45,9 @@ title: NextNode
 Guide: Next node
 ===`;
 
-    const dm = new DialogManager(yarn, handlers);
+    const dm = new DialogueManager(yarn, handlers);
     
-    // Start dialog and get generator
+    // Start dialogue and get generator
     dm.start('TestNode');
     const gen = dm.advance();
     
@@ -84,9 +84,9 @@ title: Simple
 Guide: Hello
 ===`;
 
-    const dm = new DialogManager(yarn, handlers);
+    const dm = new DialogueManager(yarn, handlers);
     
-    // Start dialog and get generator
+    // Start dialogue and get generator
     dm.start('Simple');
     const gen = dm.advance();
     
@@ -111,9 +111,9 @@ Guide: Step 2
 Guide: Step 3
 ===`;
 
-    const dm = new DialogManager(yarn, handlers);
+    const dm = new DialogueManager(yarn, handlers);
     
-    // Start dialog and get generator
+    // Start dialogue and get generator
     dm.start('MultiStep');
     const gen = dm.advance();
     

@@ -3,8 +3,8 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
-import { DialogManager, CommandHandlers, DialogueOption, DialogEvent, DialogAdvanceParam } from './dialog-manager';
-import DialogWidget from './DialogWidget';
+import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
+import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
@@ -52,9 +52,9 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
 }
 
 export default function App() {
-  const [manager, setManager] = useState<DialogManager | null>(null);
-  const [dialogGenerator, setDialogGenerator] = useState<Generator<DialogEvent, void, DialogAdvanceParam> | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<DialogEvent | null>(null);
+  const [manager, setManager] = useState<DialogueManager | null>(null);
+  const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
@@ -63,7 +63,7 @@ export default function App() {
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleDialogAction = (command: string, args: string[]) => {
+  const handleDialogueAction = (command: string, args: string[]) => {
     if (command === 'loadPuzzle' && args[0] === 'TowerOfHanoi') {
       setShowPuzzle(true);
       
@@ -73,7 +73,7 @@ export default function App() {
           container.innerHTML = '';
           startTowerOfHanoi(container, 4, () => {
             setShowPuzzle(false);
-            // Continue dialog after puzzle completion
+            // Continue dialogue after puzzle completion
             processNextEvent();
           });
         }
@@ -86,13 +86,13 @@ export default function App() {
   };
 
   const processNextEvent = () => {
-    if (!dialogGenerator) return;
+    if (!dialogueGenerator) return;
     
-    const result = dialogGenerator.next();
+    const result = dialogueGenerator.next();
     handleGeneratorResult(result);    
   };
 
-  const handleGeneratorResult = (result: IteratorResult<DialogEvent, void>) => {
+  const handleGeneratorResult = (result: IteratorResult<DialogueEvent, void>) => {
     if (result.done) {
       setCurrentEvent(null);
       return;
@@ -115,15 +115,15 @@ export default function App() {
         // Choice event handled by rendering OptionsWidget
         break;
       case 'command':
-        handleDialogAction(event.command, event.args);
+        handleDialogueAction(event.command, event.args);
         break;
     }
   };
     
   const handleOptionSelect = (optionIndex: number) => {
-    if (!dialogGenerator) return;
+    if (!dialogueGenerator) return;
     
-    const result = dialogGenerator.next({ type: 'choice', optionIndex });
+    const result = dialogueGenerator.next({ type: 'choice', optionIndex });
     handleGeneratorResult(result);
   };
 
@@ -160,18 +160,18 @@ export default function App() {
 
   useEffect(() => {
     const handlers: CommandHandlers = {
-      loadPuzzle: () => {}, // Handled by dialog action system
+      loadPuzzle: () => {}, // Handled by dialogue action system
       loadLevel: () => {},
       return: () => {}
     };
     
-    const m = new DialogManager(levels.CryoRoom.dialogue, handlers);
+    const m = new DialogueManager(levels.CryoRoom.dialogue, handlers);
     setManager(m);
     
-    // Start the dialog and get generator
+    // Start the dialogue and get generator
     m.start(levels.CryoRoom.start);
     const generator = m.advance();
-    setDialogGenerator(generator);
+    setDialogueGenerator(generator);
     
     // Get first event
     const result = generator.next();
@@ -212,7 +212,7 @@ export default function App() {
       <GameCanvas frames={animation} background={background} />
       {!showPuzzle && (
         <>
-          <DialogWidget
+          <DialogueWidget
             lines={displayLines}
             showNextButton={currentEvent?.type === 'line'}
             onNext={handleNext}
