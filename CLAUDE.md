@@ -23,8 +23,8 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - Characters organized in `src/characters/` with dedicated modules (e.g., `overlord.ts`)
 
 **Dialogue System Architecture**
-- `DialogueManager` class handles Yarn Spinner dialogue files (`src/dialog-manager.ts`)
-- Parses `.yarn` files from `src/dialogue/` using `parseYarnFile()` (`src/yarn-utils.ts`)
+- `DialogueManager` class handles custom dialogue files (`src/dialog-manager.ts`)
+- Parses `.gab` files from `src/dialogue/` using `parseGabFile()` (`src/gab-utils.ts`)
 - Supports speaker-based animations, branching choices, visited state tracking, and custom commands
 - Commands: `loadPuzzle`, `loadLevel`, `return` for game flow control
 - Key methods: `start()`, `nextLines()`, `follow()`, `choose()`, `getCurrent()`
@@ -68,7 +68,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 
 - Characters: `src/characters/` with index exports
 - Character assets: `data/characters/[Name]/` containing `.png`, `.anim`, `.def` files
-- Dialogue: `src/dialogue/` containing `.yarn` files
+- Dialogue: `src/dialogue/` containing `.gab` files
 - Level backgrounds: `data/locations/` as `.png` files
 - UI Components: Top-level in `src/` (DialogueWidget, OptionsWidget)
 - Tests: Co-located with source files as `.test.ts`
@@ -80,7 +80,7 @@ Tests use Vitest and focus on:
 - Asset validation for character definitions
 - Dialogue parsing and validation  
 - Frame parsing utilities
-- Yarn file integrity
+- Gab file integrity
 - Dialogue flow validation ensuring all nodes are reachable and terminate properly
 
 ## Code Style and Best Practices

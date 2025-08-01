@@ -59,7 +59,7 @@ Overlord: You chose option 2
 ===
 `;
 
-    it('generates line and action events from yarn node with puzzle command', () => {
+    it('generates line and action events from gab node with puzzle command', () => {
       const dm = new DialogueManager(samplePuzzle, noopHandlers);
       
       dm.start('TestNode');
@@ -78,7 +78,7 @@ Overlord: You chose option 2
       expect(thirdEvent.done).toBe(true);
     });
 
-    it('generates line and action events from yarn node with level command', () => {
+    it('generates line and action events from gab node with level command', () => {
       const dm = new DialogueManager(sampleLevel, noopHandlers);
       
       dm.start('LevelNode');

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
-import cryoDialogue from './dialogue/cryoroom.yarn?raw';
+import cryoDialogue from './dialogue/cryoroom.gab?raw';
 import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';

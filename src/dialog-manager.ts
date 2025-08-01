@@ -45,14 +45,14 @@ export interface DialogueLines {
   speaker: string | null;
 }  
 
-import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
+import { parseGabFile, GabNode, Speaker } from './gab-utils';
 
 
 // The DialogueManager class manages has:
 // - state: the current state of the dialogue including the current node, line index, speaker, variables, flags, and whether a command has been processed.
 // - an advance() to move to the next state if possible.
 export class DialogueManager {
-  private nodes: Record<string, YarnNode> = {};
+  private nodes: Record<string, GabNode> = {};
   private state: DialogueState = {
     currentNode: '',
     lineIndex: 0,
@@ -66,8 +66,8 @@ export class DialogueManager {
 
   private commandHandlers: CommandHandlers;
 
-  constructor(yarnText: string, handlers: CommandHandlers) {
-    const { nodes, speakers } = parseYarnFile(yarnText);
+  constructor(gabText: string, handlers: CommandHandlers) {
+    const { nodes, speakers } = parseGabFile(gabText);
     this.speakerInfo = speakers;
     for (const n of nodes) {
       this.nodes[n.title] = n;
