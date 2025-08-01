@@ -23,7 +23,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - Characters organized in `src/characters/` with dedicated modules (e.g., `overlord.ts`)
 
 **Dialogue System Architecture**
-- `DialogManager` class handles Yarn Spinner dialogue files (`src/dialog-manager.ts`)
+- `DialogueManager` class handles Yarn Spinner dialogue files (`src/dialog-manager.ts`)
 - Parses `.yarn` files from `src/dialogue/` using `parseYarnFile()` (`src/yarn-utils.ts`)
 - Supports speaker-based animations, branching choices, visited state tracking, and custom commands
 - Commands: `loadPuzzle`, `loadLevel`, `return` for game flow control
@@ -31,9 +31,9 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 
 **UI Component Architecture**
 - `App.tsx` manages dialogue state and coordinates between components
-- `DialogWidget` displays dialogue lines one at a time with spacebar advancement
+- `DialogueWidget` displays dialogue lines one at a time with spacebar advancement
 - `OptionsWidget` provides full-screen overlay for dialogue choices with keyboard navigation
-- Clean separation: App owns DialogManager, widgets handle presentation
+- Clean separation: App owns DialogueManager, widgets handle presentation
 
 **Game Loop & Rendering**
 - `GameCanvas` component handles canvas rendering and animation timing using requestAnimationFrame
@@ -47,16 +47,16 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 
 ### Dialogue Flow Control
 
-**DialogManager State Management:**
+**DialogueManager State Management:**
 - Uses generator-based flow: `start()` initializes state, `advance()` returns generator
-- Generator yields `DialogEvent` objects (line, choice, command types)
-- Choice events require `DialogAdvanceParam` passed to `gen.next({ type: 'choice', optionIndex })`
+- Generator yields `DialogueEvent` objects (line, choice, command types)
+- Choice events require `DialogueAdvanceParam` passed to `gen.next({ type: 'choice', optionIndex })`
 - Speaker animations: Character animations change based on dialogue speaker
 - State progression: Lines → Choices → Commands → Jump to next node
 
 **UI Interaction Patterns:**
 
-- Spacebar advances individual dialogue lines within DialogWidget
+- Spacebar advances individual dialogue lines within DialogueWidget
 - When all lines shown, spacebar triggers `follow()` to advance dialogue flow
 - Arrow keys navigate dialogue options, Space/Enter selects in OptionsWidget
 - Options display as full-screen overlay with visited state styling
@@ -69,7 +69,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - Character assets: `data/characters/[Name]/` containing `.png`, `.anim`, `.def` files
 - Dialogue: `src/dialogue/` containing `.yarn` files
 - Level backgrounds: `data/locations/` as `.png` files
-- UI Components: Top-level in `src/` (DialogWidget, OptionsWidget)
+- UI Components: Top-level in `src/` (DialogueWidget, OptionsWidget)
 - Tests: Co-located with source files as `.test.ts`
 
 ### Testing

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DialogManager, DialogEvent } from './dialog-manager';
+import { DialogueManager, DialogueEvent } from './dialog-manager';
 
-describe('DialogManager Tests', () => {
+describe('DialogueManager Tests', () => {
   let commandCalls: { name: string; args: string[] }[] = [];
 
   const noopHandlers = {
@@ -60,7 +60,7 @@ Overlord: You chose option 2
 `;
 
     it('generates line and action events from yarn node with puzzle command', () => {
-      const dm = new DialogManager(samplePuzzle, noopHandlers);
+      const dm = new DialogueManager(samplePuzzle, noopHandlers);
       
       dm.start('TestNode');
       const gen = dm.advance();
@@ -79,7 +79,7 @@ Overlord: You chose option 2
     });
 
     it('generates line and action events from yarn node with level command', () => {
-      const dm = new DialogManager(sampleLevel, noopHandlers);
+      const dm = new DialogueManager(sampleLevel, noopHandlers);
       
       dm.start('LevelNode');
       const gen = dm.advance();
@@ -98,7 +98,7 @@ Overlord: You chose option 2
     });
 
     it('generates choice events with detour and jump commands', () => {
-      const dm = new DialogManager(sampleChoice, noopHandlers);
+      const dm = new DialogueManager(sampleChoice, noopHandlers);
       
       dm.start('ChoiceNode');
       const gen = dm.advance();
@@ -164,7 +164,7 @@ Bob: I'm doing well, thanks.
 ===`;
 
     it('retrieves correct speaker animations', () => {
-      const dm = new DialogManager(sampleLines, noopHandlers);
+      const dm = new DialogueManager(sampleLines, noopHandlers);
       expect(dm.getAnimationForSpeaker('Alice')).toBe('aliceTalk');
       expect(dm.getAnimationForSpeaker('Bob')).toBe('bobTalk');
     });

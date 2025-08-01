@@ -21,4 +21,4 @@ The project includes a small utility for parsing `.yarn` dialogue files from
 `src/yarn-utils.ts` to read the contents of a `.yarn` file into an array of
 nodes.
 
-## how dialog works (atm)
+## how dialogue works (atm)

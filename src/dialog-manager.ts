@@ -11,36 +11,36 @@ export type CommandHandlers = {
   return(args: string[]): void;
 };
 
-export interface DialogCommand {
+export interface DialogueCommand {
   name: keyof CommandHandlers;
   args: string[];
 }
 
-export interface DialogNode {
+export interface DialogueNode {
   lines: string[];
   options: DialogueOption[];
   next: string | null;
-  command?: DialogCommand | null;
+  command?: DialogueCommand | null;
 }
 
-export type DialogEvent = 
+export type DialogueEvent = 
   | { type: 'line'; text: string; speaker: string | null }
   | { type: 'choice'; options: DialogueOption[] }
   // | { type: 'pause'; duration?: number }
   | { type: 'command'; command: string; args: string[] };
 
-export type DialogAdvanceParam =
+export type DialogueAdvanceParam =
 | { type: 'choice'; optionIndex: number };
 
-interface DialogState {
+interface DialogueState {
   currentNode: string;
-  content?: DialogNode; 
+  content?: DialogueNode; 
   lineIndex: number;
   variables: Record<string, any>;   // e.g. { "$hasKey": true, "$score": 10 }
   flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
 }
 
-export interface DialogLines {
+export interface DialogueLines {
   lines: string[];
   speaker: string | null;
 }  
@@ -48,12 +48,12 @@ export interface DialogLines {
 import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
 
 
-// The DialogManager class manages has:
-// - state: the current state of the dialog including the current node, line index, speaker, variables, flags, and whether a command has been processed.
+// The DialogueManager class manages has:
+// - state: the current state of the dialogue including the current node, line index, speaker, variables, flags, and whether a command has been processed.
 // - an advance() to move to the next state if possible.
-export class DialogManager {
+export class DialogueManager {
   private nodes: Record<string, YarnNode> = {};
-  private state: DialogState = {
+  private state: DialogueState = {
     currentNode: '',
     lineIndex: 0,
     variables: {},
@@ -62,7 +62,7 @@ export class DialogManager {
   private speakerInfo: Record<string, Speaker> = {};
   private visited = new Set<string>();
   private returnStack: string[] = [];
-  private currentEvent: DialogEvent | null = null;
+  private currentEvent: DialogueEvent | null = null;
 
   private commandHandlers: CommandHandlers;
 
@@ -90,9 +90,9 @@ export class DialogManager {
   }
 
 
-  public *advance(): Generator<DialogEvent, void, DialogAdvanceParam> {
+  public *advance(): Generator<DialogueEvent, void, DialogueAdvanceParam> {
     while (true) {
-      // advance through any dialog to show.
+      // advance through any dialogue to show.
       while (this.state.content && this.state.lineIndex < this.state.content.lines?.length) {
         const text = this.state.content.lines[this.state.lineIndex] || 'ERROR: Empty line';
         // extract the speaker from the text if it starts with a speaker name
@@ -156,11 +156,11 @@ export class DialogManager {
         if (returnNode) {
           this.goto(returnNode, true);
         } else {
-          // No more nodes to return to, end dialog
+          // No more nodes to return to, end dialogue
           break;
         }
       } else {
-        // No more nodes to process, end dialog
+        // No more nodes to process, end dialogue
         break;
       }
     }
@@ -191,12 +191,12 @@ export class DialogManager {
   }
 }
 
-function parseNodeBody(body: string, visitedNodes: Set<string>): DialogNode {
+function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueNode {
   const lines = body.split(/\r?\n/);
   const texts: string[] = [];
   const options: DialogueOption[] = [];
   let next: string | null = null;
-  let command: DialogCommand | null = null;
+  let command: DialogueCommand | null = null;
   let i = 0;
 
   // gather dialogue lines until options or jump
