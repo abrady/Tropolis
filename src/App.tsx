@@ -3,6 +3,7 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
+import testDialogue from './dialogue/test-choice.yarn?raw';
 import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
@@ -59,9 +60,11 @@ interface LevelData {
 }
 
 const levels: Record<string, LevelData> = {
+  Test: { image: new Image(), dialogue: testDialogue, start: 'ChoiceNode' },
   CryoRoom: { image: new Image(), dialogue: cryoDialogue, start: 'CryoRoom_Intro' }
 };
 
+levels.Test.image.src = cryoroomImg;
 levels.CryoRoom.image.src = cryoroomImg;
 
 function GameCanvas({ frames, background, width, height }: { frames: Frame[]; background: HTMLImageElement; width: number; height: number }) {
@@ -94,14 +97,18 @@ function GameCanvas({ frames, background, width, height }: { frames: Frame[]; ba
   return <canvas ref={canvasRef} width={width} height={height} />;
 }
 
-export default function App() {
+interface AppProps {
+  initialLevel?: keyof typeof levels;
+}
+
+export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const viewportSize = useViewportSize();
   const [manager, setManager] = useState<DialogueManager | null>(null);
   const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
-  const [background] = useState(() => levels.CryoRoom.image);
+  const [background] = useState(() => levels[initialLevel].image);
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
@@ -210,11 +217,11 @@ export default function App() {
       return: () => {}
     };
     
-    const m = new DialogueManager(levels.CryoRoom.dialogue, handlers);
+    const m = new DialogueManager(levels[initialLevel].dialogue, handlers);
     setManager(m);
     
     // Start the dialogue and get generator
-    m.start(levels.CryoRoom.start);
+    m.start(levels[initialLevel].start);
     const generator = m.advance();
     setDialogueGenerator(generator);
   }, []);
