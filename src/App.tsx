@@ -53,6 +53,7 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
 
 export default function App() {
   const [manager, setManager] = useState<DialogManager | null>(null);
+  const [pump, setPump] = useState<Generator<DialogEvent | null> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -66,7 +67,7 @@ export default function App() {
   const processNextEvent = () => {
     if (!manager) return;
     
-    const event = manager.advance();
+    const event = pump?.next().value;
     setCurrentEvent(event);
     
     switch (event.type) {

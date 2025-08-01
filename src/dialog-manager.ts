@@ -29,6 +29,9 @@ export type DialogEvent =
   // | { type: 'pause'; duration?: number }
   | { type: 'command'; command: string; args: string[] };
 
+export type DialogAdvanceParam =
+| { type: 'choice'; optionIndex: number };
+
 interface DialogState {
   currentNode: string;
   content?: DialogNode; 
@@ -86,8 +89,9 @@ export class DialogManager {
     this.goto(startNode); // set the initial state
   }
 
-  public *advance(): Generator<DialogEvent> {
-    while (!this.currentEvent || this.currentEvent.type !== 'end') {
+
+  public *advance(): Generator<DialogEvent, void, DialogAdvanceParam> {
+    while (true) {
       // advance through any dialog to show.
       while (this.state.content && this.state.lineIndex < this.state.content.lines?.length) {
         const text = this.state.content.lines[this.state.lineIndex] || 'ERROR: Empty line';
@@ -113,7 +117,24 @@ export class DialogManager {
           type: 'choice',
           options: this.state.content.options,
         };
-        yield this.currentEvent;
+        const result = yield this.currentEvent;
+        if (result && result.type === 'choice') {
+          const index = result.optionIndex;          
+          const opt = this.currentEvent.options[index];
+          if (!opt) {
+            throw new Error(`Invalid option index ${index}`);
+          }
+          
+          if (opt.detour && this.state.currentNode) {
+            this.returnStack.push(this.state.currentNode);
+          }
+          
+          this.currentEvent = null; // Clear choice state
+          this.goto(opt.target);
+          continue; // Restart the loop to process the next node
+        } else {
+          throw new Error('Expected choice result ' + JSON.stringify(result));
+        }
       }
 
       // if we have a command, run it
@@ -144,25 +165,6 @@ export class DialogManager {
       }
     }
     this.currentEvent = null;
-  }
-
-  choose(index: number): DialogEvent {
-    if (!this.currentEvent || this.currentEvent.type !== 'choice') {
-      throw new Error('No choice currently available');
-    }
-    
-    const opt = this.currentEvent.options[index];
-    if (!opt) {
-      throw new Error(`Invalid option index ${index}`);
-    }
-    
-    if (opt.detour && this.state.currentNode) {
-      this.returnStack.push(this.state.currentNode);
-    }
-    
-    this.currentEvent = null; // Clear choice state
-    this.goto(opt.target);
-    return this.advance();
   }
 
   private goto(nodeName: string | null, skipToChoices: boolean = false) {
