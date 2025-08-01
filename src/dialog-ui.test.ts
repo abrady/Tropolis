@@ -24,14 +24,15 @@ const mockButton = () => ({
 describe('Dialog UI Rendering Tests', () => {
   const handlers = {
     loadPuzzle: vi.fn(),
-    loadLevel: vi.fn()
+    loadLevel: vi.fn(),
+    return: vi.fn()
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should not create duplicate Next buttons when hasMoreLines and content.next both exist', () => {
+  it('should process line events and jump commands correctly', () => {
     const yarn = `
 title: TestNode
 ---
@@ -45,35 +46,31 @@ Guide: Next node
 ===`;
 
     const dm = new DialogManager(yarn, handlers);
-    dm.start('TestNode');
-
-    // Simulate the renderDialog logic
-    let buttonCount = 0;
-    const mockOptionsEl = {
-      innerHTML: '',
-      appendChild: () => {
-        buttonCount++;
-      }
-    };
-
-    // First call - should have more lines
-    let result = dm.nextLines();
-    expect(result?.lines).toHaveLength(2);
-    expect(dm.hasMoreLines()).toBe(false); // All lines consumed in one block
-
-    const content = dm.getCurrent();
     
-    // The logic should only create ONE button, not two
-    if (dm.hasMoreLines()) {
-      mockOptionsEl.appendChild(); // hasMoreLines path
-    } else if (content.next) {
-      mockOptionsEl.appendChild(); // content.next path
-    }
+    // Start and get first line
+    const firstEvent = dm.start('TestNode');
+    expect(firstEvent.type).toBe('line');
+    expect(firstEvent.text).toBe('First line');
+    expect(firstEvent.speaker).toBe('Guide');
 
-    expect(buttonCount).toBe(1);
+    // Get second line
+    const secondEvent = dm.advance();
+    expect(secondEvent.type).toBe('line');
+    expect(secondEvent.text).toBe('Second line');
+    expect(secondEvent.speaker).toBe('Guide');
+
+    // Should automatically jump to NextNode
+    const thirdEvent = dm.advance();
+    expect(thirdEvent.type).toBe('line');
+    expect(thirdEvent.text).toBe('Next node');
+    expect(thirdEvent.speaker).toBe('Guide');
+
+    // Should end
+    const fourthEvent = dm.advance();
+    expect(fourthEvent.type).toBe('end');
   });
 
-  it('should handle rapid renderDialog calls without duplicating buttons', () => {
+  it('should handle simple dialogue flow correctly', () => {
     const yarn = `
 title: Simple
 ---
@@ -81,37 +78,19 @@ Guide: Hello
 ===`;
 
     const dm = new DialogManager(yarn, handlers);
-    dm.start('Simple');
+    
+    // Start and get the line
+    const firstEvent = dm.start('Simple');
+    expect(firstEvent.type).toBe('line');
+    expect(firstEvent.text).toBe('Hello');
+    expect(firstEvent.speaker).toBe('Guide');
 
-    // Simulate multiple rapid calls to renderDialog logic
-    let buttonCount = 0;
-    const mockOptionsEl = {
-      innerHTML: '',
-      appendChild: () => {
-        buttonCount++;
-      }
-    };
-
-    // Multiple "renders" should reset innerHTML each time
-    for (let i = 0; i < 3; i++) {
-      mockOptionsEl.innerHTML = ''; // Simulate clearing
-      buttonCount = 0; // Reset count after clearing
-      
-      dm.nextLines();
-      const content = dm.getCurrent();
-      
-      if (dm.hasMoreLines()) {
-        mockOptionsEl.appendChild();
-      } else if (content.next) {
-        mockOptionsEl.appendChild();
-      }
-    }
-
-    // After the loop, should still only have created buttons for the last render
-    expect(buttonCount).toBeLessThanOrEqual(1);
+    // Should end after single line
+    const secondEvent = dm.advance();
+    expect(secondEvent.type).toBe('end');
   });
 
-  it('should properly track dialogue state to avoid button logic conflicts', () => {
+  it('should process multiple lines from same speaker', () => {
     const yarn = `
 title: MultiStep
 ---
@@ -121,20 +100,27 @@ Guide: Step 3
 ===`;
 
     const dm = new DialogManager(yarn, handlers);
-    dm.start('MultiStep');
+    
+    // Start and get first line
+    const firstEvent = dm.start('MultiStep');
+    expect(firstEvent.type).toBe('line');
+    expect(firstEvent.text).toBe('Step 1');
+    expect(firstEvent.speaker).toBe('Guide');
 
-    // First nextLines call should get all lines (same speaker)
-    let result = dm.nextLines();
-    expect(result?.lines).toHaveLength(3);
-    expect(dm.hasMoreLines()).toBe(false);
+    // Get second line
+    const secondEvent = dm.advance();
+    expect(secondEvent.type).toBe('line');
+    expect(secondEvent.text).toBe('Step 2');
+    expect(secondEvent.speaker).toBe('Guide');
 
-    const content = dm.getCurrent();
-    expect(content.next).toBeNull();
-    expect(content.options).toHaveLength(0);
+    // Get third line
+    const thirdEvent = dm.advance();
+    expect(thirdEvent.type).toBe('line');
+    expect(thirdEvent.text).toBe('Step 3');
+    expect(thirdEvent.speaker).toBe('Guide');
 
-    // With no more lines, no next node, and no options, 
-    // the UI should not create any buttons
-    let shouldCreateButton = dm.hasMoreLines() || content.next || content.options.length > 0;
-    expect(shouldCreateButton).toBe(false);
+    // Should end after all lines
+    const fourthEvent = dm.advance();
+    expect(fourthEvent.type).toBe('end');
   });
 });

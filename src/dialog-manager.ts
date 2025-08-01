@@ -23,12 +23,20 @@ export interface DialogNode {
   command?: DialogCommand | null;
 }
 
+export type DialogEvent = 
+  | { type: 'line'; text: string; speaker: string | null }
+  | { type: 'choice'; options: DialogueOption[] }
+  | { type: 'pause'; duration?: number }
+  | { type: 'action'; command: string; args: string[] }
+  | { type: 'end' };
+
 interface DialogState {
   currentNode: string;
   lineIndex: number;
   currentSpeaker: string | null;
   variables: Record<string, any>;   // e.g. { "$hasKey": true, "$score": 10 }
   flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
+  commandProcessed: boolean;
 }
 
 export interface DialogLines {
@@ -52,13 +60,13 @@ export class DialogManager {
     currentSpeaker: null,
     variables: {},
     flags: {},
+    commandProcessed: false,
   };
   private speakerInfo: Record<string, Speaker> = {};
   private visited = new Set<string>();
   private returnStack: string[] = [];
-  private commandHandled = false;
-  private commandRunning = false;
-  private currentCommandResolver: (() => void) | null = null;
+  private currentEvent: DialogEvent | null = null;
+  private eventQueue: DialogEvent[] = [];
 
   private commandHandlers: CommandHandlers;
 
@@ -81,149 +89,148 @@ export class DialogManager {
     return anim;
   }
 
-  start(startNode: string) {
+  start(startNode: string): DialogEvent {
     this.goto(startNode);
+    return this.advance();
   }
 
-  goto(nodeName: string | null) {
+  advance(): DialogEvent {
+    if (this.currentEvent && this.currentEvent.type === 'choice') {
+      throw new Error('Cannot advance while waiting for choice selection');
+    }
+
+    if (this.eventQueue.length > 0) {
+      this.currentEvent = this.eventQueue.shift()!;
+      return this.currentEvent;
+    }
+
+    this.generateNextEvents();
+    
+    if (this.eventQueue.length > 0) {
+      this.currentEvent = this.eventQueue.shift()!;
+      return this.currentEvent;
+    }
+
+    // If we have no events but need to navigate, try navigation (with stack protection)
+    let navigationDepth = 0;
+    while (navigationDepth < 10) { // Prevent stack overflow
+      const content = parseNodeBody(this.nodes[this.state.currentNode].body, this.visited);
+      if (content.next) {
+        this.goto(content.next);
+        this.generateNextEvents();
+        if (this.eventQueue.length > 0) {
+          this.currentEvent = this.eventQueue.shift()!;
+          return this.currentEvent;
+        }
+        navigationDepth++;
+      } else if (this.returnStack.length > 0) {
+        const ret = this.returnStack.pop();
+        if (ret) {
+          this.goto(ret, true);
+          this.generateNextEvents();
+          if (this.eventQueue.length > 0) {
+            this.currentEvent = this.eventQueue.shift()!;
+            return this.currentEvent;
+          }
+          navigationDepth++;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    this.currentEvent = { type: 'end' };
+    return this.currentEvent;
+  }
+
+  choose(index: number): DialogEvent {
+    if (!this.currentEvent || this.currentEvent.type !== 'choice') {
+      throw new Error('No choice currently available');
+    }
+    
+    const opt = this.currentEvent.options[index];
+    if (!opt) {
+      throw new Error(`Invalid option index ${index}`);
+    }
+    
+    if (opt.detour && this.state.currentNode) {
+      this.returnStack.push(this.state.currentNode);
+    }
+    
+    this.currentEvent = null; // Clear choice state
+    this.goto(opt.target);
+    return this.advance();
+  }
+
+  private goto(nodeName: string | null, skipToChoices: boolean = false) {
     if (!nodeName) {
       throw new Error('Cannot goto null or undefined node');
     }
     if (!this.nodes[nodeName]) {
       throw new Error(`Node '${nodeName}' does not exist`);
     }
+    
+    // If skipToChoices is true, set lineIndex to skip all lines
+    const lineIndex = skipToChoices ? 
+      parseNodeBody(this.nodes[nodeName].body, this.visited).lines.length : 0;
+    
     this.state = {
       currentNode: nodeName,
-      lineIndex: 0,
+      lineIndex,
       currentSpeaker: null,
-      variables: {},
-      flags: {}
+      variables: this.state.variables,
+      flags: this.state.flags,
+      commandProcessed: skipToChoices // If skipping to choices, mark command as processed too
     }
     this.visited.add(nodeName);
-    this.resetLineState();
+    this.eventQueue = [];
   }
 
-  getCurrent(): DialogNode {
+  private generateNextEvents() {
     if (!this.state.currentNode) {
-      throw new Error('No current node set');
+      return;
     }
+
     const content = parseNodeBody(this.nodes[this.state.currentNode].body, this.visited);
-    return content;
-  }
-
-  choose(index: number) {
-    const content = this.getCurrent();
-    const opt = content.options[index];
-    if (!opt) {
-      throw new Error(`Invalid option index ${index} for node ${this.state.currentNode}`);
-    }
-    if (opt.detour && this.state.currentNode) {
-      this.returnStack.push(this.state.currentNode);
-    }
-    this.goto(opt.target);
-  }
-
-  async follow() {
-    if (this.commandRunning) {
-      throw new Error('Cannot call follow() while command is running');
-    }
-    const content = this.getCurrent();
-    if (this.state.lineIndex < content.lines.length) {
-      throw new Error('Cannot follow() when there are lines to display');
-    }
-    await this.handleCommand(content);
-    if (content.next) {
-      this.goto(content.next);
-    } else if (content.options.length === 0 && this.returnStack.length > 0) {
-      // Auto-return when there are no options and we have a return stack
-      const ret = this.returnStack.pop();
-      if (ret) this.goto(ret);
-    }
-  }
-
-  private resetLineState() {
-    this.state.lineIndex = 0;
-    this.commandHandled = false;
-    this.commandRunning = false;
-    this.currentCommandResolver = null;
-  }
-
-  /**
-   * Returns the next block of dialogue lines for the current node. The returned
-   * lines all share the same speaker. If no more lines remain, null is
-   * returned but commands are NOT triggered automatically.
-   */
-  nextLines(): DialogLines | null {
-    const content = this.getCurrent();
-    if (this.state.lineIndex >= content.lines.length) {
-      return null;
-    }
-    const linesToShow: string[] = [];
-    let currentSpeaker: string | null = null;
-    const first = content.lines[this.state.lineIndex];
-    const firstMatch = first.match(/^(.*?):\s*(.*)$/);
-    if (firstMatch) currentSpeaker = firstMatch[1];
-    for (; this.state.lineIndex < content.lines.length; this.state.lineIndex++) {
-      const l = content.lines[this.state.lineIndex];
-      const m = l.match(/^(.*?):\s*(.*)$/);
-      if (linesToShow.length > 0 && m && currentSpeaker && m[1] !== currentSpeaker) {
-        break;
+    
+    // Generate line events if we haven't processed them yet
+    while (this.state.lineIndex < content.lines.length) {
+      const line = content.lines[this.state.lineIndex];
+      const match = line.match(/^(.*?):\s*(.*)$/);
+      
+      if (match) {
+        const speaker = match[1];
+        const text = match[2];
+        this.eventQueue.push({ type: 'line', text, speaker });
+        this.state.currentSpeaker = speaker;
+      } else {
+        this.eventQueue.push({ type: 'line', text: line, speaker: this.state.currentSpeaker || null });
       }
-      linesToShow.push(l);
-      if (m && linesToShow.length === 1) currentSpeaker = m[1];
-    }
-    this.state.currentSpeaker = currentSpeaker;
-    return { lines: linesToShow, speaker: currentSpeaker };
-  }
-
-  isCommandRunning(): boolean {
-    return this.commandRunning;
-  }
-
-  completeCommand() {
-    if (this.currentCommandResolver) {
-      this.currentCommandResolver();
-    }
-  }
-
-  hasMoreLines(): boolean {
-    const content = this.getCurrent();
-    return this.state.lineIndex < content.lines.length;
-  }
-
-  skipToEnd() {
-    const content = this.getCurrent();
-    this.state.lineIndex = content.lines.length;
-  }
-
-  showNext(): boolean {
-    const content = this.getCurrent();
-    // Show Next button only if there are more lines to display OR if there's a next node and we have dialogue text
-    return this.hasMoreLines() || (content.next !== null && content.lines.length > 0 && this.state.lineIndex >= content.lines.length);
-  }
-
-  popReturnStack(): string | undefined {
-    return this.returnStack.pop();
-  }
-
-  private async handleCommand(content: DialogNode) {
-    if (content.command && !this.commandHandled) {
-      this.commandRunning = true;
       
-      // Create promise that resolves when command finishes
-      const commandPromise = new Promise<void>(resolve => {
-        this.currentCommandResolver = resolve;
+      this.state.lineIndex++;
+    }
+
+    // Handle command only if we haven't processed it yet and all lines are consumed
+    if (content.command && !this.state.commandProcessed && this.state.lineIndex >= content.lines.length && this.eventQueue.length === 0) {
+      this.eventQueue.push({ 
+        type: 'action', 
+        command: content.command.name, 
+        args: content.command.args 
       });
-      
-      const handler = this.commandHandlers[content.command.name];
-      handler(content.command.args);
-      this.commandHandled = true;
-      
-      // Wait for command to complete
-      await commandPromise;
-      this.commandRunning = false;
-      this.currentCommandResolver = null;
+      // Mark command as processed
+      this.state.commandProcessed = true;
     }
+
+    // Handle choices only if we've processed everything else and have no events queued
+    if (this.eventQueue.length === 0 && content.options.length > 0) {
+      this.eventQueue.push({ type: 'choice', options: content.options });
+    }
+  }
+
+  getCurrentEvent(): DialogEvent | null {
+    return this.currentEvent;
   }
 }
 

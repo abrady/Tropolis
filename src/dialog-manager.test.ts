@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DialogManager } from './dialog-manager';
+import { DialogManager, DialogEvent } from './dialog-manager';
 
 describe('DialogManager Tests', () => {
   let commandCalls: { name: string; args: string[] }[] = [];
-  let currentManager: DialogManager | null = null;
 
   const noopHandlers = {
     loadPuzzle: () => {},
@@ -14,28 +13,17 @@ describe('DialogManager Tests', () => {
   const testHandlers = {
     loadPuzzle: (args: string[]) => {
       commandCalls.push({ name: 'loadPuzzle', args });
-      // Simulate async command completion
-      setTimeout(() => currentManager?.completeCommand(), 0);
     },
     loadLevel: (args: string[]) => {
       commandCalls.push({ name: 'loadLevel', args });
-      // Simulate immediate completion for level loading
-      setTimeout(() => currentManager?.completeCommand(), 0);
     },
     return: (args: string[]) => {
       commandCalls.push({ name: 'return', args });
-      // Handle return command exactly like main app
-      const ret = currentManager?.popReturnStack();
-      if (ret) {
-        currentManager?.goto(ret);
-      }
-      currentManager?.completeCommand();
     }
   };
 
   beforeEach(() => {
     commandCalls = [];
-    currentManager = null;
   });
 
   describe('Basic Command Parsing', () => {
@@ -51,18 +39,38 @@ Overlord: Proceed
 <<loadLevel Sector7>>
 ===`;
 
-    it('parses loadPuzzle command from yarn node', () => {
+    it('generates line and action events from yarn node with puzzle command', () => {
       const dm = new DialogManager(samplePuzzle, noopHandlers);
-      dm.start('TestNode');
-      const content = dm.getCurrent();
-      expect(content.command).toEqual({ name: 'loadPuzzle', args: ['TowerOfHanoi'] });
+      
+      const firstEvent = dm.start('TestNode');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Begin');
+      expect(firstEvent.speaker).toBe('Overlord');
+      
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('action');
+      expect(secondEvent.command).toBe('loadPuzzle');
+      expect(secondEvent.args).toEqual(['TowerOfHanoi']);
+      
+      const thirdEvent = dm.advance();
+      expect(thirdEvent.type).toBe('end');
     });
 
-    it('parses loadLevel command from yarn node', () => {
+    it('generates line and action events from yarn node with level command', () => {
       const dm = new DialogManager(sampleLevel, noopHandlers);
-      dm.start('LevelNode');
-      const content = dm.getCurrent();
-      expect(content.command).toEqual({ name: 'loadLevel', args: ['Sector7'] });
+      
+      const firstEvent = dm.start('LevelNode');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Proceed');
+      expect(firstEvent.speaker).toBe('Overlord');
+      
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('action');
+      expect(secondEvent.command).toBe('loadLevel');
+      expect(secondEvent.args).toEqual(['Sector7']);
+      
+      const thirdEvent = dm.advance();
+      expect(thirdEvent.type).toBe('end');
     });
   });
 
@@ -78,7 +86,6 @@ Overlord: Hi
 
     it('loads talk animation for speaker', () => {
       const dm = new DialogManager(sampleAnim, noopHandlers);
-      dm.start('AnimNode');
       expect(dm.getAnimationForSpeaker('Overlord')).toBe('overlordTalk');
     });
 
@@ -108,50 +115,31 @@ Alice: How are you doing?
 Bob: I'm doing well, thanks.
 ===`;
 
-    it('groups lines by speaker', () => {
+    it('generates individual line events for each dialogue line', () => {
       const dm = new DialogManager(sampleLines, noopHandlers);
-      currentManager = dm;
-      dm.start('LinesNode');
       
-      const first = dm.nextLines();
-      expect(first).toEqual({ lines: ['A: one', 'A: two'], speaker: 'A' });
+      const events: DialogEvent[] = [];
+      let event = dm.start('LinesNode');
+      events.push(event);
       
-      const second = dm.nextLines();
-      expect(second).toEqual({ lines: ['B: three'], speaker: 'B' });
+      while (event.type !== 'end') {
+        event = dm.advance();
+        events.push(event);
+      }
       
-      const third = dm.nextLines();
-      expect(third).toEqual({ lines: ['Alice: Hello there!', 'Alice: How are you doing?'], speaker: 'Alice' });
+      expect(events).toHaveLength(7); // 6 lines + 1 end
       
-      const fourth = dm.nextLines();
-      expect(fourth).toEqual({ lines: ['Bob: I\'m doing well, thanks.'], speaker: 'Bob' });
-      
-      const done = dm.nextLines();
-      expect(done).toBeNull();
-    });
-
-    it('correctly indicates when dialogue continues with hasMoreLines()', () => {
-      const dm = new DialogManager(sampleLines, noopHandlers);
-      currentManager = dm;
-      dm.start('LinesNode');
-      
-      expect(dm.hasMoreLines()).toBe(true);
-      dm.nextLines(); // A's block
-      
-      expect(dm.hasMoreLines()).toBe(true);
-      dm.nextLines(); // B's block
-      
-      expect(dm.hasMoreLines()).toBe(true);
-      dm.nextLines(); // Alice's block
-      
-      expect(dm.hasMoreLines()).toBe(true);
-      dm.nextLines(); // Bob's block
-      
-      expect(dm.hasMoreLines()).toBe(false);
+      expect(events[0]).toEqual({ type: 'line', text: 'one', speaker: 'A' });
+      expect(events[1]).toEqual({ type: 'line', text: 'two', speaker: 'A' });
+      expect(events[2]).toEqual({ type: 'line', text: 'three', speaker: 'B' });
+      expect(events[3]).toEqual({ type: 'line', text: 'Hello there!', speaker: 'Alice' });
+      expect(events[4]).toEqual({ type: 'line', text: 'How are you doing?', speaker: 'Alice' });
+      expect(events[5]).toEqual({ type: 'line', text: 'I\'m doing well, thanks.', speaker: 'Bob' });
+      expect(events[6]).toEqual({ type: 'end' });
     });
 
     it('retrieves correct speaker animations', () => {
       const dm = new DialogManager(sampleLines, noopHandlers);
-      currentManager = dm;
       expect(dm.getAnimationForSpeaker('Alice')).toBe('aliceTalk');
       expect(dm.getAnimationForSpeaker('Bob')).toBe('bobTalk');
     });
@@ -177,82 +165,43 @@ title: AfterPuzzle
 Guide: Well done!
 ===`;
 
-    it('executes command callbacks only when follow() is called', async () => {
-      const calls: string[] = [];
-      let manager: DialogManager;
-      const dm = new DialogManager(sampleCmd, {
-        loadPuzzle: args => {
-          calls.push(args[0]);
-          // Complete command immediately for test
-          setTimeout(() => manager.completeCommand(), 0);
-        },
-        loadLevel: () => {},
-        return: () => {}
-      });
-      manager = dm;
-      dm.start('CmdNode');
+    it('generates action events for commands in dialogue', () => {
+      const dm = new DialogManager(sampleCmd, noopHandlers);
       
-      // Commands should NOT execute during nextLines()
-      const lines = dm.nextLines();
-      expect(lines?.speaker).toBe('Overlord');
-      expect(calls).toEqual([]); // No commands executed yet
+      const firstEvent = dm.start('CmdNode');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Do it');
+      expect(firstEvent.speaker).toBe('Overlord');
       
-      // Commands should execute when follow() is called after all dialogue
-      await dm.follow();
-      expect(calls).toEqual(['TowerOfHanoi']);
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('action');
+      expect(secondEvent.command).toBe('loadPuzzle');
+      expect(secondEvent.args).toEqual(['TowerOfHanoi']);
     });
 
-    it('should NOT execute commands during nextLines()', () => {
-      const dm = new DialogManager(commandYarn, testHandlers);
-      currentManager = dm;
-      dm.start('PuzzleNode');
+    it('generates events in correct order: lines, then actions, then navigation', () => {
+      const dm = new DialogManager(commandYarn, noopHandlers);
       
-      // Read all dialogue lines
-      dm.nextLines(); // First guide block
-      expect(commandCalls).toHaveLength(0); // No commands yet
+      const firstEvent = dm.start('PuzzleNode');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Solve this puzzle.');
+      expect(firstEvent.speaker).toBe('Guide');
       
-      dm.nextLines(); // This should return null (no more lines)
-      expect(commandCalls).toHaveLength(0); // Still no commands
-    });
-
-    it('should execute commands only when follow() is called after all dialogue', async () => {
-      const dm = new DialogManager(commandYarn, testHandlers);
-      currentManager = dm;
-      dm.start('PuzzleNode');
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('line');
+      expect(secondEvent.text).toBe('Good luck!');
+      expect(secondEvent.speaker).toBe('Guide');
       
-      // Read all dialogue
-      dm.nextLines();
-      expect(dm.hasMoreLines()).toBe(false);
+      const thirdEvent = dm.advance();
+      expect(thirdEvent.type).toBe('action');
+      expect(thirdEvent.command).toBe('loadPuzzle');
+      expect(thirdEvent.args).toEqual(['TowerOfHanoi']);
       
-      // Now follow should execute command and jump
-      await dm.follow();
-      
-      expect(commandCalls).toHaveLength(1);
-      expect(commandCalls[0]).toEqual({ name: 'loadPuzzle', args: ['TowerOfHanoi'] });
-      
-      // Should have jumped to AfterPuzzle
-      const content = dm.getCurrent();
-      expect(content.lines[0]).toContain('Well done!');
-    });
-
-    it('should track command running state', async () => {
-      const dm = new DialogManager(commandYarn, testHandlers);
-      currentManager = dm;
-      dm.start('PuzzleNode');
-      
-      dm.nextLines();
-      expect(dm.isCommandRunning()).toBe(false);
-      
-      // Start follow() but don't await - command should be running
-      const followPromise = dm.follow();
-      expect(dm.isCommandRunning()).toBe(true);
-      
-      // Should error if trying to call follow() while running
-      await expect(dm.follow()).rejects.toThrow('Cannot call follow() while command is running');
-      
-      // Wait for command to complete
-      await followPromise;
-      expect(dm.isCommandRunning()).toBe(false);
+      // After action, should automatically navigate to AfterPuzzle
+      const fourthEvent = dm.advance();
+      expect(fourthEvent.type).toBe('line');
+      expect(fourthEvent.text).toBe('Well done!');
+      expect(fourthEvent.speaker).toBe('Guide');
     });
   });
 
@@ -278,32 +227,36 @@ title: Final
 Guide: All done now!
 ===`;
 
-    it('should handle jump commands correctly through multiple nodes', async () => {
-      const dm = new DialogManager(jumpYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Start');
+    it('should handle jump commands correctly through multiple nodes', () => {
+      const dm = new DialogManager(jumpYarn, noopHandlers);
       
-      // Read the initial dialogue
-      const first = dm.nextLines();
-      expect(first?.speaker).toBe('Player');
-      expect(dm.hasMoreLines()).toBe(false);
+      // Start node
+      const firstEvent = dm.start('Start');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('I should go somewhere.');
+      expect(firstEvent.speaker).toBe('Player');
       
-      // Follow the jump to Middle
-      await dm.follow();
-      let content = dm.getCurrent();
-      expect(content.lines[0]).toContain('You made it to the middle');
+      // Should automatically jump to Middle after the line
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('line');
+      expect(secondEvent.text).toBe('You made it to the middle.');
+      expect(secondEvent.speaker).toBe('Guide');
       
-      // Read middle dialogue and jump to End
-      dm.nextLines();
-      await dm.follow();
-      content = dm.getCurrent();
-      expect(content.lines[0]).toContain('Journey complete!');
+      // Should automatically jump to End
+      const thirdEvent = dm.advance();
+      expect(thirdEvent.type).toBe('line');
+      expect(thirdEvent.text).toBe('Journey complete!');
+      expect(thirdEvent.speaker).toBe('Guide');
       
-      // Read end dialogue and jump to Final
-      dm.nextLines();
-      await dm.follow();
-      content = dm.getCurrent();
-      expect(content.lines[0]).toContain('All done now!');
+      // Should automatically jump to Final
+      const fourthEvent = dm.advance();
+      expect(fourthEvent.type).toBe('line');
+      expect(fourthEvent.text).toBe('All done now!');
+      expect(fourthEvent.speaker).toBe('Guide');
+      
+      // Should end
+      const fifthEvent = dm.advance();
+      expect(fifthEvent.type).toBe('end');
     });
 
     const detourYarn = `
@@ -325,33 +278,38 @@ title: End
 Guide: All done!
 ===`;
 
-    it('should handle detour commands with return stack', async () => {
-      const dm = new DialogManager(detourYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Main');
+    it('should handle detour commands with return stack', () => {
+      const dm = new DialogManager(detourYarn, noopHandlers);
       
-      // Read main dialogue
-      dm.nextLines();
+      // Start at Main
+      const firstEvent = dm.start('Main');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Main conversation.');
+      expect(firstEvent.speaker).toBe('Guide');
+      
+      // Should get choice event
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('choice');
+      expect(secondEvent.options).toHaveLength(2);
+      expect(secondEvent.options[0].text).toBe('Go on a detour');
+      expect(secondEvent.options[0].detour).toBe(true);
       
       // Choose detour option
-      const content = dm.getCurrent();
-      expect(content.options).toHaveLength(2);
-      expect(content.options[0].detour).toBe(true);
+      const thirdEvent = dm.choose(0);
+      expect(thirdEvent.type).toBe('line');
+      expect(thirdEvent.text).toBe('This is a detour.');
+      expect(thirdEvent.speaker).toBe('Helper');
       
-      dm.choose(0); // Choose detour
+      // Continue detour
+      const fourthEvent = dm.advance();
+      expect(fourthEvent.type).toBe('line');
+      expect(fourthEvent.text).toBe('Returning now.');
+      expect(fourthEvent.speaker).toBe('Helper');
       
-      // Should be in detour
-      const detourLines = dm.nextLines();
-      expect(detourLines?.speaker).toBe('Helper');
-      
-      // Finish detour dialogue
-      dm.nextLines(); // Second Helper line
-      expect(dm.hasMoreLines()).toBe(false);
-      
-      // Follow should return to main
-      await dm.follow();
-      const afterDetour = dm.getCurrent();
-      expect(afterDetour.options).toHaveLength(2); // Back to main options
+      // Should return to main options
+      const fifthEvent = dm.advance();
+      expect(fifthEvent.type).toBe('choice');
+      expect(fifthEvent.options).toHaveLength(2); // Back to main options
     });
 
     const optionsYarn = `
@@ -373,21 +331,26 @@ Guide: You chose path B.
 ===`;
 
     it('should navigate to correct nodes when choosing options', () => {
-      const dm = new DialogManager(optionsYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Start');
+      const dm = new DialogManager(optionsYarn, noopHandlers);
       
-      dm.nextLines(); // Read guide line
+      // Start with dialogue
+      const firstEvent = dm.start('Start');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Choose your path.');
+      expect(firstEvent.speaker).toBe('Guide');
       
-      const content = dm.getCurrent();
-      expect(content.options).toHaveLength(2);
-      expect(content.options[0].text).toBe('Path A');
-      expect(content.options[1].text).toBe('Path B');
+      // Get choice options
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('choice');
+      expect(secondEvent.options).toHaveLength(2);
+      expect(secondEvent.options[0].text).toBe('Path A');
+      expect(secondEvent.options[1].text).toBe('Path B');
       
-      dm.choose(1); // Choose Path B
-      
-      const result = dm.nextLines();
-      expect(result?.lines[0]).toContain('You chose path B');
+      // Choose Path B
+      const thirdEvent = dm.choose(1);
+      expect(thirdEvent.type).toBe('line');
+      expect(thirdEvent.text).toBe('You chose path B.');
+      expect(thirdEvent.speaker).toBe('Guide');
     });
   });
 
@@ -416,47 +379,48 @@ title: End
 Guide: Goodbye!
 ===`;
 
-    it('should track visited state and show/hide conditional options', async () => {
-      const dm = new DialogManager(conditionalYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Start');
+    it('should track visited state and show/hide conditional options', () => {
+      const dm = new DialogManager(conditionalYarn, noopHandlers);
       
-      dm.nextLines();
+      // Start dialogue
+      const firstEvent = dm.start('Start');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Welcome!');
+      expect(firstEvent.speaker).toBe('Guide');
       
-      let content = dm.getCurrent();
-      // Should only show 2 options (shop and continue, not the conditional thank you)
-      expect(content.options).toHaveLength(2);
-      expect(content.options[0].text).toBe('Visit the shop');
-      expect(content.options[1].text).toBe('Continue');
+      // Get initial options (should only show 2, not the conditional one)
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('choice');
+      expect(secondEvent.options).toHaveLength(2);
+      expect(secondEvent.options[0].text).toBe('Visit the shop');
+      expect(secondEvent.options[1].text).toBe('Continue');
       
       // Visit shop
-      dm.choose(0);
-      dm.nextLines(); // Read merchant line
-      await dm.follow(); // Return from detour
+      const thirdEvent = dm.choose(0);
+      expect(thirdEvent.type).toBe('line');
+      expect(thirdEvent.text).toBe('Welcome to my shop!');
+      expect(thirdEvent.speaker).toBe('Merchant');
       
-      // Now the conditional option should appear
-      content = dm.getCurrent();
-      expect(content.options).toHaveLength(3);
-      expect(content.options[1].text).toBe('Thanks for visiting the shop');
+      // Return from detour - should now show conditional option
+      const fourthEvent = dm.advance();
+      expect(fourthEvent.type).toBe('choice');
+      expect(fourthEvent.options).toHaveLength(3);
+      expect(fourthEvent.options[1].text).toBe('Thanks for visiting the shop');
     });
 
-    it('should mark options as visited when targets are visited', async () => {
-      const dm = new DialogManager(conditionalYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Start');
+    it('should mark options as visited when targets are visited', () => {
+      const dm = new DialogManager(conditionalYarn, noopHandlers);
       
-      dm.nextLines();
-      let content = dm.getCurrent();
-      expect(content.options[0].visited).toBe(false);
+      const firstEvent = dm.start('Start');
+      const secondEvent = dm.advance();
+      expect(secondEvent.options[0].visited).toBe(false);
       
       // Visit shop
-      dm.choose(0);
-      dm.nextLines();
-      await dm.follow(); // Return
+      const thirdEvent = dm.choose(0);
+      const fourthEvent = dm.advance(); // Return from detour
       
       // Shop option should now be marked as visited
-      content = dm.getCurrent();
-      expect(content.options[0].visited).toBe(true);
+      expect(fourthEvent.options[0].visited).toBe(true);
     });
   });
 
@@ -467,17 +431,10 @@ title: Empty
 ===`;
 
     it('should handle empty nodes gracefully', () => {
-      const dm = new DialogManager(emptyYarn, testHandlers);
-      currentManager = dm;
-      dm.start('Empty');
+      const dm = new DialogManager(emptyYarn, noopHandlers);
       
-      const content = dm.getCurrent();
-      expect(content.lines).toHaveLength(0);
-      expect(content.options).toHaveLength(0);
-      expect(content.next).toBeNull();
-      
-      const lines = dm.nextLines();
-      expect(lines).toBeNull();
+      const firstEvent = dm.start('Empty');
+      expect(firstEvent.type).toBe('end');
     });
 
     const invalidJumpYarn = `
@@ -487,13 +444,15 @@ Guide: Going nowhere.
 <<jump NonExistent>>
 ===`;
 
-    it('should throw error for invalid jump targets', async () => {
-      const dm = new DialogManager(invalidJumpYarn, testHandlers);
-      currentManager = dm;
-      dm.start('BadJump');
+    it('should throw error for invalid jump targets', () => {
+      const dm = new DialogManager(invalidJumpYarn, noopHandlers);
       
-      dm.nextLines();
-      await expect(dm.follow()).rejects.toThrow("Node 'NonExistent' does not exist");
+      const firstEvent = dm.start('BadJump');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('Going nowhere.');
+      
+      // Should throw when trying to jump to non-existent node
+      expect(() => dm.advance()).toThrow("Node 'NonExistent' does not exist");
     });
 
     const noSpeakerYarn = `
@@ -504,14 +463,17 @@ Another line without speaker.
 ===`;
 
     it('should handle lines without speakers', () => {
-      const dm = new DialogManager(noSpeakerYarn, testHandlers);
-      currentManager = dm;
-      dm.start('NoSpeaker');
+      const dm = new DialogManager(noSpeakerYarn, noopHandlers);
       
-      const result = dm.nextLines();
-      expect(result?.speaker).toBeNull();
-      expect(result?.lines).toHaveLength(2);
-      expect(result?.lines[0]).toBe('This line has no speaker.');
+      const firstEvent = dm.start('NoSpeaker');
+      expect(firstEvent.type).toBe('line');
+      expect(firstEvent.text).toBe('This line has no speaker.');
+      expect(firstEvent.speaker).toBeNull();
+      
+      const secondEvent = dm.advance();
+      expect(secondEvent.type).toBe('line');
+      expect(secondEvent.text).toBe('Another line without speaker.');
+      expect(secondEvent.speaker).toBeNull();
     });
   });
 });

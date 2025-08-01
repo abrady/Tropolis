@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { DialogueOption } from './dialog-manager';
 
-interface OptionsWidgetProps {
+export interface OptionsWidgetProps {
   options: DialogueOption[];
-  onSelect: (index: number) => void;
+  onChoose: (index: number) => void;
   onEscape?: () => void;
 }
 
-export default function OptionsWidget({ options, onSelect, onEscape }: OptionsWidgetProps) {
+export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWidgetProps) {
   const getFirstUnvisited = (opts: DialogueOption[]) => {
     const idx = opts.findIndex(o => !o.visited);
     return idx === -1 ? 0 : idx;
@@ -35,7 +35,7 @@ export default function OptionsWidget({ options, onSelect, onEscape }: OptionsWi
         case 'Space':
         case 'Enter':
           event.preventDefault();
-          onSelect(selectedIndex);
+          onChoose(selectedIndex);
           break;
         case 'Backspace':
           event.preventDefault();
@@ -48,7 +48,7 @@ export default function OptionsWidget({ options, onSelect, onEscape }: OptionsWi
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [options, selectedIndex, onSelect, onEscape]);
+  }, [options, selectedIndex, onChoose, onEscape]);
 
   if (options.length === 0) {
     return null;
@@ -66,7 +66,7 @@ export default function OptionsWidget({ options, onSelect, onEscape }: OptionsWi
             return (
               <button
                 key={index}
-                onClick={() => onSelect(index)}
+                onClick={() => onChoose(index)}
                 className={classes.join(' ')}
               >
                 {option.text}

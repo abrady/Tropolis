@@ -3,7 +3,7 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
-import { DialogManager, CommandHandlers, DialogueOption } from './dialog-manager';
+import { DialogManager, CommandHandlers, DialogueOption, DialogEvent } from './dialog-manager';
 import DialogWidget from './DialogWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
@@ -53,45 +53,94 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
 
 export default function App() {
   const [manager, setManager] = useState<DialogManager | null>(null);
-  const [lines, setLines] = useState<string[]>([]);
-  const [options, setOptions] = useState<DialogueOption[]>([]);
+  const [currentEvent, setCurrentEvent] = useState<DialogEvent | null>(null);
+  const [displayLines, setDisplayLines] = useState<string[]>([]);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
-  const [hasMoreLines, setHasMoreLines] = useState(false);
-  const [showNextButton, setShowNextButton] = useState(true);
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleOptionSelect = async (optionIndex: number) => {
+  const processNextEvent = () => {
     if (!manager) return;
-    manager.choose(optionIndex);
-    setOptions([]);
-    const result = manager.nextLines();
-    if (result) {
-      setLines(result.lines);
-      setShowNextButton(true);
-      const speaker = result.speaker;
-      if (speaker) {
-        const animName = manager.getAnimationForSpeaker(speaker);
+    
+    const event = manager.advance();
+    setCurrentEvent(event);
+    
+    switch (event.type) {
+      case 'line':
+        setDisplayLines(prev => [...prev, event.text]);
+        if (event.speaker) {
+          const animName = manager.getAnimationForSpeaker(event.speaker);
+          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+          }
+        }
+        break;
+      case 'choice':
+        // Choice event handled by rendering OptionsWidget
+        break;
+      case 'action':
+        handleDialogAction(event.command, event.args);
+        break;
+      case 'end':
+        // Dialog ended
+        break;
+    }
+  };
+
+  const handleOptionSelect = (optionIndex: number) => {
+    if (!manager) return;
+    
+    const event = manager.choose(optionIndex);
+    setCurrentEvent(event);
+    
+    // Process the event after choice
+    if (event.type === 'line') {
+      setDisplayLines([event.text]);
+      if (event.speaker) {
+        const animName = manager.getAnimationForSpeaker(event.speaker);
         if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
           setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
         }
       }
+    } else if (event.type === 'action') {
+      handleDialogAction(event.command, event.args);
     }
-    setHasMoreLines(manager.hasMoreLines());
-    setOptions(manager.getCurrent().options);
   };
 
-  const handleAction = (action: ActionType) => {
+  const handleDialogAction = (command: string, args: string[]) => {
+    if (command === 'loadPuzzle' && args[0] === 'TowerOfHanoi') {
+      setShowPuzzle(true);
+      
+      setTimeout(() => {
+        const container = puzzleContainerRef.current;
+        if (container) {
+          container.innerHTML = '';
+          startTowerOfHanoi(container, 4, () => {
+            setShowPuzzle(false);
+            // Continue dialog after puzzle completion
+            processNextEvent();
+          });
+        }
+      }, 100);
+    }
+    // Auto-advance after processing action
+    else {
+      processNextEvent();
+    }
+  };
+
+  const handleMenuAction = (action: ActionType) => {
     setShowActionMenu(false);
     console.log(`Action selected: ${action}`);
     
     switch (action) {
       case 'talk':
-        if (previousOptions.length > 0) {
-          setOptions(previousOptions);
+        if (previousOptions.length > 0 && currentEvent?.type === 'choice') {
+          // Restore previous choice options
         }
         break;
       case 'examine':
@@ -104,100 +153,46 @@ export default function App() {
   };
 
   const handleOptionsEscape = () => {
-    setPreviousOptions(options);
-    setOptions([]);
-    setLines([]);
+    if (currentEvent?.type === 'choice') {
+      setPreviousOptions(currentEvent.options);
+    }
+    setDisplayLines([]);
     setShowActionMenu(true);
   };
 
-  const handleNext = async () => {
-    if (!manager) return;
-    
-    if (manager.hasMoreLines()) {
-      const result = manager.nextLines();
-      if (result) {
-        setLines(result.lines);
-        const speaker = result.speaker;
-        if (speaker) {
-          const animName = manager.getAnimationForSpeaker(speaker);
-          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-          }
-        }
-      }
-    } else {
-      // No more lines, advance the dialogue flow and hide the next button
-      setShowNextButton(false);
-      await manager.follow();
-      const result = manager.nextLines();
-      if (result) {
-        setLines(result.lines);
-        setShowNextButton(true);
-        const speaker = result.speaker;
-        if (speaker) {
-          const animName = manager.getAnimationForSpeaker(speaker);
-          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-          }
-        }
-      }
-    }
-    
-    setHasMoreLines(manager.hasMoreLines());
-    setOptions(manager.getCurrent().options);
+  const handleNext = () => {
+    processNextEvent();
   };
 
   useEffect(() => {
-    let currentManager: DialogManager | null = null;
-    
     const handlers: CommandHandlers = {
-      loadPuzzle: (args: string[]) => {
-        const puzzleName = args[0];
-        
-        if (puzzleName === 'TowerOfHanoi') {
-          setShowPuzzle(true);
-          
-          // Use setTimeout to ensure the state update and ref are ready
-          setTimeout(() => {
-            const container = puzzleContainerRef.current;
-            if (container) {
-              container.innerHTML = '';
-              startTowerOfHanoi(container, 4, () => {
-                setShowPuzzle(false);
-                if (currentManager) {
-                  currentManager.completeCommand();
-                  // Continue dialogue flow by triggering a state update
-                  const result = currentManager.nextLines();
-                  if (result) {
-                    setLines(result.lines);
-                    setShowNextButton(true);
-                  }
-                  setHasMoreLines(currentManager.hasMoreLines());
-                  setOptions(currentManager.getCurrent().options);
-                }
-              });
-            }
-          }, 100);
-        }
-      },
-      loadLevel: (args: string[]) => {},
-      return: (args: string[]) => {}
+      loadPuzzle: () => {}, // Handled by dialog action system
+      loadLevel: () => {},
+      return: () => {}
     };
+    
     const m = new DialogManager(levels.CryoRoom.dialogue, handlers);
-    currentManager = m;
-    m.start(levels.CryoRoom.start);
     setManager(m);
+    
+    // Start the dialog and get first event
+    const firstEvent = m.start(levels.CryoRoom.start);
+    setCurrentEvent(firstEvent);
+    
+    if (firstEvent.type === 'line') {
+      setDisplayLines([firstEvent.text]);
+      if (firstEvent.speaker) {
+        const animName = m.getAnimationForSpeaker(firstEvent.speaker);
+        if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+          setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+        }
+      }
+    }
   }, []);
-
-  useEffect(() => {
-    if (!manager) return;
-    handleNext();
-  }, [manager]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Only allow action menu when not in dialogue/options/puzzle
-      if (showPuzzle || options.length > 0 || lines.length > 0) return;
+      if (showPuzzle || currentEvent?.type === 'choice' || displayLines.length > 0) return;
       
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
@@ -207,7 +202,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showPuzzle, options.length, lines.length]);
+  }, [showPuzzle, currentEvent?.type, displayLines.length]);
 
 
   return (
@@ -216,18 +211,18 @@ export default function App() {
       {!showPuzzle && (
         <>
           <DialogWidget
-            lines={lines}
-            showNextButton={showNextButton}
+            lines={displayLines}
+            showNextButton={currentEvent?.type === 'line'}
             onNext={handleNext}
           />
           <OptionsWidget
-            options={options}
-            onSelect={handleOptionSelect}
+            options={currentEvent?.type === 'choice' ? currentEvent.options : []}
+            onChoose={handleOptionSelect}
             onEscape={handleOptionsEscape}
           />
           <ActionMenu
             isVisible={showActionMenu}
-            onAction={handleAction}
+            onAction={handleMenuAction}
             onClose={() => setShowActionMenu(false)}
           />
         </>
