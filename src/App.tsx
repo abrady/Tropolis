@@ -6,6 +6,7 @@ import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import { DialogManager, CommandHandlers, DialogueOption } from './dialog-manager';
 import DialogWidget from './DialogWidget';
 import OptionsWidget from './OptionsWidget';
+import { startTowerOfHanoi } from './puzzles';
 
 interface LevelData {
   image: HTMLImageElement;
@@ -57,6 +58,8 @@ export default function App() {
   const [background] = useState(() => levels.CryoRoom.image);
   const [hasMoreLines, setHasMoreLines] = useState(false);
   const [showNextButton, setShowNextButton] = useState(true);
+  const [showPuzzle, setShowPuzzle] = useState(false);
+  const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleOptionSelect = async (optionIndex: number) => {
     if (!manager) return;
@@ -116,12 +119,43 @@ export default function App() {
   };
 
   useEffect(() => {
+    let currentManager: DialogManager | null = null;
+    
     const handlers: CommandHandlers = {
-      loadPuzzle: (args: string[]) => {},
+      loadPuzzle: (args: string[]) => {
+        const puzzleName = args[0];
+        
+        if (puzzleName === 'TowerOfHanoi') {
+          setShowPuzzle(true);
+          
+          // Use setTimeout to ensure the state update and ref are ready
+          setTimeout(() => {
+            const container = puzzleContainerRef.current;
+            if (container) {
+              container.innerHTML = '';
+              startTowerOfHanoi(container, 4, () => {
+                setShowPuzzle(false);
+                if (currentManager) {
+                  currentManager.completeCommand();
+                  // Continue dialogue flow by triggering a state update
+                  const result = currentManager.nextLines();
+                  if (result) {
+                    setLines(result.lines);
+                    setShowNextButton(true);
+                  }
+                  setHasMoreLines(currentManager.hasMoreLines());
+                  setOptions(currentManager.getCurrent().options);
+                }
+              });
+            }
+          }, 100);
+        }
+      },
       loadLevel: (args: string[]) => {},
       return: (args: string[]) => {}
     };
     const m = new DialogManager(levels.CryoRoom.dialogue, handlers);
+    currentManager = m;
     m.start(levels.CryoRoom.start);
     setManager(m);
   }, []);
@@ -135,15 +169,39 @@ export default function App() {
   return (
     <div id="game-container">
       <GameCanvas frames={animation} background={background} />
-      <DialogWidget
-        lines={lines}
-        showNextButton={showNextButton}
-        onNext={handleNext}
-      />
-      <OptionsWidget
-        options={options}
-        onSelect={handleOptionSelect}
-      />
+      {!showPuzzle && (
+        <>
+          <DialogWidget
+            lines={lines}
+            showNextButton={showNextButton}
+            onNext={handleNext}
+          />
+          <OptionsWidget
+            options={options}
+            onSelect={handleOptionSelect}
+          />
+        </>
+      )}
+      {showPuzzle && (
+        <div 
+          ref={puzzleContainerRef} 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            zIndex: 1000
+          }}
+        >
+          <h2 style={{ color: 'white', marginBottom: '20px' }}>Tower of Hanoi Puzzle</h2>
+        </div>
+      )}
     </div>
   );
 }
