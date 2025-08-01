@@ -229,7 +229,9 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   };
 
   const handleNext = () => {
-    processNextEvent();
+    if (currentEvent?.type === 'line') {
+      processNextEvent();
+    }
   };
 
   // our run-once effect to initialize the dialogue manager and start the dialogue
