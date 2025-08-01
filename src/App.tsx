@@ -256,6 +256,10 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
         if (event.code === 'Escape') {
           event.preventDefault();
           setShowExamine(false);
+        } else if (event.code === 'KeyE') {
+          event.preventDefault();
+          setShowExamine(false);
+          setShowExamineEditor(true);
         }
         return;
       }
