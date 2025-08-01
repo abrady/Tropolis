@@ -3,7 +3,7 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
-import { DialogManager, CommandHandlers, DialogueOption, DialogEvent } from './dialog-manager';
+import { DialogManager, CommandHandlers, DialogueOption, DialogEvent, DialogAdvanceParam } from './dialog-manager';
 import DialogWidget from './DialogWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
@@ -53,10 +53,9 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
 
 export default function App() {
   const [manager, setManager] = useState<DialogManager | null>(null);
-  const [pump, setPump] = useState<Generator<DialogEvent | null> | null>(null);
+  const [dialogGenerator, setDialogGenerator] = useState<Generator<DialogEvent, void, DialogAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
   const [showPuzzle, setShowPuzzle] = useState(false);
@@ -65,15 +64,21 @@ export default function App() {
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const processNextEvent = () => {
-    if (!manager) return;
+    if (!dialogGenerator) return;
     
-    const event = pump?.next().value;
+    const result = dialogGenerator.next();
+    if (result.done) {
+      setCurrentEvent(null);
+      return;
+    }
+    
+    const event = result.value;
     setCurrentEvent(event);
     
     switch (event.type) {
       case 'line':
         setDisplayLines(prev => [...prev, event.text]);
-        if (event.speaker) {
+        if (event.speaker && manager) {
           const animName = manager.getAnimationForSpeaker(event.speaker);
           if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
             setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
@@ -83,31 +88,34 @@ export default function App() {
       case 'choice':
         // Choice event handled by rendering OptionsWidget
         break;
-      case 'action':
+      case 'command':
         handleDialogAction(event.command, event.args);
-        break;
-      case 'end':
-        // Dialog ended
         break;
     }
   };
 
   const handleOptionSelect = (optionIndex: number) => {
-    if (!manager) return;
+    if (!dialogGenerator) return;
     
-    const event = manager.choose(optionIndex);
+    const result = dialogGenerator.next({ type: 'choice', optionIndex });
+    if (result.done) {
+      setCurrentEvent(null);
+      return;
+    }
+    
+    const event = result.value;
     setCurrentEvent(event);
     
     // Process the event after choice
     if (event.type === 'line') {
       setDisplayLines([event.text]);
-      if (event.speaker) {
+      if (event.speaker && manager) {
         const animName = manager.getAnimationForSpeaker(event.speaker);
         if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
           setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
         }
       }
-    } else if (event.type === 'action') {
+    } else if (event.type === 'command') {
       handleDialogAction(event.command, event.args);
     }
   };
@@ -175,16 +183,24 @@ export default function App() {
     const m = new DialogManager(levels.CryoRoom.dialogue, handlers);
     setManager(m);
     
-    // Start the dialog and get first event
-    const firstEvent = m.start(levels.CryoRoom.start);
-    setCurrentEvent(firstEvent);
+    // Start the dialog and get generator
+    m.start(levels.CryoRoom.start);
+    const generator = m.advance();
+    setDialogGenerator(generator);
     
-    if (firstEvent.type === 'line') {
-      setDisplayLines([firstEvent.text]);
-      if (firstEvent.speaker) {
-        const animName = m.getAnimationForSpeaker(firstEvent.speaker);
-        if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-          setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+    // Get first event
+    const result = generator.next();
+    if (!result.done) {
+      const firstEvent = result.value;
+      setCurrentEvent(firstEvent);
+      
+      if (firstEvent.type === 'line') {
+        setDisplayLines([firstEvent.text]);
+        if (firstEvent.speaker) {
+          const animName = m.getAnimationForSpeaker(firstEvent.speaker);
+          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+          }
         }
       }
     }

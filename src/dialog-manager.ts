@@ -85,7 +85,7 @@ export class DialogManager {
     return anim;
   }
 
-  start(startNode: string): DialogEvent {
+  start(startNode: string): void {
     this.goto(startNode); // set the initial state
   }
 
@@ -149,7 +149,7 @@ export class DialogManager {
 
       // If we have a next node, go to it
       if (this.state.content?.next) {
-        this.goto(this.state.content.next, true);
+        this.goto(this.state.content.next);
       } else if (this.returnStack.length > 0) {
         // If we have a return stack, pop the last node and go there
         const returnNode = this.returnStack.pop();

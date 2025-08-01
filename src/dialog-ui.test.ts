@@ -47,27 +47,34 @@ Guide: Next node
 
     const dm = new DialogManager(yarn, handlers);
     
-    // Start and get first line
-    const firstEvent = dm.start('TestNode');
-    expect(firstEvent.type).toBe('line');
-    expect(firstEvent.text).toBe('First line');
-    expect(firstEvent.speaker).toBe('Guide');
+    // Start dialog and get generator
+    dm.start('TestNode');
+    const gen = dm.advance();
+    
+    // Get first line
+    const firstResult = gen.next();
+    expect(firstResult.done).toBe(false);
+    expect(firstResult.value.type).toBe('line');
+    expect(firstResult.value.text).toBe('First line');
+    expect(firstResult.value.speaker).toBe('Guide');
 
     // Get second line
-    const secondEvent = dm.advance();
-    expect(secondEvent.type).toBe('line');
-    expect(secondEvent.text).toBe('Second line');
-    expect(secondEvent.speaker).toBe('Guide');
+    const secondResult = gen.next();
+    expect(secondResult.done).toBe(false);
+    expect(secondResult.value.type).toBe('line');
+    expect(secondResult.value.text).toBe('Second line');
+    expect(secondResult.value.speaker).toBe('Guide');
 
     // Should automatically jump to NextNode
-    const thirdEvent = dm.advance();
-    expect(thirdEvent.type).toBe('line');
-    expect(thirdEvent.text).toBe('Next node');
-    expect(thirdEvent.speaker).toBe('Guide');
+    const thirdResult = gen.next();
+    expect(thirdResult.done).toBe(false);
+    expect(thirdResult.value.type).toBe('line');
+    expect(thirdResult.value.text).toBe('Next node');
+    expect(thirdResult.value.speaker).toBe('Guide');
 
     // Should end
-    const fourthEvent = dm.advance();
-    expect(fourthEvent.type).toBe('end');
+    const fourthResult = gen.next();
+    expect(fourthResult.done).toBe(true);
   });
 
   it('should handle simple dialogue flow correctly', () => {
@@ -79,15 +86,20 @@ Guide: Hello
 
     const dm = new DialogManager(yarn, handlers);
     
-    // Start and get the line
-    const firstEvent = dm.start('Simple');
-    expect(firstEvent.type).toBe('line');
-    expect(firstEvent.text).toBe('Hello');
-    expect(firstEvent.speaker).toBe('Guide');
+    // Start dialog and get generator
+    dm.start('Simple');
+    const gen = dm.advance();
+    
+    // Get the line
+    const firstResult = gen.next();
+    expect(firstResult.done).toBe(false);
+    expect(firstResult.value.type).toBe('line');
+    expect(firstResult.value.text).toBe('Hello');
+    expect(firstResult.value.speaker).toBe('Guide');
 
     // Should end after single line
-    const secondEvent = dm.advance();
-    expect(secondEvent.type).toBe('end');
+    const secondResult = gen.next();
+    expect(secondResult.done).toBe(true);
   });
 
   it('should process multiple lines from same speaker', () => {
@@ -101,26 +113,33 @@ Guide: Step 3
 
     const dm = new DialogManager(yarn, handlers);
     
-    // Start and get first line
-    const firstEvent = dm.start('MultiStep');
-    expect(firstEvent.type).toBe('line');
-    expect(firstEvent.text).toBe('Step 1');
-    expect(firstEvent.speaker).toBe('Guide');
+    // Start dialog and get generator
+    dm.start('MultiStep');
+    const gen = dm.advance();
+    
+    // Get first line
+    const firstResult = gen.next();
+    expect(firstResult.done).toBe(false);
+    expect(firstResult.value.type).toBe('line');
+    expect(firstResult.value.text).toBe('Step 1');
+    expect(firstResult.value.speaker).toBe('Guide');
 
     // Get second line
-    const secondEvent = dm.advance();
-    expect(secondEvent.type).toBe('line');
-    expect(secondEvent.text).toBe('Step 2');
-    expect(secondEvent.speaker).toBe('Guide');
+    const secondResult = gen.next();
+    expect(secondResult.done).toBe(false);
+    expect(secondResult.value.type).toBe('line');
+    expect(secondResult.value.text).toBe('Step 2');
+    expect(secondResult.value.speaker).toBe('Guide');
 
     // Get third line
-    const thirdEvent = dm.advance();
-    expect(thirdEvent.type).toBe('line');
-    expect(thirdEvent.text).toBe('Step 3');
-    expect(thirdEvent.speaker).toBe('Guide');
+    const thirdResult = gen.next();
+    expect(thirdResult.done).toBe(false);
+    expect(thirdResult.value.type).toBe('line');
+    expect(thirdResult.value.text).toBe('Step 3');
+    expect(thirdResult.value.speaker).toBe('Guide');
 
     // Should end after all lines
-    const fourthEvent = dm.advance();
-    expect(fourthEvent.type).toBe('end');
+    const fourthResult = gen.next();
+    expect(fourthResult.done).toBe(true);
   });
 });

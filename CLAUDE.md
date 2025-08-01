@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Start development server with hot reload and auto-open browser
 - `npm run build` - Build production bundle with Vite
 - `npm run test` - Run tests with Vitest
+- `npm run test -- src/path/to/file.test.ts` - Run specific test file
+- `npm run test -- --watch` - Run tests in watch mode
 
 ## Architecture Overview
 
@@ -36,7 +38,8 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 **Game Loop & Rendering**
 - `GameCanvas` component handles canvas rendering and animation timing using requestAnimationFrame
 - Character animations synchronized with dialogue speaker changes
-- Level system with background images loaded as static assets
+- Level system with background images loaded as static assets from `data/locations/`
+- Canvas dimensions match background image dimensions
 
 **Puzzle System**
 - Modular puzzle components in `src/puzzles/` (currently Tower of Hanoi)
@@ -45,16 +48,20 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 ### Dialogue Flow Control
 
 **DialogManager State Management:**
-- Line advancement: `nextLines()` returns lines for current speaker, `null` when exhausted
-- Flow control: `follow()` executes commands and advances to next node when no more lines
-- Option selection: `choose(index)` advances to selected dialogue branch
+- Uses generator-based flow: `start()` initializes state, `advance()` returns generator
+- Generator yields `DialogEvent` objects (line, choice, command types)
+- Choice events require `DialogAdvanceParam` passed to `gen.next({ type: 'choice', optionIndex })`
 - Speaker animations: Character animations change based on dialogue speaker
+- State progression: Lines → Choices → Commands → Jump to next node
 
 **UI Interaction Patterns:**
+
 - Spacebar advances individual dialogue lines within DialogWidget
 - When all lines shown, spacebar triggers `follow()` to advance dialogue flow
 - Arrow keys navigate dialogue options, Space/Enter selects in OptionsWidget
 - Options display as full-screen overlay with visited state styling
+- Escape key from dialogue options opens action menu system
+- 'A' key or Space opens action menu when not in active dialogue
 
 ### File Structure Conventions
 
@@ -68,6 +75,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 ### Testing
 
 Tests use Vitest and focus on:
+
 - Asset validation for character definitions
 - Dialogue parsing and validation  
 - Frame parsing utilities
