@@ -52,7 +52,7 @@ export default function ExamineOverlay({ width, height, rects, onExit }: Examine
   return (
     <div
       className="examine-overlay"
-      style={{ width, height, cursor: hover ? 'pointer' : 'default' }}
+      style={{ width, height, cursor: hover ? 'pointer' : 'crosshair' }}
       onMouseMove={handleMove}
       onClick={handleClick}
     />
