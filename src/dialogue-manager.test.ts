@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DialogueManager, DialogueEvent } from './dialog-manager';
+import { DialogueManager, DialogueEvent } from './dialogue-manager';
 
 describe('DialogueManager Tests', () => {
   let commandCalls: { name: string; args: string[] }[] = [];

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DialogueManager } from './dialog-manager';
+import { DialogueManager } from './dialogue-manager';
 
 // Mock DOM elements for testing UI behavior
 const mockElement = () => ({

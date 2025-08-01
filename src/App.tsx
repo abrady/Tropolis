@@ -4,7 +4,7 @@ import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.gab?raw';
 import testDialogue from './dialogue/test-choice.gab?raw';
-import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
+import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
