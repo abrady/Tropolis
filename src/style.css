@@ -42,7 +42,7 @@ canvas {
   color: #fff;
   font-family: sans-serif;
   padding: 15px;
-  transform: translateY(100%);
+  /* transform: translateY(100%); */
   transition: transform 0.3s ease-out;
   box-sizing: border-box;
   border-top: 2px solid #fff;
