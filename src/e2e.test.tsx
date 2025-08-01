@@ -20,17 +20,56 @@ beforeEach(() => {
 });
 
 describe('Game boot', () => {
-  it('shows wake up line on initial load', async () => {
+  it('follows detour and jump choices', async () => {
     await act(async () => {
       ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App />
+        <App initialLevel="Test" />
       );
     });
 
-    // Wait for effects to run
+    // Wait for initial effects
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    const dialogueText = document.querySelector('#dialogue p')?.textContent?.toLowerCase();
-    expect(dialogueText).toContain('wake up');
+    let dialogueText = document.querySelector('#dialogue p')?.textContent;
+    expect(dialogueText).toBe('Choose an option');
+
+    // advance to choice
+    await act(async () => {
+      (document.querySelector('#dialogue button') as HTMLButtonElement).click();
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    let options = document.querySelectorAll('.option-button');
+    expect(options.length).toBe(1);
+    expect(options[0].textContent).toBe('Option 1');
+
+    // select first option
+    await act(async () => {
+      (options[0] as HTMLButtonElement).click();
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    dialogueText = document.querySelector('#dialogue p')?.textContent;
+    expect(dialogueText).toBe('You chose option 1');
+
+    // advance back to choice
+    await act(async () => {
+      (document.querySelector('#dialogue button') as HTMLButtonElement).click();
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    options = document.querySelectorAll('.option-button');
+    expect(options.length).toBe(2);
+    expect(options[1].textContent).toBe('Option 2');
+    expect(options[0].classList.contains('visited')).toBe(true);
+
+    // select second option
+    await act(async () => {
+      (options[1] as HTMLButtonElement).click();
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    dialogueText = document.querySelector('#dialogue p')?.textContent;
+    expect(dialogueText).toBe('You chose option 2');
   });
 });

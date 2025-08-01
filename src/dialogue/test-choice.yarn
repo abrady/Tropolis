@@ -1,0 +1,23 @@
+speaker: Overlord
+---
+talkAnim overlordTalk
+===
+
+title: ChoiceNode
+---
+Overlord: Choose an option
+-> Option 1
+    <<detour Option1>>
+-> {Option1} Option 2
+    <<jump Option2>>
+===
+
+title: Option1
+---
+Overlord: You chose option 1
+===
+
+title: Option2
+---
+Overlord: You chose option 2
+===
