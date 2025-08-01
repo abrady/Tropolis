@@ -301,11 +301,11 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
             showNextButton={currentEvent?.type === 'line'}
             onNext={handleNext}
           />
-          <OptionsWidget
+          {showActionMenu && (<OptionsWidget
             options={showActionMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}
             onChoose={handleOptionSelect}
             onEscape={handleOptionsEscape}
-          />
+          />)}
           <ActionMenu
             isVisible={showActionMenu}
             onAction={handleMenuAction}
