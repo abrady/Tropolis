@@ -9,6 +9,49 @@ import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
 
+function useViewportSize() {
+  const [size, setSize] = useState(() => {
+    const aspectRatio = 16 / 9;
+    const maxWidth = window.innerWidth;
+    const maxHeight = window.innerHeight;
+    
+    let gameWidth, gameHeight;
+    if (maxWidth / maxHeight > aspectRatio) {
+      gameHeight = maxHeight;
+      gameWidth = gameHeight * aspectRatio;
+    } else {
+      gameWidth = maxWidth;
+      gameHeight = gameWidth / aspectRatio;
+    }
+    
+    return { width: gameWidth, height: gameHeight };
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const aspectRatio = 16 / 9;
+      const maxWidth = window.innerWidth;
+      const maxHeight = window.innerHeight;
+      
+      let gameWidth, gameHeight;
+      if (maxWidth / maxHeight > aspectRatio) {
+        gameHeight = maxHeight;
+        gameWidth = gameHeight * aspectRatio;
+      } else {
+        gameWidth = maxWidth;
+        gameHeight = gameWidth / aspectRatio;
+      }
+      
+      setSize({ width: gameWidth, height: gameHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return size;
+}
+
 interface LevelData {
   image: HTMLImageElement;
   dialogue: string;
@@ -21,7 +64,7 @@ const levels: Record<string, LevelData> = {
 
 levels.CryoRoom.image.src = cryoroomImg;
 
-function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLImageElement }) {
+function GameCanvas({ frames, background, width, height }: { frames: Frame[]; background: HTMLImageElement; width: number; height: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -46,12 +89,13 @@ function GameCanvas({ frames, background }: { frames: Frame[]; background: HTMLI
       requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
-  }, [frames, background]);
+  }, [frames, background, width, height]);
 
-  return <canvas ref={canvasRef} width={background.width} height={background.height} />;
+  return <canvas ref={canvasRef} width={width} height={height} />;
 }
 
 export default function App() {
+  const viewportSize = useViewportSize();
   const [manager, setManager] = useState<DialogueManager | null>(null);
   const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
@@ -208,8 +252,8 @@ export default function App() {
 
 
   return (
-    <div id="game-container">
-      <GameCanvas frames={animation} background={background} />
+    <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
+      <GameCanvas frames={animation} background={background} width={viewportSize.width} height={viewportSize.height} />
       {!showPuzzle && (
         <>
           <DialogueWidget
