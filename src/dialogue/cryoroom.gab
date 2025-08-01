@@ -103,3 +103,9 @@ Overlord: Remember, your skills are vital to our survival.
 Overlord: Good luck, 11235.
 <<loadLevel Sector7>>
 ===
+
+title: CryoRoom_ExamineCryoChambers
+tags: examine
+---
+You: Thousands of identical chambers extend into the distance
+===

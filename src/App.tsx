@@ -11,7 +11,7 @@ import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
 import ExamineEditor, { ExamineRect } from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
-import cryoExamine from './examine/cryoroom.json';
+import { getRoomExamineRects } from './examine/rooms';
 import { GameState, LevelData } from './game-state';
 
 function useViewportSize() {
@@ -62,7 +62,7 @@ const levels: Record<string, LevelData> = {
     image: new Image(),
     dialogue: cryoDialogue,
     start: 'CryoRoom_Intro',
-    examine: cryoExamine as ExamineRect[]
+    examine: getRoomExamineRects('cryoroom')
   },
   Test: { 
       image: new Image(), 

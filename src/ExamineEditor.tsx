@@ -1,11 +1,18 @@
 import React, { useState, useRef } from 'react';
 
+export enum ExamineRectType {
+  None = 'none',
+  Dialogue = 'dialogue',
+  AddToInventory = 'inventory',
+}
+
 export interface ExamineRect {
-  x: number;
+  type: ExamineRectType;
+  x: number; 
   y: number;
   width: number;
   height: number;
-  label: string;
+  args: string;
 }
 
 export function exportRectangles(rects: ExamineRect[]): string {

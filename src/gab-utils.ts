@@ -186,7 +186,7 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
   const unreachable: string[] = [];
   for (const n of nodes) {
     const tags = n.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
-    if (!reachable.has(n.title) && !tags.includes('disabled')) {
+    if (!reachable.has(n.title) && !tags.includes('disabled') && !tags.includes('examine')) {
       unreachable.push(n.title);
     }
     if (tags.includes('final')) finalNodes.add(n.title);
