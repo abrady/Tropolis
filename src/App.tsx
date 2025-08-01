@@ -3,8 +3,7 @@ import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import { DialogueManager, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
-import cryoDialogue from './dialogue/cryoroom.gab?raw';
-import testDialogue from './dialogue/test-choice.gab?raw';
+import { getRoomDialogueData } from './dialogue';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
@@ -57,17 +56,20 @@ function useViewportSize() {
   return size;
 }
 
+const cryoroomDialogueData = getRoomDialogueData('cryoroom')!;
+const testDialogueData = getRoomDialogueData('test')!;
+
 const levels: Record<string, LevelData> = {
   CryoRoom: {
     image: new Image(),
-    dialogue: cryoDialogue,
-    start: 'CryoRoom_Intro',
+    dialogue: cryoroomDialogueData.dialogue,
+    start: cryoroomDialogueData.start,
     examine: getRoomExamineRects('cryoroom')
   },
   Test: { 
       image: new Image(), 
-      dialogue: testDialogue, 
-      start: 'ChoiceNode',
+      dialogue: testDialogueData.dialogue, 
+      start: testDialogueData.start,
      examine: [],
     },
 };
@@ -220,6 +222,14 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
     }
   };
 
+  const handleDialogueFromExamine = (dialogueId: string) => {
+    manager.start(dialogueId);
+    const generator = manager.advance();
+    setDialogueGenerator(generator);
+    const first = generator.next();
+    handleGeneratorResult(first);
+  };
+
   const handleOptionsEscape = () => {
     if (currentEvent?.type === 'choice') {
       setPreviousOptions(currentEvent.options);
@@ -290,6 +300,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           height={viewportSize.height}
           rects={levels.CryoRoom.examine}
           onExit={() => setShowExamine(false)}
+          onDialogue={handleDialogueFromExamine}
         />
       )}
       {showExamineEditor && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExamineRect } from './ExamineEditor';
+import { ExamineRect, ExamineRectType } from './ExamineEditor';
 
 export function getRectAtPosition(rects: ExamineRect[], x: number, y: number): ExamineRect | null {
   for (const r of rects) {
@@ -19,9 +19,10 @@ interface ExamineOverlayProps {
   height: number;
   rects: ExamineRect[];
   onExit?: () => void;
+  onDialogue?: (dialogueId: string) => void;
 }
 
-export default function ExamineOverlay({ width, height, rects, onExit }: ExamineOverlayProps) {
+export default function ExamineOverlay({ width, height, rects, onExit, onDialogue }: ExamineOverlayProps) {
   const [hover, setHover] = useState<ExamineRect | null>(null);
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -34,7 +35,10 @@ export default function ExamineOverlay({ width, height, rects, onExit }: Examine
 
   const handleClick = () => {
     if (hover) {
-      console.log(`${hover.label} clicked`);
+      console.log(`${hover.args} clicked`);
+      if (hover.type === ExamineRectType.Dialogue && onDialogue) {
+        onDialogue(hover.args);
+      }
       if (onExit) onExit();
     }
   };

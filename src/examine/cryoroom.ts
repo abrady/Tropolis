@@ -7,6 +7,6 @@ export const cryoroomExamineRects: ExamineRect[] = [
     y: 297,
     width: 1708,
     height: 666,
-    args: 'CryoChambers'
+    args: 'CryoRoom_ExamineCryoChambers'
   }
 ];
