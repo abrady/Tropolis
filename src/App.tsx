@@ -63,63 +63,6 @@ export default function App() {
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
-  const processNextEvent = () => {
-    if (!dialogGenerator) return;
-    
-    const result = dialogGenerator.next();
-    if (result.done) {
-      setCurrentEvent(null);
-      return;
-    }
-    
-    const event = result.value;
-    setCurrentEvent(event);
-    
-    switch (event.type) {
-      case 'line':
-        setDisplayLines(prev => [...prev, event.text]);
-        if (event.speaker && manager) {
-          const animName = manager.getAnimationForSpeaker(event.speaker);
-          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-          }
-        }
-        break;
-      case 'choice':
-        // Choice event handled by rendering OptionsWidget
-        break;
-      case 'command':
-        handleDialogAction(event.command, event.args);
-        break;
-    }
-  };
-
-  const handleOptionSelect = (optionIndex: number) => {
-    if (!dialogGenerator) return;
-    
-    const result = dialogGenerator.next({ type: 'choice', optionIndex });
-    if (result.done) {
-      setCurrentEvent(null);
-      return;
-    }
-    
-    const event = result.value;
-    setCurrentEvent(event);
-    
-    // Process the event after choice
-    if (event.type === 'line') {
-      setDisplayLines([event.text]);
-      if (event.speaker && manager) {
-        const animName = manager.getAnimationForSpeaker(event.speaker);
-        if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-          setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-        }
-      }
-    } else if (event.type === 'command') {
-      handleDialogAction(event.command, event.args);
-    }
-  };
-
   const handleDialogAction = (command: string, args: string[]) => {
     if (command === 'loadPuzzle' && args[0] === 'TowerOfHanoi') {
       setShowPuzzle(true);
@@ -140,6 +83,48 @@ export default function App() {
     else {
       processNextEvent();
     }
+  };
+
+  const processNextEvent = () => {
+    if (!dialogGenerator) return;
+    
+    const result = dialogGenerator.next();
+    handleGeneratorResult(result);    
+  };
+
+  const handleGeneratorResult = (result: IteratorResult<DialogEvent, void>) => {
+    if (result.done) {
+      setCurrentEvent(null);
+      return;
+    }
+
+    const event = result.value;
+    setCurrentEvent(event);
+    
+    switch (event.type) {
+      case 'line':
+        setDisplayLines([event.text]);
+        if (event.speaker && manager) {
+          const animName = manager.getAnimationForSpeaker(event.speaker);
+          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
+            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
+          }
+        }
+        break;
+      case 'choice':
+        // Choice event handled by rendering OptionsWidget
+        break;
+      case 'command':
+        handleDialogAction(event.command, event.args);
+        break;
+    }
+  };
+    
+  const handleOptionSelect = (optionIndex: number) => {
+    if (!dialogGenerator) return;
+    
+    const result = dialogGenerator.next({ type: 'choice', optionIndex });
+    handleGeneratorResult(result);
   };
 
   const handleMenuAction = (action: ActionType) => {
