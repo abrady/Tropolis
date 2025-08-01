@@ -40,6 +40,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - Character animations synchronized with dialogue speaker changes
 - Level system with background images loaded as static assets from `data/locations/`
 - Canvas dimensions match background image dimensions
+- The game should run at a 16:9 aspect ratio, that's what all the backgrounds should be
 
 **Puzzle System**
 - Modular puzzle components in `src/puzzles/` (currently Tower of Hanoi)
