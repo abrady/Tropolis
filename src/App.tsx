@@ -302,7 +302,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
             onNext={handleNext}
           />
           {showActionMenu && (<OptionsWidget
-            options={showActionMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}
+            options={currentEvent?.type === 'choice' ? currentEvent.options : []}
             onChoose={handleOptionSelect}
             onEscape={handleOptionsEscape}
           />)}
