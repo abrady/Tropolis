@@ -8,7 +8,9 @@ import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
-import ExamineEditor from './ExamineEditor';
+import ExamineEditor, { ExamineRect } from './ExamineEditor';
+import ExamineOverlay from './ExamineOverlay';
+import cryoExamine from './examine/cryoroom.json';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -57,10 +59,16 @@ interface LevelData {
   image: HTMLImageElement;
   dialogue: string;
   start: string;
+  examine: ExamineRect[];
 }
 
 const levels: Record<string, LevelData> = {
-  CryoRoom: { image: new Image(), dialogue: cryoDialogue, start: 'CryoRoom_Intro' }
+  CryoRoom: {
+    image: new Image(),
+    dialogue: cryoDialogue,
+    start: 'CryoRoom_Intro',
+    examine: cryoExamine as ExamineRect[]
+  }
 };
 
 levels.CryoRoom.image.src = cryoroomImg;
@@ -105,6 +113,7 @@ export default function App() {
   const [background] = useState(() => levels.CryoRoom.image);
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showExamineEditor, setShowExamineEditor] = useState(false);
+  const [showExamine, setShowExamine] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
@@ -184,7 +193,7 @@ export default function App() {
         }
         break;
       case 'examine':
-        setShowExamineEditor(true);
+        setShowExamine(true);
         break;
       case 'move':
         // TODO: Implement move functionality
@@ -229,6 +238,14 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      if (showExamine) {
+        if (event.code === 'Escape') {
+          event.preventDefault();
+          setShowExamine(false);
+        }
+        return;
+      }
+
       // Only allow action menu when not in dialogue/options/puzzle
       if (showPuzzle || currentEvent?.type === 'choice' || displayLines.length > 0) return;
 
@@ -243,12 +260,20 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showPuzzle, currentEvent?.type, displayLines.length]);
+  }, [showPuzzle, showExamine, currentEvent?.type, displayLines.length]);
 
 
   return (
     <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
       <GameCanvas frames={animation} background={background} width={viewportSize.width} height={viewportSize.height} />
+      {showExamine && (
+        <ExamineOverlay
+          width={viewportSize.width}
+          height={viewportSize.height}
+          rects={levels.CryoRoom.examine}
+          onExit={() => setShowExamine(false)}
+        />
+      )}
       {showExamineEditor && (
         <ExamineEditor
           width={viewportSize.width}

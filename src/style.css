@@ -370,3 +370,11 @@ canvas {
 .examine-editor-panel label {
   margin-right: 6px;
 }
+
+/* Examine Overlay */
+.examine-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2500;
+}

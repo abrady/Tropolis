@@ -1,0 +1,4 @@
+[
+  {"x": 100, "y": 150, "width": 80, "height": 60, "label": "Console"},
+  {"x": 300, "y": 200, "width": 120, "height": 90, "label": "Door"}
+]
