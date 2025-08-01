@@ -45,10 +45,7 @@ export function useDialog(
     if (nextEvent.type === 'action') {
       handleAction(nextEvent.command, nextEvent.args).then(() => {
         // After action completes, pump again to get next event
-        if (managerRef.current) {
-          const followingEvent = managerRef.current.advance();
-          setEvent(followingEvent);
-        }
+        pump(); // Recursively pump to get the next event after action
       });
       return;
     }

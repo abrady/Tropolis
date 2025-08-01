@@ -42,35 +42,39 @@ Overlord: Proceed
     it('generates line and action events from yarn node with puzzle command', () => {
       const dm = new DialogManager(samplePuzzle, noopHandlers);
       
-      const firstEvent = dm.start('TestNode');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('Begin');
-      expect(firstEvent.speaker).toBe('Overlord');
+      dm.start('TestNode');
+      const gen = dm.advance();
+      let n = gen.next().value;
+      expect(n.type).toBe('line');
+      expect(n.text).toBe('Begin');
+      expect(n.speaker).toBe('Overlord');
       
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('action');
-      expect(secondEvent.command).toBe('loadPuzzle');
-      expect(secondEvent.args).toEqual(['TowerOfHanoi']);
+      n = gen.next().value;
+      expect(n.type).toBe('command');
+      expect(n.command).toBe('loadPuzzle');
+      expect(n.args).toEqual(['TowerOfHanoi']);
       
-      const thirdEvent = dm.advance();
-      expect(thirdEvent.type).toBe('end');
+      const thirdEvent = gen.next();
+      expect(thirdEvent.done).toBe(true);
     });
 
     it('generates line and action events from yarn node with level command', () => {
       const dm = new DialogManager(sampleLevel, noopHandlers);
       
-      const firstEvent = dm.start('LevelNode');
+      dm.start('LevelNode');
+      const gen = dm.advance();
+      const firstEvent = gen.next().value;
       expect(firstEvent.type).toBe('line');
       expect(firstEvent.text).toBe('Proceed');
       expect(firstEvent.speaker).toBe('Overlord');
-      
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('action');
+
+      const secondEvent = gen.next().value;
+      expect(secondEvent.type).toBe('command');
       expect(secondEvent.command).toBe('loadLevel');
       expect(secondEvent.args).toEqual(['Sector7']);
-      
-      const thirdEvent = dm.advance();
-      expect(thirdEvent.type).toBe('end');
+
+      const thirdEvent = gen.next();
+      expect(thirdEvent.done).toBe(true);
     });
   });
 
@@ -174,7 +178,7 @@ Guide: Well done!
       expect(firstEvent.speaker).toBe('Overlord');
       
       const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('action');
+      expect(secondEvent.type).toBe('command');
       expect(secondEvent.command).toBe('loadPuzzle');
       expect(secondEvent.args).toEqual(['TowerOfHanoi']);
     });
@@ -193,7 +197,7 @@ Guide: Well done!
       expect(secondEvent.speaker).toBe('Guide');
       
       const thirdEvent = dm.advance();
-      expect(thirdEvent.type).toBe('action');
+      expect(thirdEvent.type).toBe('command');
       expect(thirdEvent.command).toBe('loadPuzzle');
       expect(thirdEvent.args).toEqual(['TowerOfHanoi']);
       

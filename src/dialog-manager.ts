@@ -26,17 +26,15 @@ export interface DialogNode {
 export type DialogEvent = 
   | { type: 'line'; text: string; speaker: string | null }
   | { type: 'choice'; options: DialogueOption[] }
-  | { type: 'pause'; duration?: number }
-  | { type: 'action'; command: string; args: string[] }
-  | { type: 'end' };
+  // | { type: 'pause'; duration?: number }
+  | { type: 'command'; command: string; args: string[] };
 
 interface DialogState {
   currentNode: string;
+  content?: DialogNode; 
   lineIndex: number;
-  currentSpeaker: string | null;
   variables: Record<string, any>;   // e.g. { "$hasKey": true, "$score": 10 }
   flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
-  commandProcessed: boolean;
 }
 
 export interface DialogLines {
@@ -46,27 +44,22 @@ export interface DialogLines {
 
 import { parseYarnFile, YarnNode, Speaker } from './yarn-utils';
 
-// The DialogManager class manages the flow of dialogue in a game or application,
-// - start(node): initializes the dialogue from a starting node.
-// - getCurrent(): retrieves the current dialogue content: lines, options, next node, and command.
-//     currently not having content is used on in main.ts to decide if the dialog should be shown or not.
-// - nextLines(): returns the next block of dialogue lines for the current node, sharing the same speaker
 
+// The DialogManager class manages has:
+// - state: the current state of the dialog including the current node, line index, speaker, variables, flags, and whether a command has been processed.
+// - an advance() to move to the next state if possible.
 export class DialogManager {
   private nodes: Record<string, YarnNode> = {};
   private state: DialogState = {
     currentNode: '',
     lineIndex: 0,
-    currentSpeaker: null,
     variables: {},
     flags: {},
-    commandProcessed: false,
   };
   private speakerInfo: Record<string, Speaker> = {};
   private visited = new Set<string>();
   private returnStack: string[] = [];
   private currentEvent: DialogEvent | null = null;
-  private eventQueue: DialogEvent[] = [];
 
   private commandHandlers: CommandHandlers;
 
@@ -90,59 +83,67 @@ export class DialogManager {
   }
 
   start(startNode: string): DialogEvent {
-    this.goto(startNode);
-    return this.advance();
+    this.goto(startNode); // set the initial state
   }
 
-  advance(): DialogEvent {
-    if (this.currentEvent && this.currentEvent.type === 'choice') {
-      throw new Error('Cannot advance while waiting for choice selection');
-    }
-
-    if (this.eventQueue.length > 0) {
-      this.currentEvent = this.eventQueue.shift()!;
-      return this.currentEvent;
-    }
-
-    this.generateNextEvents();
-    
-    if (this.eventQueue.length > 0) {
-      this.currentEvent = this.eventQueue.shift()!;
-      return this.currentEvent;
-    }
-
-    // If we have no events but need to navigate, try navigation (with stack protection)
-    let navigationDepth = 0;
-    while (navigationDepth < 10) { // Prevent stack overflow
-      const content = parseNodeBody(this.nodes[this.state.currentNode].body, this.visited);
-      if (content.next) {
-        this.goto(content.next);
-        this.generateNextEvents();
-        if (this.eventQueue.length > 0) {
-          this.currentEvent = this.eventQueue.shift()!;
-          return this.currentEvent;
+  public *advance(): Generator<DialogEvent> {
+    while (!this.currentEvent || this.currentEvent.type !== 'end') {
+      // advance through any dialog to show.
+      while (this.state.content && this.state.lineIndex < this.state.content.lines?.length) {
+        const text = this.state.content.lines[this.state.lineIndex] || 'ERROR: Empty line';
+        // extract the speaker from the text if it starts with a speaker name
+        const speakerMatch = text.match(/^(.+?):\s*(.*)$/);
+        if (!speakerMatch) {
+          throw new Error(`Invalid line format: ${text}`);
         }
-        navigationDepth++;
+        const speaker = speakerMatch[1];
+        const textOnly = speakerMatch[2];
+        this.currentEvent = {
+          type: 'line',
+          text: textOnly,
+          speaker: speaker,
+        };
+        yield this.currentEvent;
+        this.state.lineIndex++;
+      }
+
+      // next, check if we have options
+      if (this.state.content?.options && this.state.content.options.length > 0) {
+        this.currentEvent = {
+          type: 'choice',
+          options: this.state.content.options,
+        };
+        yield this.currentEvent;
+      }
+
+      // if we have a command, run it
+      if (this.state.content?.command) {
+        this.currentEvent = {
+          type: 'command',
+          command: this.state.content.command.name,
+          args: this.state.content.command.args,
+        };
+        yield this.currentEvent;
+      }
+
+      // If we have a next node, go to it
+      if (this.state.content?.next) {
+        this.goto(this.state.content.next, true);
       } else if (this.returnStack.length > 0) {
-        const ret = this.returnStack.pop();
-        if (ret) {
-          this.goto(ret, true);
-          this.generateNextEvents();
-          if (this.eventQueue.length > 0) {
-            this.currentEvent = this.eventQueue.shift()!;
-            return this.currentEvent;
-          }
-          navigationDepth++;
+        // If we have a return stack, pop the last node and go there
+        const returnNode = this.returnStack.pop();
+        if (returnNode) {
+          this.goto(returnNode, true);
         } else {
+          // No more nodes to return to, end dialog
           break;
         }
       } else {
+        // No more nodes to process, end dialog
         break;
       }
     }
-
-    this.currentEvent = { type: 'end' };
-    return this.currentEvent;
+    this.currentEvent = null;
   }
 
   choose(index: number): DialogEvent {
@@ -173,64 +174,18 @@ export class DialogManager {
     }
     
     // If skipToChoices is true, set lineIndex to skip all lines
-    const lineIndex = skipToChoices ? 
-      parseNodeBody(this.nodes[nodeName].body, this.visited).lines.length : 0;
-    
+    const content = parseNodeBody(this.nodes[nodeName].body, this.visited);
+    const lineIndex = skipToChoices ? content.lines.length : 0;
+
     this.state = {
       currentNode: nodeName,
+      content,
       lineIndex,
-      currentSpeaker: null,
       variables: this.state.variables,
-      flags: this.state.flags,
-      commandProcessed: skipToChoices // If skipping to choices, mark command as processed too
+      flags: this.state.flags
     }
     this.visited.add(nodeName);
-    this.eventQueue = [];
-  }
-
-  private generateNextEvents() {
-    if (!this.state.currentNode) {
-      return;
-    }
-
-    const content = parseNodeBody(this.nodes[this.state.currentNode].body, this.visited);
-    
-    // Generate line events if we haven't processed them yet
-    while (this.state.lineIndex < content.lines.length) {
-      const line = content.lines[this.state.lineIndex];
-      const match = line.match(/^(.*?):\s*(.*)$/);
-      
-      if (match) {
-        const speaker = match[1];
-        const text = match[2];
-        this.eventQueue.push({ type: 'line', text, speaker });
-        this.state.currentSpeaker = speaker;
-      } else {
-        this.eventQueue.push({ type: 'line', text: line, speaker: this.state.currentSpeaker || null });
-      }
-      
-      this.state.lineIndex++;
-    }
-
-    // Handle command only if we haven't processed it yet and all lines are consumed
-    if (content.command && !this.state.commandProcessed && this.state.lineIndex >= content.lines.length && this.eventQueue.length === 0) {
-      this.eventQueue.push({ 
-        type: 'action', 
-        command: content.command.name, 
-        args: content.command.args 
-      });
-      // Mark command as processed
-      this.state.commandProcessed = true;
-    }
-
-    // Handle choices only if we've processed everything else and have no events queued
-    if (this.eventQueue.length === 0 && content.options.length > 0) {
-      this.eventQueue.push({ type: 'choice', options: content.options });
-    }
-  }
-
-  getCurrentEvent(): DialogEvent | null {
-    return this.currentEvent;
+    this.currentEvent = null; // Reset current event
   }
 }
 
