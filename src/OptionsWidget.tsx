@@ -7,10 +7,15 @@ interface OptionsWidgetProps {
 }
 
 export default function OptionsWidget({ options, onSelect }: OptionsWidgetProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const getFirstUnvisited = (opts: DialogueOption[]) => {
+    const idx = opts.findIndex(o => !o.visited);
+    return idx === -1 ? 0 : idx;
+  };
+
+  const [selectedIndex, setSelectedIndex] = useState(() => getFirstUnvisited(options));
 
   useEffect(() => {
-    setSelectedIndex(0);
+    setSelectedIndex(getFirstUnvisited(options));
   }, [options]);
 
   useEffect(() => {
