@@ -61,6 +61,7 @@ export default function App() {
   const [showNextButton, setShowNextButton] = useState(true);
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleOptionSelect = async (optionIndex: number) => {
@@ -86,10 +87,27 @@ export default function App() {
   const handleAction = (action: ActionType) => {
     setShowActionMenu(false);
     console.log(`Action selected: ${action}`);
-    // TODO: Implement action handlers
+    
+    switch (action) {
+      case 'talk':
+        if (previousOptions.length > 0) {
+          setOptions(previousOptions);
+        }
+        break;
+      case 'examine':
+        // TODO: Implement examine functionality
+        break;
+      case 'move':
+        // TODO: Implement move functionality
+        break;
+    }
   };
 
   const handleOptionsEscape = () => {
+    setPreviousOptions(options);
+    setOptions([]);
+    setLines([]);
+    setShowActionMenu(true);
   };
 
   const handleNext = async () => {
