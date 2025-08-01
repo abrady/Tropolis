@@ -4,7 +4,7 @@ import { Overlord } from './characters';
 import cryoroomImg from '../data/locations/cryoroom.png';
 import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import testDialogue from './dialogue/test-choice.yarn?raw';
-import { DialogueManager, CommandHandlers, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
+import { DialogueManager, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialog-manager';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
@@ -12,6 +12,7 @@ import { startTowerOfHanoi } from './puzzles';
 import ExamineEditor, { ExamineRect } from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
 import cryoExamine from './examine/cryoroom.json';
+import { GameState, LevelData } from './game-state';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -54,13 +55,6 @@ function useViewportSize() {
   }, []);
 
   return size;
-}
-
-interface LevelData {
-  image: HTMLImageElement;
-  dialogue: string;
-  start: string;
-  examine: ExamineRect[];
 }
 
 const levels: Record<string, LevelData> = {
@@ -117,12 +111,16 @@ interface AppProps {
 
 export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const viewportSize = useViewportSize();
-  const [manager, setManager] = useState<DialogueManager | null>(null);
+  const gameStateRef = useRef<GameState>();
+  if (!gameStateRef.current) {
+    gameStateRef.current = new GameState(levels, initialLevel);
+  }
+  const [manager, setManager] = useState<DialogueManager>(() => gameStateRef.current!.getManager());
   const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
-  const [background] = useState(() => levels[initialLevel].image);
+  const [background, setBackground] = useState(() => gameStateRef.current!.getBackground());
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showExamineEditor, setShowExamineEditor] = useState(false);
   const [showExamine, setShowExamine] = useState(false);
@@ -145,6 +143,15 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           });
         }
       }, 100);
+    } else if (command === 'loadLevel') {
+      const gs = gameStateRef.current!;
+      gs.gotoLevel(args[0]);
+      setManager(gs.getManager());
+      setBackground(gs.getBackground());
+      const gen = gs.getManager().advance();
+      setDialogueGenerator(gen);
+      const first = gen.next();
+      handleGeneratorResult(first);
     }
     // Auto-advance after processing action
     else {
@@ -227,25 +234,18 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
 
   // our run-once effect to initialize the dialogue manager and start the dialogue
   useEffect(() => {
-    const handlers: CommandHandlers = {
-      loadPuzzle: () => {}, // Handled by dialogue action system
-      loadLevel: () => {},
-      return: () => {}
-    };
-    
-    const m = new DialogueManager(levels[initialLevel].dialogue, handlers);
-    setManager(m);
-    
-    // Start the dialogue and get generator
-    m.start(levels[initialLevel].start);
+    const gs = gameStateRef.current!;
+    const m = gs.getManager();
     const generator = m.advance();
+    setManager(m);
     setDialogueGenerator(generator);
   }, []);
 
   // call this one time once we have the dialogue manager and generator set up
   useEffect(() => {
     if (!dialogueGenerator) return;
-    processNextEvent(); // kick off the state machine
+    const first = dialogueGenerator.next();
+    handleGeneratorResult(first);
   }, [dialogueGenerator]);
 
   useEffect(() => {
