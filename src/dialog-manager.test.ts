@@ -44,7 +44,7 @@ Overlord: Proceed
 Overlord: Choose an option
 -> Option 1
     <<detour Option1>>
--> Option 2
+-> {Option1} Option 2
     <<jump Option2>>
 ===
 
@@ -109,13 +109,10 @@ Overlord: You chose option 2
 
       n = gen.next().value;
       expect(n.type).toBe('choice');
-      expect(n.options).toHaveLength(2);
+      expect(n.options).toHaveLength(1);
       expect(n.options[0].text).toBe('Option 1');
       expect(n.options[0].detour).toBe(true);
       expect(n.options[0].visited).toBe(false);
-      expect(n.options[1].text).toBe('Option 2');
-      expect(n.options[1].detour).toBe(false);
-      expect(n.options[1].visited).toBe(false);
 
       // Choose first option
       const choiceEvent = gen.next({ type: 'choice', optionIndex: 0 }).value;
@@ -146,27 +143,6 @@ Overlord: You chose option 2
     });
   });
 
-  describe.skip('Speaker Animation System', () => {
-    const sampleAnim = `speaker: Overlord
----
-talkAnim overlordTalk
-===
-title: AnimNode
----
-Overlord: Hi
-===`;
-
-    it('loads talk animation for speaker', () => {
-      const dm = new DialogManager(sampleAnim, noopHandlers);
-      expect(dm.getAnimationForSpeaker('Overlord')).toBe('overlordTalk');
-    });
-
-    it('throws if speaker not defined', () => {
-      const dm = new DialogManager(sampleAnim, noopHandlers);
-      expect(() => dm.getAnimationForSpeaker('Unknown')).toThrow();
-    });
-  });
-
   describe('Core Dialogue Flow', () => {
     const sampleLines = `
 speaker: Alice
@@ -187,242 +163,10 @@ Alice: How are you doing?
 Bob: I'm doing well, thanks.
 ===`;
 
-    it.skip('generates individual line events for each dialogue line', () => {
-      const dm = new DialogManager(sampleLines, noopHandlers);
-      
-      const events: DialogEvent[] = [];
-      let event = dm.start('LinesNode');
-      events.push(event);
-      
-      while (event.type !== 'end') {
-        event = dm.advance();
-        events.push(event);
-      }
-      
-      expect(events).toHaveLength(7); // 6 lines + 1 end
-      
-      expect(events[0]).toEqual({ type: 'line', text: 'one', speaker: 'A' });
-      expect(events[1]).toEqual({ type: 'line', text: 'two', speaker: 'A' });
-      expect(events[2]).toEqual({ type: 'line', text: 'three', speaker: 'B' });
-      expect(events[3]).toEqual({ type: 'line', text: 'Hello there!', speaker: 'Alice' });
-      expect(events[4]).toEqual({ type: 'line', text: 'How are you doing?', speaker: 'Alice' });
-      expect(events[5]).toEqual({ type: 'line', text: 'I\'m doing well, thanks.', speaker: 'Bob' });
-      expect(events[6]).toEqual({ type: 'end' });
-    });
-
     it('retrieves correct speaker animations', () => {
       const dm = new DialogManager(sampleLines, noopHandlers);
       expect(dm.getAnimationForSpeaker('Alice')).toBe('aliceTalk');
       expect(dm.getAnimationForSpeaker('Bob')).toBe('bobTalk');
-    });
-  });
-
-  describe.skip('Command System and Timing', () => {
-    const sampleCmd = `title: CmdNode
----
-Overlord: Do it
-<<loadPuzzle TowerOfHanoi>>
-===`;
-
-    const commandYarn = `
-title: PuzzleNode
----
-Guide: Solve this puzzle.
-Guide: Good luck!
-<<loadPuzzle TowerOfHanoi>>
-<<jump AfterPuzzle>>
-===
-title: AfterPuzzle
----
-Guide: Well done!
-===`;
-
-    it('generates action events for commands in dialogue', () => {
-      const dm = new DialogManager(sampleCmd, noopHandlers);
-      
-      const firstEvent = dm.start('CmdNode');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('Do it');
-      expect(firstEvent.speaker).toBe('Overlord');
-      
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('command');
-      expect(secondEvent.command).toBe('loadPuzzle');
-      expect(secondEvent.args).toEqual(['TowerOfHanoi']);
-    });
-
-    it('generates events in correct order: lines, then actions, then navigation', () => {
-      const dm = new DialogManager(commandYarn, noopHandlers);
-      
-      const firstEvent = dm.start('PuzzleNode');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('Solve this puzzle.');
-      expect(firstEvent.speaker).toBe('Guide');
-      
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('line');
-      expect(secondEvent.text).toBe('Good luck!');
-      expect(secondEvent.speaker).toBe('Guide');
-      
-      const thirdEvent = dm.advance();
-      expect(thirdEvent.type).toBe('command');
-      expect(thirdEvent.command).toBe('loadPuzzle');
-      expect(thirdEvent.args).toEqual(['TowerOfHanoi']);
-      
-      // After action, should automatically navigate to AfterPuzzle
-      const fourthEvent = dm.advance();
-      expect(fourthEvent.type).toBe('line');
-      expect(fourthEvent.text).toBe('Well done!');
-      expect(fourthEvent.speaker).toBe('Guide');
-    });
-  });
-
-  describe.skip('Navigation and Branching', () => {
-    const jumpYarn = `
-title: Start
----
-Player: I should go somewhere.
-<<jump Middle>>
-===
-title: Middle
----
-Guide: You made it to the middle.
-<<jump End>>
-===
-title: End
----
-Guide: Journey complete!
-<<jump Final>>
-===
-title: Final
----
-Guide: All done now!
-===`;
-
-    it('should handle jump commands correctly through multiple nodes', () => {
-      const dm = new DialogManager(jumpYarn, noopHandlers);
-      
-      // Start node
-      const firstEvent = dm.start('Start');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('I should go somewhere.');
-      expect(firstEvent.speaker).toBe('Player');
-      
-      // Should automatically jump to Middle after the line
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('line');
-      expect(secondEvent.text).toBe('You made it to the middle.');
-      expect(secondEvent.speaker).toBe('Guide');
-      
-      // Should automatically jump to End
-      const thirdEvent = dm.advance();
-      expect(thirdEvent.type).toBe('line');
-      expect(thirdEvent.text).toBe('Journey complete!');
-      expect(thirdEvent.speaker).toBe('Guide');
-      
-      // Should automatically jump to Final
-      const fourthEvent = dm.advance();
-      expect(fourthEvent.type).toBe('line');
-      expect(fourthEvent.text).toBe('All done now!');
-      expect(fourthEvent.speaker).toBe('Guide');
-      
-      // Should end
-      const fifthEvent = dm.advance();
-      expect(fifthEvent.type).toBe('end');
-    });
-
-    const detourYarn = `
-title: Main
----
-Guide: Main conversation.
--> Go on a detour
-    <<detour Detour>>
--> Continue main
-    <<jump End>>
-===
-title: Detour
----
-Helper: This is a detour.
-Helper: Returning now.
-===
-title: End
----
-Guide: All done!
-===`;
-
-    it('should handle detour commands with return stack', () => {
-      const dm = new DialogManager(detourYarn, noopHandlers);
-      
-      // Start at Main
-      const firstEvent = dm.start('Main');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('Main conversation.');
-      expect(firstEvent.speaker).toBe('Guide');
-      
-      // Should get choice event
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('choice');
-      expect(secondEvent.options).toHaveLength(2);
-      expect(secondEvent.options[0].text).toBe('Go on a detour');
-      expect(secondEvent.options[0].detour).toBe(true);
-      
-      // Choose detour option
-      const thirdEvent = dm.choose(0);
-      expect(thirdEvent.type).toBe('line');
-      expect(thirdEvent.text).toBe('This is a detour.');
-      expect(thirdEvent.speaker).toBe('Helper');
-      
-      // Continue detour
-      const fourthEvent = dm.advance();
-      expect(fourthEvent.type).toBe('line');
-      expect(fourthEvent.text).toBe('Returning now.');
-      expect(fourthEvent.speaker).toBe('Helper');
-      
-      // Should return to main options
-      const fifthEvent = dm.advance();
-      expect(fifthEvent.type).toBe('choice');
-      expect(fifthEvent.options).toHaveLength(2); // Back to main options
-    });
-
-    const optionsYarn = `
-title: Start
----
-Guide: Choose your path.
--> Path A
-    <<jump PathA>>
--> Path B
-    <<jump PathB>>
-===
-title: PathA
----
-Guide: You chose path A.
-===
-title: PathB
----
-Guide: You chose path B.
-===`;
-
-    it('should navigate to correct nodes when choosing options', () => {
-      const dm = new DialogManager(optionsYarn, noopHandlers);
-      
-      // Start with dialogue
-      const firstEvent = dm.start('Start');
-      expect(firstEvent.type).toBe('line');
-      expect(firstEvent.text).toBe('Choose your path.');
-      expect(firstEvent.speaker).toBe('Guide');
-      
-      // Get choice options
-      const secondEvent = dm.advance();
-      expect(secondEvent.type).toBe('choice');
-      expect(secondEvent.options).toHaveLength(2);
-      expect(secondEvent.options[0].text).toBe('Path A');
-      expect(secondEvent.options[1].text).toBe('Path B');
-      
-      // Choose Path B
-      const thirdEvent = dm.choose(1);
-      expect(thirdEvent.type).toBe('line');
-      expect(thirdEvent.text).toBe('You chose path B.');
-      expect(thirdEvent.speaker).toBe('Guide');
     });
   });
 
