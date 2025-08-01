@@ -1,11 +1,11 @@
-export interface YarnNode {
+export interface GabNode {
   title: string;
   body: string;
   metadata: Record<string, string>;
 }
 
-export function parseYarn(content: string): YarnNode[] {
-  const nodes: YarnNode[] = [];
+export function parseGab(content: string): GabNode[] {
+  const nodes: GabNode[] = [];
   const lines = content.split(/\r?\n/);
   let i = 0;
 
@@ -13,7 +13,7 @@ export function parseYarn(content: string): YarnNode[] {
     let line = lines[i].trim();
     if (!line) { i++; continue; }
     if (line.startsWith('title:')) {
-      const node: YarnNode = { title: line.slice(6).trim(), body: '', metadata: {} };
+      const node: GabNode = { title: line.slice(6).trim(), body: '', metadata: {} };
       i++;
       // parse metadata until ---
       let inBody = false;
@@ -56,12 +56,12 @@ export interface Speaker {
   talkAnim?: string;
 }
 
-export interface YarnFile {
-  nodes: YarnNode[];
+export interface GabFile {
+  nodes: GabNode[];
   speakers: Record<string, Speaker>;
 }
 
-export function parseYarnFile(content: string): YarnFile {
+export function parseGabFile(content: string): GabFile {
   const speakers: Record<string, Speaker> = {};
   const lines = content.split(/\r?\n/);
   let i = 0;
@@ -89,7 +89,7 @@ export function parseYarnFile(content: string): YarnFile {
     }
     i++;
   }
-  const nodes = parseYarn(lines.slice(i).join('\n'));
+  const nodes = parseGab(lines.slice(i).join('\n'));
   return { nodes, speakers };
 }
 
@@ -143,13 +143,13 @@ function parseEdges(body: string): NodeEdges {
   return { targets, command };
 }
 
-export interface YarnValidationResult {
+export interface GabValidationResult {
   unreachable: string[];
   nonterminating: string[];
 }
 
-export function validateYarn(nodes: YarnNode[], start: string, terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']): YarnValidationResult {
-  const nodeMap = new Map<string, YarnNode>();
+export function validateGab(nodes: GabNode[], start: string, terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']): GabValidationResult {
+  const nodeMap = new Map<string, GabNode>();
   for (const n of nodes) nodeMap.set(n.title, n);
 
   const edges = new Map<string, string[]>();

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DialogueManager } from './dialog-manager';
+import { DialogueManager } from './dialogue-manager';
 
 // Mock DOM elements for testing UI behavior
 const mockElement = () => ({
@@ -33,7 +33,7 @@ describe('Dialogue UI Rendering Tests', () => {
   });
 
   it('should process line events and jump commands correctly', () => {
-    const yarn = `
+    const gab = `
 title: TestNode
 ---
 Guide: First line
@@ -45,7 +45,7 @@ title: NextNode
 Guide: Next node
 ===`;
 
-    const dm = new DialogueManager(yarn, handlers);
+    const dm = new DialogueManager(gab, handlers);
     
     // Start dialogue and get generator
     dm.start('TestNode');
@@ -78,13 +78,13 @@ Guide: Next node
   });
 
   it('should handle simple dialogue flow correctly', () => {
-    const yarn = `
+    const gab = `
 title: Simple
 ---
 Guide: Hello
 ===`;
 
-    const dm = new DialogueManager(yarn, handlers);
+    const dm = new DialogueManager(gab, handlers);
     
     // Start dialogue and get generator
     dm.start('Simple');
@@ -103,7 +103,7 @@ Guide: Hello
   });
 
   it('should process multiple lines from same speaker', () => {
-    const yarn = `
+    const gab = `
 title: MultiStep
 ---
 Guide: Step 1
@@ -111,7 +111,7 @@ Guide: Step 2
 Guide: Step 3
 ===`;
 
-    const dm = new DialogueManager(yarn, handlers);
+    const dm = new DialogueManager(gab, handlers);
     
     // Start dialogue and get generator
     dm.start('MultiStep');
