@@ -8,6 +8,7 @@ import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
+import ExamineEditor from './ExamineEditor';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -103,6 +104,7 @@ export default function App() {
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels.CryoRoom.image);
   const [showPuzzle, setShowPuzzle] = useState(false);
+  const [showExamineEditor, setShowExamineEditor] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
@@ -182,7 +184,7 @@ export default function App() {
         }
         break;
       case 'examine':
-        // TODO: Implement examine functionality
+        setShowExamineEditor(true);
         break;
       case 'move':
         // TODO: Implement move functionality
@@ -239,10 +241,13 @@ export default function App() {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Only allow action menu when not in dialogue/options/puzzle
       if (showPuzzle || currentEvent?.type === 'choice' || displayLines.length > 0) return;
-      
+
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
         setShowActionMenu(true);
+      } else if (event.code === 'KeyE') {
+        event.preventDefault();
+        setShowExamineEditor(prev => !prev);
       }
     };
 
@@ -254,6 +259,14 @@ export default function App() {
   return (
     <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
       <GameCanvas frames={animation} background={background} width={viewportSize.width} height={viewportSize.height} />
+      {showExamineEditor && (
+        <ExamineEditor
+          width={viewportSize.width}
+          height={viewportSize.height}
+          background={background}
+          onClose={() => setShowExamineEditor(false)}
+        />
+      )}
       {!showPuzzle && (
         <>
           <DialogueWidget
