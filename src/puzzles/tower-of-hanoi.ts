@@ -5,6 +5,7 @@ export function startTowerOfHanoi(
 ) {
   container.innerHTML = '';
   container.style.display = 'flex';
+  container.style.position = 'relative';
 
   const pegs: number[][] = [[], [], []];
   for (let i = count; i >= 1; i--) pegs[0].push(i);
@@ -62,6 +63,17 @@ export function startTowerOfHanoi(
     pegEls.push(peg);
     container.appendChild(peg);
   }
+
+  // Add skip button
+  const skipButton = document.createElement('button');
+  skipButton.textContent = 'Skip Puzzle';
+  skipButton.className = 'skip-puzzle-button';
+  skipButton.onclick = () => {
+    if (onComplete) {
+      onComplete();
+    }
+  };
+  container.appendChild(skipButton);
 
   render();
 }

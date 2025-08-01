@@ -89,6 +89,9 @@ export default function App() {
     // TODO: Implement action handlers
   };
 
+  const handleOptionsEscape = () => {
+  };
+
   const handleNext = async () => {
     if (!manager) return;
     
@@ -202,6 +205,7 @@ export default function App() {
           <OptionsWidget
             options={options}
             onSelect={handleOptionSelect}
+            onEscape={handleOptionsEscape}
           />
           <ActionMenu
             isVisible={showActionMenu}

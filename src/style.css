@@ -304,3 +304,26 @@ canvas {
   font-style: italic;
   margin-top: 10px;
 }
+
+/* Skip Puzzle Button */
+.skip-puzzle-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.skip-puzzle-button:hover {
+  background: rgba(255, 0, 0, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}

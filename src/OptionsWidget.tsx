@@ -4,9 +4,10 @@ import { DialogueOption } from './dialog-manager';
 interface OptionsWidgetProps {
   options: DialogueOption[];
   onSelect: (index: number) => void;
+  onEscape?: () => void;
 }
 
-export default function OptionsWidget({ options, onSelect }: OptionsWidgetProps) {
+export default function OptionsWidget({ options, onSelect, onEscape }: OptionsWidgetProps) {
   const getFirstUnvisited = (opts: DialogueOption[]) => {
     const idx = opts.findIndex(o => !o.visited);
     return idx === -1 ? 0 : idx;
@@ -36,12 +37,18 @@ export default function OptionsWidget({ options, onSelect }: OptionsWidgetProps)
           event.preventDefault();
           onSelect(selectedIndex);
           break;
+        case 'Backspace':
+          event.preventDefault();
+          if (onEscape) {
+            onEscape();
+          }
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [options, selectedIndex, onSelect]);
+  }, [options, selectedIndex, onSelect, onEscape]);
 
   if (options.length === 0) {
     return null;
