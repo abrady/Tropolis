@@ -69,7 +69,7 @@ const levels: Record<string, LevelData> = {
     dialogue: cryoDialogue,
     start: 'CryoRoom_Intro',
     examine: cryoExamine as ExamineRect[]
-  }
+  },
   Test: { 
       image: new Image(), 
       dialogue: testDialogue, 
