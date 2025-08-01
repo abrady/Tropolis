@@ -9,6 +9,9 @@ import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
+import ExamineEditor, { ExamineRect } from './ExamineEditor';
+import ExamineOverlay from './ExamineOverlay';
+import cryoExamine from './examine/cryoroom.json';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -57,11 +60,22 @@ interface LevelData {
   image: HTMLImageElement;
   dialogue: string;
   start: string;
+  examine: ExamineRect[];
 }
 
 const levels: Record<string, LevelData> = {
-  Test: { image: new Image(), dialogue: testDialogue, start: 'ChoiceNode' },
-  CryoRoom: { image: new Image(), dialogue: cryoDialogue, start: 'CryoRoom_Intro' }
+  CryoRoom: {
+    image: new Image(),
+    dialogue: cryoDialogue,
+    start: 'CryoRoom_Intro',
+    examine: cryoExamine as ExamineRect[]
+  }
+  Test: { 
+      image: new Image(), 
+      dialogue: testDialogue, 
+      start: 'ChoiceNode',
+     examine: [],
+    },
 };
 
 levels.Test.image.src = cryoroomImg;
@@ -110,6 +124,8 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
   const [background] = useState(() => levels[initialLevel].image);
   const [showPuzzle, setShowPuzzle] = useState(false);
+  const [showExamineEditor, setShowExamineEditor] = useState(false);
+  const [showExamine, setShowExamine] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
@@ -189,7 +205,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
         }
         break;
       case 'examine':
-        // TODO: Implement examine functionality
+        setShowExamine(true);
         break;
       case 'move':
         // TODO: Implement move functionality
@@ -234,23 +250,50 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      if (showExamine) {
+        if (event.code === 'Escape') {
+          event.preventDefault();
+          setShowExamine(false);
+        }
+        return;
+      }
+
       // Only allow action menu when not in dialogue/options/puzzle
       if (showPuzzle || currentEvent?.type === 'choice' || displayLines.length > 0) return;
-      
+
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
         setShowActionMenu(true);
+      } else if (event.code === 'KeyE') {
+        event.preventDefault();
+        setShowExamineEditor(prev => !prev);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showPuzzle, currentEvent?.type, displayLines.length]);
+  }, [showPuzzle, showExamine, currentEvent?.type, displayLines.length]);
 
 
   return (
     <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
       <GameCanvas frames={animation} background={background} width={viewportSize.width} height={viewportSize.height} />
+      {showExamine && (
+        <ExamineOverlay
+          width={viewportSize.width}
+          height={viewportSize.height}
+          rects={levels.CryoRoom.examine}
+          onExit={() => setShowExamine(false)}
+        />
+      )}
+      {showExamineEditor && (
+        <ExamineEditor
+          width={viewportSize.width}
+          height={viewportSize.height}
+          background={background}
+          onClose={() => setShowExamineEditor(false)}
+        />
+      )}
       {!showPuzzle && (
         <>
           <DialogueWidget
