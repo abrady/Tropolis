@@ -14,6 +14,16 @@ npm run dev
 
 The server will automatically open the game in your browser and reload on changes.
 
+## Testing
+
+Run tests with:
+
+```bash
+npm run test
+```
+
+The project includes unit tests and end-to-end tests that verify game functionality from initial boot through dialogue interactions.
+
 ## Yarn Spinner Support
 
 The project includes a small utility for parsing `.yarn` dialogue files from
