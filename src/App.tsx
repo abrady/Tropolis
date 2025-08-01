@@ -202,6 +202,7 @@ export default function App() {
     processNextEvent();
   };
 
+  // our run-once effect to initialize the dialogue manager and start the dialogue
   useEffect(() => {
     const handlers: CommandHandlers = {
       loadPuzzle: () => {}, // Handled by dialogue action system
@@ -216,24 +217,13 @@ export default function App() {
     m.start(levels.CryoRoom.start);
     const generator = m.advance();
     setDialogueGenerator(generator);
-    
-    // Get first event
-    const result = generator.next();
-    if (!result.done) {
-      const firstEvent = result.value;
-      setCurrentEvent(firstEvent);
-      
-      if (firstEvent.type === 'line') {
-        setDisplayLines([firstEvent.text]);
-        if (firstEvent.speaker) {
-          const animName = m.getAnimationForSpeaker(firstEvent.speaker);
-          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-          }
-        }
-      }
-    }
   }, []);
+
+  // call this one time once we have the dialogue manager and generator set up
+  useEffect(() => {
+    if (!dialogueGenerator) return;
+    processNextEvent(); // kick off the state machine
+  }, [dialogueGenerator]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
