@@ -43,46 +43,19 @@ export default function OptionsWidget({ options, onSelect }: OptionsWidgetProps)
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: 'transparent',
-        padding: '20px',
-        borderRadius: '8px',
-        minWidth: '300px',
-        maxWidth: '80%'
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="options-overlay">
+      <div className="options-panel">
+        <div className="options-list">
           {options.map((option, index) => {
             const isSelected = index === selectedIndex;
-            const isVisited = option.visited;
-            
+            const classes = ['option-button'];
+            if (isSelected) classes.push('selected');
+            if (option.visited) classes.push('visited');
             return (
               <button
                 key={index}
                 onClick={() => onSelect(index)}
-                style={{
-                  padding: '10px 15px',
-                  fontSize: '14px',
-                  border: isSelected ? '2px solid #007acc' : '1px solid #ccc',
-                  borderRadius: '4px',
-                  backgroundColor: isVisited 
-                    ? (isSelected ? '#d0d0d0' : '#888') 
-                    : (isSelected ? '#e6f3ff' : 'white'),
-                  color: isVisited ? '#555' : 'black',
-                  cursor: 'pointer',
-                  opacity: isVisited ? 0.7 : 1
-                }}
+                className={classes.join(' ')}
               >
                 {option.text}
               </button>
