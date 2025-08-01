@@ -6,6 +6,7 @@ import cryoDialogue from './dialogue/cryoroom.yarn?raw';
 import { DialogManager, CommandHandlers, DialogueOption } from './dialog-manager';
 import DialogWidget from './DialogWidget';
 import OptionsWidget from './OptionsWidget';
+import ActionMenu, { ActionType } from './ActionMenu';
 import { startTowerOfHanoi } from './puzzles';
 
 interface LevelData {
@@ -59,6 +60,7 @@ export default function App() {
   const [hasMoreLines, setHasMoreLines] = useState(false);
   const [showNextButton, setShowNextButton] = useState(true);
   const [showPuzzle, setShowPuzzle] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleOptionSelect = async (optionIndex: number) => {
@@ -79,6 +81,12 @@ export default function App() {
     }
     setHasMoreLines(manager.hasMoreLines());
     setOptions(manager.getCurrent().options);
+  };
+
+  const handleAction = (action: ActionType) => {
+    setShowActionMenu(false);
+    console.log(`Action selected: ${action}`);
+    // TODO: Implement action handlers
   };
 
   const handleNext = async () => {
@@ -165,6 +173,21 @@ export default function App() {
     handleNext();
   }, [manager]);
 
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only allow action menu when not in dialogue/options/puzzle
+      if (showPuzzle || options.length > 0 || lines.length > 0) return;
+      
+      if (event.code === 'KeyA' || event.code === 'Space') {
+        event.preventDefault();
+        setShowActionMenu(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showPuzzle, options.length, lines.length]);
+
 
   return (
     <div id="game-container">
@@ -179,6 +202,11 @@ export default function App() {
           <OptionsWidget
             options={options}
             onSelect={handleOptionSelect}
+          />
+          <ActionMenu
+            isVisible={showActionMenu}
+            onAction={handleAction}
+            onClose={() => setShowActionMenu(false)}
           />
         </>
       )}

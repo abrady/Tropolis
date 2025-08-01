@@ -232,3 +232,75 @@ canvas {
 .option-button.selected.visited {
   background: #d0d0d0;
 }
+
+/* Phoenix Wright-style Action Menu */
+.action-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.action-menu-panel {
+  background: linear-gradient(135deg, #1a4480 0%, #2a5aa0 100%);
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.action-menu-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.action-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.action-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #ffffff;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #3366cc 0%, #4d7fff 100%);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.action-button:hover {
+  background: linear-gradient(135deg, #4d7fff 0%, #6699ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-button.selected {
+  background: linear-gradient(135deg, #ff6600 0%, #ff8833 100%);
+  border-color: #ffcc00;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+  transform: scale(1.05);
+}
+
+.action-menu-hint {
+  color: #cccccc;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 10px;
+}
