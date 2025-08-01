@@ -300,7 +300,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           onClose={() => setShowExamineEditor(false)}
         />
       )}
-      {!showPuzzle && (
+      {!showPuzzle && !showExamine && (
         <>
           <DialogueWidget
             lines={displayLines}
