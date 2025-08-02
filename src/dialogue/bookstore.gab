@@ -101,14 +101,3 @@ Overlord: The important thing is learning from these mistakes to prevent recurre
 -> I understand, let's focus on solutions
     <<jump Bookstore_History>>
 ===
-
-title: Bookstore_Leave
----
-Overlord: Where would you like to go from here?
--> Return to the mall
-    <<loadLevel mall>>
--> Go to the cryo room
-    <<loadLevel CryoRoom>>
--> Visit Sector 7
-    <<loadLevel Sector7>>
-===

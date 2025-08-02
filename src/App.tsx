@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
-import cryoroomImg from '../data/locations/cryoroom.png';
 import { DialogueManager, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
-import { getRoomDialogueData } from './dialogue';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
@@ -12,6 +10,7 @@ import ExamineEditor, { ExamineRect } from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
 import { getRoomExamineRects } from './examine/rooms';
 import { GameState, LevelData } from './game-state';
+import { levels } from './examine/levels';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -55,27 +54,6 @@ function useViewportSize() {
 
   return size;
 }
-
-const cryoroomDialogueData = getRoomDialogueData('cryoroom')!;
-const testDialogueData = getRoomDialogueData('test')!;
-
-const levels: Record<string, LevelData> = {
-  CryoRoom: {
-    image: new Image(),
-    dialogue: cryoroomDialogueData.dialogue,
-    start: cryoroomDialogueData.start,
-    examine: getRoomExamineRects('cryoroom')
-  },
-  Test: { 
-      image: new Image(), 
-      dialogue: testDialogueData.dialogue, 
-      start: testDialogueData.start,
-     examine: [],
-    },
-};
-
-levels.Test.image.src = cryoroomImg;
-levels.CryoRoom.image.src = cryoroomImg;
 
 function GameCanvas({ frames, background, width, height }: { frames: Frame[]; background: HTMLImageElement; width: number; height: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
