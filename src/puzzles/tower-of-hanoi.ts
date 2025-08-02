@@ -1,8 +1,4 @@
-export function startTowerOfHanoi(
-  container: HTMLElement,
-  count = 4,
-  onComplete?: () => void
-) {
+export function startTowerOfHanoi(container: HTMLElement, count = 4, onComplete?: () => void) {
   container.innerHTML = '';
   container.style.display = 'flex';
   container.style.position = 'relative';
@@ -18,7 +14,7 @@ export function startTowerOfHanoi(
     pegEls.forEach((pegEl, idx) => {
       pegEl.innerHTML = '';
       const disks = pegs[idx];
-      disks.forEach(d => {
+      disks.forEach((d) => {
         const disk = document.createElement('div');
         disk.className = 'disk';
         disk.style.width = 20 + d * 20 + 'px';

@@ -8,6 +8,6 @@ export const cryoroomExamineRects: ExamineRect[] = [
     width: 1708,
     height: 666,
     level: 'cryoroom',
-    dialogueNode: 'CryoRoom_ExamineCryoChambers'
-  } as DialogueExamineRect
+    dialogueNode: 'CryoRoom_ExamineCryoChambers',
+  } as DialogueExamineRect,
 ];

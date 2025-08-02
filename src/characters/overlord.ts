@@ -13,8 +13,8 @@ const Overlord: CharacterDef = {
   animations: {
     idle: [frames[0]],
     talk: frames.slice(1),
-    all: frames
-  }
+    all: frames,
+  },
 };
 
 export default Overlord;

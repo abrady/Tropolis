@@ -8,16 +8,34 @@
     "type": "git",
     "url": "https://github.com/abrady/tropolis"
   },
-  "engines": { "vscode": "^1.84.0" },
-  "categories": ["Programming Languages"],
-  "activationEvents": ["onLanguage:gab"],
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:gab"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
-      { "id": "gab", "extensions": [".gab"], "aliases": ["Gab"] }
+      {
+        "id": "gab",
+        "extensions": [
+          ".gab"
+        ],
+        "aliases": [
+          "Gab"
+        ]
+      }
     ],
     "grammars": [
-      { "language": "gab", "scopeName": "source.gab", "path": "./syntaxes/gab.tmLanguage.json" }
+      {
+        "language": "gab",
+        "scopeName": "source.gab",
+        "path": "./syntaxes/gab.tmLanguage.json"
+      }
     ]
   },
   "scripts": {

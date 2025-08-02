@@ -2,13 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { DialogueManager } from './dialogue-manager';
 
 describe('DialogueManager Tests', () => {
-
   const noopHandlers = {
     loadPuzzle: () => {},
     loadLevel: () => {},
-    return: () => {}
+    return: () => {},
   };
-  
 
   describe('Basic Command Parsing', () => {
     const samplePuzzle = `title: TestNode
@@ -45,26 +43,26 @@ Overlord: You chose option 2
 
     it('generates line and action events from gab node with puzzle command', () => {
       const dm = new DialogueManager(samplePuzzle, noopHandlers);
-      
+
       dm.start('TestNode');
       const gen = dm.advance();
       let n = gen.next().value;
       expect(n.type).toBe('line');
       expect(n.text).toBe('Begin');
       expect(n.speaker).toBe('Overlord');
-      
+
       n = gen.next().value;
       expect(n.type).toBe('command');
       expect(n.command).toBe('loadPuzzle');
       expect(n.args).toEqual(['TowerOfHanoi']);
-      
+
       const thirdEvent = gen.next();
       expect(thirdEvent.done).toBe(true);
     });
 
     it('generates line and action events from gab node with level command', () => {
       const dm = new DialogueManager(sampleLevel, noopHandlers);
-      
+
       dm.start('LevelNode');
       const gen = dm.advance();
       const firstEvent = gen.next().value;
@@ -83,7 +81,7 @@ Overlord: You chose option 2
 
     it('generates choice events with detour and jump commands', () => {
       const dm = new DialogueManager(sampleChoice, noopHandlers);
-      
+
       dm.start('ChoiceNode');
       const gen = dm.advance();
       let n = gen.next().value;
@@ -167,11 +165,11 @@ Alice: This is an examine dialogue node.
 
     it('detects examine tagged nodes correctly', () => {
       const dm = new DialogueManager(examineDialogue, noopHandlers);
-      
+
       // Regular node should not be marked as examine
       dm.start('RegularNode');
       expect(dm.isCurrentNodeExamine()).toBe(false);
-      
+
       // Examine tagged node should be marked as examine
       dm.start('ExamineNode');
       expect(dm.isCurrentNodeExamine()).toBe(true);

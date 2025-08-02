@@ -9,7 +9,7 @@ function validateDialogueNodeExists(dialogueFile: string, nodeName: string): boo
   try {
     const content = readFileSync(join(__dirname, 'dialogue', dialogueFile), 'utf-8');
     const nodes = parseGab(content);
-    return nodes.some(node => node.title === nodeName);
+    return nodes.some((node) => node.title === nodeName);
   } catch {
     return false;
   }
@@ -17,13 +17,13 @@ function validateDialogueNodeExists(dialogueFile: string, nodeName: string): boo
 
 function validateExamineRect(rect: ExamineRect): string[] {
   const errors: string[] = [];
-  
+
   // Basic validation
   if (rect.x < 0) errors.push(`Invalid x coordinate: ${rect.x}`);
   if (rect.y < 0) errors.push(`Invalid y coordinate: ${rect.y}`);
   if (rect.width <= 0) errors.push(`Invalid width: ${rect.width}`);
   if (rect.height <= 0) errors.push(`Invalid height: ${rect.height}`);
-  
+
   // Type-specific validation
   switch (rect.type) {
     case ExamineRectType.Dialogue:
@@ -39,27 +39,27 @@ function validateExamineRect(rect: ExamineRect): string[] {
         }
       }
       break;
-    
+
     case ExamineRectType.AddToInventory:
       if (!rect.item || rect.item.trim() === '') {
         errors.push('Missing item parameter for inventory rect');
       }
       break;
-    
+
     case ExamineRectType.None:
       if (!rect.args || rect.args.trim() === '') {
         errors.push('Missing args parameter for none rect');
       }
       break;
   }
-  
+
   return errors;
 }
 
 describe('Examine Rectangle Validation', () => {
   it('validates all room examine rectangles', () => {
     const allErrors: string[] = [];
-    
+
     for (const [roomName, roomData] of Object.entries(roomExamineData)) {
       roomData.rects.forEach((rect, index) => {
         const errors = validateExamineRect(rect);
@@ -68,15 +68,15 @@ describe('Examine Rectangle Validation', () => {
         }
       });
     }
-    
+
     if (allErrors.length > 0) {
       console.log('Examine Rectangle Validation Errors:');
-      allErrors.forEach(error => console.log(`  - ${error}`));
+      allErrors.forEach((error) => console.log(`  - ${error}`));
     }
-    
+
     expect(allErrors).toEqual([]);
   });
-  
+
   it('validates individual examine rectangle basic properties', () => {
     const validRect: ExamineRect = {
       type: ExamineRectType.None,
@@ -84,12 +84,12 @@ describe('Examine Rectangle Validation', () => {
       y: 20,
       width: 100,
       height: 50,
-      args: 'valid_args'
+      args: 'valid_args',
     };
-    
+
     expect(validateExamineRect(validRect)).toEqual([]);
   });
-  
+
   it('catches invalid examine rectangle properties', () => {
     const invalidRect: ExamineRect = {
       type: ExamineRectType.None,
@@ -97,9 +97,9 @@ describe('Examine Rectangle Validation', () => {
       y: -5,
       width: 0,
       height: -10,
-      args: ''
+      args: '',
     };
-    
+
     const errors = validateExamineRect(invalidRect);
     expect(errors).toContain('Invalid x coordinate: -1');
     expect(errors).toContain('Invalid y coordinate: -5');
@@ -107,7 +107,7 @@ describe('Examine Rectangle Validation', () => {
     expect(errors).toContain('Invalid height: -10');
     expect(errors).toContain('Missing args parameter for none rect');
   });
-  
+
   it('validates dialogue node references', () => {
     const dialogueRect: DialogueExamineRect = {
       type: ExamineRectType.Dialogue,
@@ -116,13 +116,13 @@ describe('Examine Rectangle Validation', () => {
       width: 20,
       height: 20,
       level: 'cryoroom',
-      dialogueNode: 'NonExistentNode'
+      dialogueNode: 'NonExistentNode',
     };
-    
+
     const errors = validateExamineRect(dialogueRect);
     expect(errors).toContain("Dialogue node 'NonExistentNode' not found in cryoroom.gab");
   });
-  
+
   it('validates existing dialogue nodes', () => {
     const dialogueRect: DialogueExamineRect = {
       type: ExamineRectType.Dialogue,
@@ -131,13 +131,13 @@ describe('Examine Rectangle Validation', () => {
       width: 20,
       height: 20,
       level: 'cryoroom',
-      dialogueNode: 'CryoRoom_Intro'
+      dialogueNode: 'CryoRoom_Intro',
     };
-    
+
     const errors = validateExamineRect(dialogueRect);
     expect(errors).toEqual([]);
   });
-  
+
   it('validates dialogue rect missing parameters', () => {
     const dialogueRect: DialogueExamineRect = {
       type: ExamineRectType.Dialogue,
@@ -146,9 +146,9 @@ describe('Examine Rectangle Validation', () => {
       width: 20,
       height: 20,
       level: '',
-      dialogueNode: ''
+      dialogueNode: '',
     };
-    
+
     const errors = validateExamineRect(dialogueRect);
     expect(errors).toContain('Missing level parameter for dialogue rect');
     expect(errors).toContain('Missing dialogueNode parameter for dialogue rect');

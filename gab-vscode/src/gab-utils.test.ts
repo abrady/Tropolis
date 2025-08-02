@@ -9,13 +9,13 @@ tags: tags
 ---
 Speaker: test line
 ===`;
-      
+
       const result = parseGab(content);
       expect(result.length).toBe(1);
       expect(result[0]).toEqual({
         title: 'Title',
         body: 'Speaker: test line',
-        metadata: { tags: 'tags' }
+        metadata: { tags: 'tags' },
       } as GabNode);
     });
 
@@ -25,10 +25,10 @@ tags: test
 ---
 Speaker: test line
 ===`;
-      
+
       const nodes = parseGab(content);
       const result = validateGab(nodes, 'TestNode');
-      
+
       // This node should be naturally terminating since it has no outgoing edges
       expect(result.nonterminating).not.toContain('TestNode');
       expect(result.unreachable).not.toContain('TestNode');
@@ -39,13 +39,13 @@ Speaker: test line
 ---
 Speaker: hello world
 ===`;
-      
+
       const result = parseGab(content);
       expect(result.length).toBe(1);
       expect(result[0]).toEqual({
         title: 'SimpleNode',
         body: 'Speaker: hello world',
-        metadata: {}
+        metadata: {},
       } as GabNode);
     });
 
@@ -56,10 +56,12 @@ Speaker1: First line
 Speaker2: Second line
 Speaker1: Third line
 ===`;
-      
+
       const result = parseGab(content);
       expect(result.length).toBe(1);
-      expect(result[0].body).toBe('Speaker1: First line\nSpeaker2: Second line\nSpeaker1: Third line');
+      expect(result[0].body).toBe(
+        'Speaker1: First line\nSpeaker2: Second line\nSpeaker1: Third line'
+      );
     });
     it('reports unknown metadata fields', () => {
       const content = `title: Foo\n tag: bar\n---\n===`;
@@ -89,10 +91,10 @@ title: Target2
 ---
 Speaker: You chose option 2
 ===`;
-      
+
       const nodes = parseGab(content);
       const result = validateGab(nodes, 'ChoiceNode');
-      
+
       expect(result.nonterminating).not.toContain('ChoiceNode');
       // Target1 and Target2 should be naturally terminating since they have no outgoing edges
       expect(result.nonterminating).toEqual([]);
@@ -104,16 +106,16 @@ Speaker: You chose option 2
 Speaker: This should return
 <<return>>
 ===`;
-      
+
       const nodes = parseGab(content);
       const result = validateGab(nodes, 'ReturnNode');
-      
+
       // This should be terminating because of the return command
       expect(result.nonterminating).not.toContain('ReturnNode');
     });
 
-  it('recognizes nodes that do not terminate', () => {
-    const content = `title: Bookstore_Start
+    it('recognizes nodes that do not terminate', () => {
+      const content = `title: Bookstore_Start
 ---
 Overlord: This is the old Central Library Bookstore, 11235.
 Overlord: The automated archive system is still functional.
@@ -138,15 +140,15 @@ title: Target2
 ---
 Speaker: You chose option 2
 ===`;
-      
+
       const nodes = parseGab(content);
       const result = validateGab(nodes, 'Bookstore_Start');
 
-    expect(result.nonterminating).toContain('Bookstore_Start');
-  });
+      expect(result.nonterminating).toContain('Bookstore_Start');
+    });
 
-  it('treats examine nodes as additional start points for non-termination checks', () => {
-    const content = `title: Start
+    it('treats examine nodes as additional start points for non-termination checks', () => {
+      const content = `title: Start
 ---
 Speaker: start
 ===
@@ -166,13 +168,12 @@ Speaker: in loop
     <<jump Examine_Start>>
 ===`;
 
-    const nodes = parseGab(content);
-    const result = validateGab(nodes, 'Start');
+      const nodes = parseGab(content);
+      const result = validateGab(nodes, 'Start');
 
-    expect(result.unreachable).toEqual([]);
-    expect(result.nonterminating).toContain('Loop');
-    expect(result.nonterminating).not.toContain('Examine_Start');
-  });
-
+      expect(result.unreachable).toEqual([]);
+      expect(result.nonterminating).toContain('Loop');
+      expect(result.nonterminating).not.toContain('Examine_Start');
+    });
   });
 });

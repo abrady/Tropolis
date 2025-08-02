@@ -16,7 +16,9 @@ export function isValidLevelName(name: string): name is LevelName {
 
 export function assertValidLevelName(name: string): LevelName {
   if (!isValidLevelName(name)) {
-    throw new Error(`Invalid level name: "${name}". Valid levels: cryoroom, test, mall, bookstore, sector7`);
+    throw new Error(
+      `Invalid level name: "${name}". Valid levels: cryoroom, test, mall, bookstore, sector7`
+    );
   }
   return name;
 }
@@ -33,35 +35,35 @@ const levels: Record<LevelName, LevelData> = {
     dialogue: cryoroomDialogueData.dialogue,
     start: cryoroomDialogueData.start,
     examine: getRoomExamineRects('cryoroom'),
-    connections: ['mall', 'sector7']
+    connections: ['mall', 'sector7'],
   },
-  test: { 
-      image: new Image(), 
-      dialogue: testDialogueData.dialogue, 
-      start: testDialogueData.start,
-     examine: [],
-     connections: []
-    },
+  test: {
+    image: new Image(),
+    dialogue: testDialogueData.dialogue,
+    start: testDialogueData.start,
+    examine: [],
+    connections: [],
+  },
   mall: {
     image: new Image(),
     dialogue: mallDialogueData.dialogue,
     start: mallDialogueData.start,
     examine: getRoomExamineRects('mall'),
-    connections: ['bookstore', 'cryoroom']
+    connections: ['bookstore', 'cryoroom'],
   },
   bookstore: {
     image: new Image(),
     dialogue: bookstoreDialogueData.dialogue,
     start: bookstoreDialogueData.start,
     examine: getRoomExamineRects('bookstore'),
-    connections: ['mall']
+    connections: ['mall'],
   },
   sector7: {
     image: new Image(),
     dialogue: sector7DialogueData.dialogue,
     start: sector7DialogueData.start,
     examine: getRoomExamineRects('sector7'),
-    connections: ['mall', 'cryoroom']
+    connections: ['mall', 'cryoroom'],
   },
 };
 

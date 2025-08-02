@@ -27,27 +27,26 @@ export interface DialogueNode {
   command?: DialogueCommand | null;
 }
 
-export type DialogueEvent = 
+export type DialogueEvent =
   | { type: 'line'; text: string; speaker: string | null; node: DialogueNode }
   | { type: 'choice'; options: DialogueOption[]; node: DialogueNode }
   // | { type: 'pause'; duration?: number; node: DialogueNode }
   | { type: 'command'; command: string; args: string[]; node: DialogueNode };
 
-export type DialogueAdvanceParam =
-| { type: 'choice'; optionIndex: number };
+export type DialogueAdvanceParam = { type: 'choice'; optionIndex: number };
 
 interface DialogueState {
   currentNode: string;
-  content?: DialogueNode; 
+  content?: DialogueNode;
   lineIndex: number;
-  variables: Record<string, string>;   // e.g. { "$hasKey": true, "$score": 10 }
-  flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
+  variables: Record<string, string>; // e.g. { "$hasKey": true, "$score": 10 }
+  flags: Record<string, boolean>; // e.g. { "saw_dialog_Intro": true }
 }
 
 export interface DialogueLines {
   lines: string[];
   speaker: string | null;
-}  
+}
 
 import { parseGabFile, GabNode, Speaker } from './gab-utils';
 
@@ -121,7 +120,7 @@ export class DialogueManager {
           type: 'line',
           text: textOnly,
           speaker: speaker,
-          node: this.state.content
+          node: this.state.content,
         };
         yield this.currentEvent;
         this.state.lineIndex++;
@@ -132,20 +131,20 @@ export class DialogueManager {
         this.currentEvent = {
           type: 'choice',
           options: this.state.content.options,
-          node: this.state.content
+          node: this.state.content,
         };
         const result = yield this.currentEvent;
         if (result && result.type === 'choice') {
-          const index = result.optionIndex;          
+          const index = result.optionIndex;
           const opt = this.currentEvent.options[index];
           if (!opt) {
             throw new Error(`Invalid option index ${index}`);
           }
-          
+
           if (opt.detour && this.state.currentNode) {
             this.returnStack.push(this.state.currentNode);
           }
-          
+
           this.currentEvent = null; // Clear choice state
           this.goto(opt.target);
           continue; // Restart the loop to process the next node
@@ -160,7 +159,7 @@ export class DialogueManager {
           type: 'command',
           command: this.state.content.command.name,
           args: this.state.content.command.args,
-          node: this.state.content
+          node: this.state.content,
         };
         yield this.currentEvent;
       }
@@ -192,7 +191,7 @@ export class DialogueManager {
     if (!this.nodes[nodeName]) {
       throw new Error(`Node '${nodeName}' does not exist`);
     }
-    
+
     // If skipToChoices is true, set lineIndex to skip all lines
     const content = parseNodeBody(this.nodes[nodeName], this.visited);
     const lineIndex = skipToChoices ? content.lines.length : 0;
@@ -202,8 +201,8 @@ export class DialogueManager {
       content,
       lineIndex,
       variables: this.state.variables,
-      flags: this.state.flags
-    }
+      flags: this.state.flags,
+    };
     this.visited.add(nodeName);
     this.currentEvent = null; // Reset current event
   }
@@ -214,16 +213,16 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
   const title = gabNode.title;
   const tagString = gabNode.metadata['tags'] || '';
   const tags = new Set<DialogueNodeTag>();
-  
+
   if (tagString) {
-    const tagArray = tagString.split(',').map(s => s.trim());
+    const tagArray = tagString.split(',').map((s) => s.trim());
     for (const tag of tagArray) {
       if (tag === 'examine') {
         tags.add(tag);
       }
     }
   }
-  
+
   const lines = body.split(/\r?\n/);
   const texts: string[] = [];
   const options: DialogueOption[] = [];
@@ -300,4 +299,3 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
   }
   return { title, tags, lines: texts, options, next, command };
 }
-

@@ -23,7 +23,10 @@ export function parseGab(content: string, errors?: GabParseError[]): GabNode[] {
 
   while (i < lines.length) {
     let line = stripComment(lines[i]).trim();
-    if (!line) { i++; continue; }
+    if (!line) {
+      i++;
+      continue;
+    }
     if (line.startsWith('title:')) {
       const node: GabNode = { title: line.slice(6).trim(), body: '', metadata: {} };
       i++;
@@ -172,7 +175,11 @@ export interface GabValidationResult {
   nonterminating: string[];
 }
 
-export function validateGab(nodes: GabNode[], start: string, terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']): GabValidationResult {
+export function validateGab(
+  nodes: GabNode[],
+  start: string,
+  terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']
+): GabValidationResult {
   const nodeMap = new Map<string, GabNode>();
   for (const n of nodes) nodeMap.set(n.title, n);
 
@@ -187,7 +194,7 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   for (const n of nodes) {
     const { targets, command } = parseEdges(n.body);
-    const tags = n.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    const tags = n.metadata['tags']?.split(',').map((s) => s.trim()) ?? [];
     if (command && terminatingCommands.includes(command)) {
       finalNodes.add(n.title);
     }
@@ -218,7 +225,7 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   const unreachable: string[] = [];
   for (const n of nodes) {
-    const tags = n.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    const tags = n.metadata['tags']?.split(',').map((s) => s.trim()) ?? [];
     if (!reachable.has(n.title) && !tags.includes('disabled') && !tags.includes('examine')) {
       unreachable.push(n.title);
     }
@@ -247,7 +254,7 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
   const nonterminating: string[] = [];
   for (const n of reachable) {
     const node = nodeMap.get(n);
-    const tags = node?.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    const tags = node?.metadata['tags']?.split(',').map((s) => s.trim()) ?? [];
     if (!canReachFinal.has(n) && !tags.includes('examine')) {
       nonterminating.push(n);
     }

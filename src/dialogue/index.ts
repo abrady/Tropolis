@@ -1,7 +1,7 @@
-export { 
-  roomDialogueData, 
-  getRoomDialogue, 
-  getRoomDialogueStart, 
+export {
+  roomDialogueData,
+  getRoomDialogue,
+  getRoomDialogueStart,
   getRoomDialogueData,
-  type RoomDialogueData 
+  type RoomDialogueData,
 } from './dialogues';

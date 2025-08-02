@@ -35,7 +35,11 @@ export class GameState {
   startDialogue(dialogueId: string): DialogueGenerator {
     const data = this.levels[this.currentLevel];
     if (!data) throw new Error(`Unknown level: ${this.currentLevel}`);
-    const manager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
+    const manager = new DialogueManager(data.dialogue, {
+      loadPuzzle: () => {},
+      loadLevel: () => {},
+      return: () => {},
+    });
     manager.start(dialogueId);
     this.dialogueGenerator = manager.advance();
     return this.dialogueGenerator;
@@ -92,7 +96,7 @@ export class GameState {
   }
 
   unsubscribe(fn: GameStateListener) {
-    this.listeners = this.listeners.filter(l => l !== fn);
+    this.listeners = this.listeners.filter((l) => l !== fn);
   }
 
   private emit() {

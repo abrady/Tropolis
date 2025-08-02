@@ -9,11 +9,17 @@ interface MoveMenuProps {
   onClose: () => void;
 }
 
-export default function MoveMenu({ isVisible, availableLocations, currentLocation, onLocationSelect, onClose }: MoveMenuProps) {
+export default function MoveMenu({
+  isVisible,
+  availableLocations,
+  currentLocation,
+  onLocationSelect,
+  onClose,
+}: MoveMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Filter out current location from available options
-  const locations = availableLocations.filter(location => location !== currentLocation);
+  const locations = availableLocations.filter((location) => location !== currentLocation);
 
   useEffect(() => {
     if (isVisible) {
@@ -28,11 +34,11 @@ export default function MoveMenu({ isVisible, availableLocations, currentLocatio
       switch (event.code) {
         case 'ArrowUp':
           event.preventDefault();
-          setSelectedIndex(prev => prev > 0 ? prev - 1 : locations.length - 1);
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : locations.length - 1));
           break;
         case 'ArrowDown':
           event.preventDefault();
-          setSelectedIndex(prev => prev < locations.length - 1 ? prev + 1 : 0);
+          setSelectedIndex((prev) => (prev < locations.length - 1 ? prev + 1 : 0));
           break;
         case 'Space':
         case 'Enter':
@@ -79,7 +85,7 @@ export default function MoveMenu({ isVisible, availableLocations, currentLocatio
             const isSelected = index === selectedIndex;
             const classes = ['action-button'];
             if (isSelected) classes.push('selected');
-            
+
             return (
               <button
                 key={location}
@@ -91,7 +97,9 @@ export default function MoveMenu({ isVisible, availableLocations, currentLocatio
             );
           })}
         </div>
-        <div className="action-menu-hint">Use arrow keys to navigate, Enter to select, Escape to close</div>
+        <div className="action-menu-hint">
+          Use arrow keys to navigate, Enter to select, Escape to close
+        </div>
       </div>
     </div>
   );

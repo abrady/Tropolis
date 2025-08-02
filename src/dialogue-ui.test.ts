@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DialogueManager } from './dialogue-manager';
 
-
-
 describe('Dialogue UI Rendering Tests', () => {
   const handlers = {
     loadPuzzle: vi.fn(),
     loadLevel: vi.fn(),
-    return: vi.fn()
+    return: vi.fn(),
   };
 
   beforeEach(() => {
@@ -28,11 +26,11 @@ Guide: Next node
 ===`;
 
     const dm = new DialogueManager(gab, handlers);
-    
+
     // Start dialogue and get generator
     dm.start('TestNode');
     const gen = dm.advance();
-    
+
     // Get first line
     const firstResult = gen.next();
     expect(firstResult.done).toBe(false);
@@ -67,11 +65,11 @@ Guide: Hello
 ===`;
 
     const dm = new DialogueManager(gab, handlers);
-    
+
     // Start dialogue and get generator
     dm.start('Simple');
     const gen = dm.advance();
-    
+
     // Get the line
     const firstResult = gen.next();
     expect(firstResult.done).toBe(false);
@@ -94,11 +92,11 @@ Guide: Step 3
 ===`;
 
     const dm = new DialogueManager(gab, handlers);
-    
+
     // Start dialogue and get generator
     dm.start('MultiStep');
     const gen = dm.advance();
-    
+
     // Get first line
     const firstResult = gen.next();
     expect(firstResult.done).toBe(false);

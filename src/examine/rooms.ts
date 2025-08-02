@@ -4,23 +4,22 @@ import { mallExamineRects } from './mall';
 import { sector7ExamineRects } from './sector7';
 import { bookstoreExamineRects } from './bookstore';
 
-
 export interface RoomExamineData {
   rects: ExamineRect[];
 }
 
 export const roomExamineData: Record<string, RoomExamineData> = {
-  'cryoroom': {
-    rects: cryoroomExamineRects
+  cryoroom: {
+    rects: cryoroomExamineRects,
   },
-  'mall': {
-    rects: mallExamineRects
+  mall: {
+    rects: mallExamineRects,
   },
-  'sector7': {
-    rects: sector7ExamineRects
+  sector7: {
+    rects: sector7ExamineRects,
   },
-  'bookstore': {
-    rects: bookstoreExamineRects
+  bookstore: {
+    rects: bookstoreExamineRects,
   },
 };
 

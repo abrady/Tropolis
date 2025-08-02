@@ -18,9 +18,7 @@
       "name": "meta.command.gab",
       "begin": "<<",
       "end": ">>",
-      "patterns": [
-        { "match": "\\b[A-Za-z0-9_]+\\b", "name": "support.function.gab" }
-      ]
+      "patterns": [{ "match": "\\b[A-Za-z0-9_]+\\b", "name": "support.function.gab" }]
     }
   ]
 }

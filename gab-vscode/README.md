@@ -1,14 +1,15 @@
 To try the extension locally:
 
 From the gab-vscode folder, install dependencies and build the bundled JavaScript:
-* npm install
-* npm run compile
+
+- npm install
+- npm run compile
 
 (The build script compiles the TypeScript sources into dist/extension.js.)
 
 Package it into a VSIX:
 
-* npx vsce package
+- npx vsce package
 
 This generates gab-language-0.0.1.vsix in the same folder.
 

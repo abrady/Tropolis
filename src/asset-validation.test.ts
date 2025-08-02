@@ -53,7 +53,7 @@ describe('character asset validation', () => {
         referenced.add(anim);
         expect(fs.existsSync(animPath)).toBe(true);
       }
-      const files = fs.readdirSync(folder).filter(f => f !== `${char}.def`);
+      const files = fs.readdirSync(folder).filter((f) => f !== `${char}.def`);
       for (const file of files) {
         if (!referenced.has(file)) {
           console.warn(`Unreferenced file in ${char}: ${file}`);

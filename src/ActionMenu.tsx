@@ -11,7 +11,7 @@ interface ActionMenuProps {
 const actions: { type: ActionType; text: string }[] = [
   { type: 'examine', text: 'Examine' },
   { type: 'talk', text: 'Talk' },
-  { type: 'move', text: 'Move' }
+  { type: 'move', text: 'Move' },
 ];
 
 export default function ActionMenu({ isVisible, onAction, onClose }: ActionMenuProps) {
@@ -30,11 +30,11 @@ export default function ActionMenu({ isVisible, onAction, onClose }: ActionMenuP
       switch (event.code) {
         case 'ArrowUp':
           event.preventDefault();
-          setSelectedIndex(prev => prev > 0 ? prev - 1 : actions.length - 1);
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : actions.length - 1));
           break;
         case 'ArrowDown':
           event.preventDefault();
-          setSelectedIndex(prev => prev < actions.length - 1 ? prev + 1 : 0);
+          setSelectedIndex((prev) => (prev < actions.length - 1 ? prev + 1 : 0));
           break;
         case 'Space':
         case 'Enter':
@@ -65,7 +65,7 @@ export default function ActionMenu({ isVisible, onAction, onClose }: ActionMenuP
             const isSelected = index === selectedIndex;
             const classes = ['action-button'];
             if (isSelected) classes.push('selected');
-            
+
             return (
               <button
                 key={action.type}
@@ -77,7 +77,9 @@ export default function ActionMenu({ isVisible, onAction, onClose }: ActionMenuP
             );
           })}
         </div>
-        <div className="action-menu-hint">Use arrow keys to navigate, Enter to select, Escape to close</div>
+        <div className="action-menu-hint">
+          Use arrow keys to navigate, Enter to select, Escape to close
+        </div>
       </div>
     </div>
   );

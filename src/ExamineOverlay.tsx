@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ORIGINAL_WIDTH, ORIGINAL_HEIGHT, ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './examine';
+import {
+  ORIGINAL_WIDTH,
+  ORIGINAL_HEIGHT,
+  ExamineRect,
+  ExamineRectType,
+  DialogueExamineRect,
+  InventoryExamineRect,
+  NoneExamineRect,
+} from './examine';
 
 function scaleRect<T extends ExamineRect>(rect: T, scaleX: number, scaleY: number): T {
   return {
@@ -33,15 +41,22 @@ interface ExamineOverlayProps {
   debugMode?: boolean;
 }
 
-export default function ExamineOverlay({ width, height, rects, onExit, onDialogue, debugMode = false }: ExamineOverlayProps) {
+export default function ExamineOverlay({
+  width,
+  height,
+  rects,
+  onExit,
+  onDialogue,
+  debugMode = false,
+}: ExamineOverlayProps) {
   const [hover, setHover] = useState<ExamineRect | null>(null);
-  
+
   // Calculate scaling factors
   const scaleX = width / ORIGINAL_WIDTH;
   const scaleY = height / ORIGINAL_HEIGHT;
-  
+
   // Scale all rects to current viewport
-  const scaledRects = rects.map(rect => scaleRect(rect, scaleX, scaleY));
+  const scaledRects = rects.map((rect) => scaleRect(rect, scaleX, scaleY));
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const bounds = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
@@ -78,14 +93,14 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
   return (
     <div
       className="examine-overlay"
-      style={{ 
-        width, 
-        height, 
-        cursor: hover ? 'pointer' : 'crosshair', 
+      style={{
+        width,
+        height,
+        cursor: hover ? 'pointer' : 'crosshair',
         position: 'absolute',
         top: 0,
         left: 0,
-        zIndex: 2500
+        zIndex: 2500,
       }}
       onMouseMove={handleMove}
       onClick={handleClick}
@@ -119,9 +134,11 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
               strokeWidth="0.5"
               style={{ pointerEvents: 'none' }}
             >
-              {rect.type === ExamineRectType.Dialogue ? `D: ${(rect as DialogueExamineRect).dialogueNode}` : 
-               rect.type === ExamineRectType.AddToInventory ? `I: ${(rect as InventoryExamineRect).item}` : 
-               `N: ${(rect as NoneExamineRect).args}`}
+              {rect.type === ExamineRectType.Dialogue
+                ? `D: ${(rect as DialogueExamineRect).dialogueNode}`
+                : rect.type === ExamineRectType.AddToInventory
+                  ? `I: ${(rect as InventoryExamineRect).item}`
+                  : `N: ${(rect as NoneExamineRect).args}`}
             </text>
           ))}
         </svg>

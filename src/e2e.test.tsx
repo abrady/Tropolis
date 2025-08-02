@@ -11,8 +11,8 @@ beforeEach(() => {
   Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
     value: () => ({
       clearRect: () => {},
-      drawImage: () => {}
-    })
+      drawImage: () => {},
+    }),
   });
   // Prevent requestAnimationFrame loop from running indefinitely
   globalThis.requestAnimationFrame = vi.fn();
@@ -22,13 +22,11 @@ beforeEach(() => {
 describe('Game boot', () => {
   it('follows detour and jump choices', async () => {
     await act(async () => {
-      ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="test" />
-      );
+      ReactDOM.createRoot(document.getElementById('root')!).render(<App initialLevel="test" />);
     });
 
     // Wait for initial effects
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     let dialogueText = document.querySelector('#dialogue p')?.textContent;
     expect(dialogueText).toBe('Choose an option');
@@ -37,7 +35,7 @@ describe('Game boot', () => {
     await act(async () => {
       (document.querySelector('#dialogue button') as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     let options = document.querySelectorAll('.option-button');
     expect(options.length).toBe(1);
@@ -47,7 +45,7 @@ describe('Game boot', () => {
     await act(async () => {
       (options[0] as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     dialogueText = document.querySelector('#dialogue p')?.textContent;
     expect(dialogueText).toBe('You chose option 1');
@@ -56,7 +54,7 @@ describe('Game boot', () => {
     await act(async () => {
       (document.querySelector('#dialogue button') as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     options = document.querySelectorAll('.option-button');
     expect(options.length).toBe(2);
@@ -67,7 +65,7 @@ describe('Game boot', () => {
     await act(async () => {
       (options[1] as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     dialogueText = document.querySelector('#dialogue p')?.textContent;
     expect(dialogueText).toBe('You chose option 2');
@@ -75,25 +73,23 @@ describe('Game boot', () => {
 
   it('hides options when the action menu is opened with Backspace', async () => {
     await act(async () => {
-      ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="test" />
-      );
+      ReactDOM.createRoot(document.getElementById('root')!).render(<App initialLevel="test" />);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // advance to choice
     await act(async () => {
       (document.querySelector('#dialogue button') as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     // open action menu via Backspace
     await act(async () => {
       const evt = new KeyboardEvent('keydown', { code: 'Backspace' });
       window.dispatchEvent(evt);
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     const options = document.querySelectorAll('.option-button');
     expect(options.length).toBe(0);
@@ -103,25 +99,23 @@ describe('Game boot', () => {
 
   it('hides options when the action menu is opened with Escape', async () => {
     await act(async () => {
-      ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="test" />
-      );
+      ReactDOM.createRoot(document.getElementById('root')!).render(<App initialLevel="test" />);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // advance to choice
     await act(async () => {
       (document.querySelector('#dialogue button') as HTMLButtonElement).click();
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     // open action menu via Escape
     await act(async () => {
       const evt = new KeyboardEvent('keydown', { code: 'Escape' });
       window.dispatchEvent(evt);
     });
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     const options = document.querySelectorAll('.option-button');
     expect(options.length).toBe(0);

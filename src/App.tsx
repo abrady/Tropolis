@@ -18,7 +18,7 @@ function useViewportSize() {
     const aspectRatio = 16 / 9;
     const maxWidth = window.innerWidth;
     const maxHeight = window.innerHeight;
-    
+
     let gameWidth, gameHeight;
     if (maxWidth / maxHeight > aspectRatio) {
       gameHeight = maxHeight;
@@ -27,7 +27,7 @@ function useViewportSize() {
       gameWidth = maxWidth;
       gameHeight = gameWidth / aspectRatio;
     }
-    
+
     return { width: gameWidth, height: gameHeight };
   });
 
@@ -36,7 +36,7 @@ function useViewportSize() {
       const aspectRatio = 16 / 9;
       const maxWidth = window.innerWidth;
       const maxHeight = window.innerHeight;
-      
+
       let gameWidth, gameHeight;
       if (maxWidth / maxHeight > aspectRatio) {
         gameHeight = maxHeight;
@@ -45,7 +45,7 @@ function useViewportSize() {
         gameWidth = maxWidth;
         gameHeight = gameWidth / aspectRatio;
       }
-      
+
       setSize({ width: gameWidth, height: gameHeight });
     };
 
@@ -56,7 +56,17 @@ function useViewportSize() {
   return size;
 }
 
-function GameCanvas({ frames, background, width, height }: { frames: Frame[] | null; background: HTMLImageElement; width: number; height: number }) {
+function GameCanvas({
+  frames,
+  background,
+  width,
+  height,
+}: {
+  frames: Frame[] | null;
+  background: HTMLImageElement;
+  width: number;
+  height: number;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -66,7 +76,7 @@ function GameCanvas({ frames, background, width, height }: { frames: Frame[] | n
     function draw(ts: number) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      
+
       // Only draw character if frames are provided
       if (frames && frames.length > 0) {
         const f = frames[frameIndex];
@@ -76,10 +86,14 @@ function GameCanvas({ frames, background, width, height }: { frames: Frame[] | n
         }
         ctx.drawImage(
           Overlord.image,
-          f.x, f.y, f.w, f.h,
+          f.x,
+          f.y,
+          f.w,
+          f.h,
           (canvas.width - f.w) / 2,
-          (canvas.height / 2) - f.h,
-          f.w, f.h
+          canvas.height / 2 - f.h,
+          f.w,
+          f.h
         );
       }
       requestAnimationFrame(draw);
@@ -100,7 +114,9 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   if (!gameStateRef.current) {
     gameStateRef.current = new GameState(levels, initialLevel);
   }
-  const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | undefined>();
+  const [dialogueGenerator, setDialogueGenerator] = useState<
+    Generator<DialogueEvent, void, DialogueAdvanceParam> | undefined
+  >();
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[] | null>(Overlord.animations.idle);
@@ -117,81 +133,82 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const [examineDebugMode, setExamineDebugMode] = useState(false);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
-  const processNextEvent = useCallback((param?: DialogueAdvanceParam) => {
-    if (!dialogueGenerator) return;
-    
-    const result = param ?
-      dialogueGenerator.next(param) :
-      dialogueGenerator.next();
+  const processNextEvent = useCallback(
+    (param?: DialogueAdvanceParam) => {
+      if (!dialogueGenerator) return;
 
-    if (result.done) {
-      console.log('Dialogue ended');
-      setCurrentEvent(null);
-      setDialogueGenerator(undefined);
-      setDisplayLines([]);
-      
-      setShowActionMenu(true);
-      return;
-    }
+      const result = param ? dialogueGenerator.next(param) : dialogueGenerator.next();
 
-    const event = result.value;
-    setCurrentEvent(event);
-    
-    switch (event.type) {
-      case 'line':
-        setDisplayLines([event.text]);
-        // For now, we'll skip speaker animations since we don't have a direct way to access the manager
-        break;
-      case 'choice':
-        // Choice event handled by rendering OptionsWidget
-        break;
-      case 'command':
-        if (event.command === 'loadPuzzle') {
-          if(event.args[0] !== 'TowerOfHanoi') {
-            throw new Error(`Unknown puzzle type: ${event.args[0]}`);
-          }
-          setShowPuzzle(true);
-          
-          setTimeout(() => {
-            const container = puzzleContainerRef.current;
-            if (container) {
-              container.innerHTML = '';
-              startTowerOfHanoi(container, 4, () => {
-                setShowPuzzle(false);
-                // Continue dialogue after puzzle completion
-                processNextEvent();
-              });
+      if (result.done) {
+        console.log('Dialogue ended');
+        setCurrentEvent(null);
+        setDialogueGenerator(undefined);
+        setDisplayLines([]);
+
+        setShowActionMenu(true);
+        return;
+      }
+
+      const event = result.value;
+      setCurrentEvent(event);
+
+      switch (event.type) {
+        case 'line':
+          setDisplayLines([event.text]);
+          // For now, we'll skip speaker animations since we don't have a direct way to access the manager
+          break;
+        case 'choice':
+          // Choice event handled by rendering OptionsWidget
+          break;
+        case 'command':
+          if (event.command === 'loadPuzzle') {
+            if (event.args[0] !== 'TowerOfHanoi') {
+              throw new Error(`Unknown puzzle type: ${event.args[0]}`);
             }
-          }, 100);
-        } else if (event.command === 'loadLevel') {
-          const gs = gameStateRef.current!;
-          const levelName = event.args[0] as LevelName;
-          if (!(levelName in levels)) {
-            throw new Error(`Unknown level: ${levelName}`);
+            setShowPuzzle(true);
+
+            setTimeout(() => {
+              const container = puzzleContainerRef.current;
+              if (container) {
+                container.innerHTML = '';
+                startTowerOfHanoi(container, 4, () => {
+                  setShowPuzzle(false);
+                  // Continue dialogue after puzzle completion
+                  processNextEvent();
+                });
+              }
+            }, 100);
+          } else if (event.command === 'loadLevel') {
+            const gs = gameStateRef.current!;
+            const levelName = event.args[0] as LevelName;
+            if (!(levelName in levels)) {
+              throw new Error(`Unknown level: ${levelName}`);
+            }
+            gs.gotoLevel(levelName);
+            const newBg = gs.getBackground();
+            if (newBg) setBackground(newBg);
+            setAnimation(null); // Clear character display when changing levels
+            setDialogueGenerator(gs.getDialogueGenerator());
+          } else {
+            throw new Error(`Unknown command: ${event.command}`);
           }
-          gs.gotoLevel(levelName);
-          const newBg = gs.getBackground();
-          if (newBg) setBackground(newBg);
-          setAnimation(null); // Clear character display when changing levels
-          setDialogueGenerator(gs.getDialogueGenerator());
-        } else {
-          throw new Error(`Unknown command: ${event.command}`);
-        }
-        break;
-    }
-  }, [dialogueGenerator]);
+          break;
+      }
+    },
+    [dialogueGenerator]
+  );
 
   // Remove the separate handleDialogueAction function since it's now inline
-    
+
   const handleOptionSelect = (optionIndex: number) => {
     if (!dialogueGenerator) return;
-    processNextEvent({ type: 'choice', optionIndex }); 
+    processNextEvent({ type: 'choice', optionIndex });
   };
 
   const handleMenuAction = (action: ActionType) => {
     setShowActionMenu(false);
     console.log(`Action selected: ${action}`);
-    
+
     switch (action) {
       case 'talk': {
         // Start main dialogue for current level
@@ -201,7 +218,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
           // Clear current state
           setCurrentEvent(null);
           setDisplayLines([]);
-          
+
           // Start new dialogue
           const gameState = gameStateRef.current!;
           gameState.gotoLevel(currentLevel);
@@ -262,7 +279,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   // to pump the state forward
   useEffect(() => {
     if (dialogueGenerator) {
-      processNextEvent(); 
+      processNextEvent();
     }
   }, [dialogueGenerator, processNextEvent]);
 
@@ -278,20 +295,21 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
           setShowExamineEditor(true);
         } else if (event.code === 'KeyD') {
           event.preventDefault();
-          setExamineDebugMode(prev => !prev);
+          setExamineDebugMode((prev) => !prev);
         }
         return;
       }
 
       // Only allow action menu when not in dialogue/options/puzzle/move menu
-      if (showPuzzle || showMoveMenu || currentEvent?.type === 'choice' || displayLines.length > 0) return;
+      if (showPuzzle || showMoveMenu || currentEvent?.type === 'choice' || displayLines.length > 0)
+        return;
 
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
         setShowActionMenu(true);
       } else if (event.code === 'KeyE') {
         event.preventDefault();
-        setShowExamineEditor(prev => !prev);
+        setShowExamineEditor((prev) => !prev);
       }
     };
 
@@ -299,10 +317,14 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [showPuzzle, showMoveMenu, showExamine, currentEvent?.type, displayLines.length]);
 
-
   return (
     <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
-      <GameCanvas frames={animation} background={background} width={viewportSize.width} height={viewportSize.height} />
+      <GameCanvas
+        frames={animation}
+        background={background}
+        width={viewportSize.width}
+        height={viewportSize.height}
+      />
       {showExamine && (
         <ExamineOverlay
           width={viewportSize.width}
@@ -330,7 +352,13 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
             onNext={handleNextLine}
           />
           <OptionsWidget
-            options={showActionMenu || showMoveMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}
+            options={
+              showActionMenu || showMoveMenu
+                ? []
+                : currentEvent?.type === 'choice'
+                  ? currentEvent.options
+                  : []
+            }
             onChoose={handleOptionSelect}
             onEscape={handleOptionsEscape}
           />
@@ -349,8 +377,8 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
         </>
       )}
       {showPuzzle && (
-        <div 
-          ref={puzzleContainerRef} 
+        <div
+          ref={puzzleContainerRef}
           style={{
             position: 'absolute',
             top: 0,
@@ -362,17 +390,13 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
             justifyContent: 'center',
             alignItems: 'center',
             flexDirection: 'column',
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           <h2 style={{ color: 'white', marginBottom: '20px' }}>Tower of Hanoi Puzzle</h2>
         </div>
       )}
-      {showExamine && examineDebugMode && (
-        <div className="debug-indicator">
-          DEBUG [D]
-        </div>
-      )}
+      {showExamine && examineDebugMode && <div className="debug-indicator">DEBUG [D]</div>}
     </div>
   );
 }

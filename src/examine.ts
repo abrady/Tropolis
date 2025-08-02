@@ -1,4 +1,3 @@
-
 // Original background image dimensions - should match ExamineOverlay
 export const ORIGINAL_WIDTH = 1536;
 export const ORIGINAL_HEIGHT = 1024;
@@ -10,7 +9,7 @@ export enum ExamineRectType {
 }
 
 interface BaseExamineRect {
-  x: number; 
+  x: number;
   y: number;
   width: number;
   height: number;

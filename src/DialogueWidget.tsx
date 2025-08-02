@@ -6,11 +6,7 @@ interface DialogueWidgetProps {
   onNext: () => void;
 }
 
-export default function DialogueWidget({ 
-  lines, 
-  showNextButton, 
-  onNext
-}: DialogueWidgetProps) {
+export default function DialogueWidget({ lines, showNextButton, onNext }: DialogueWidgetProps) {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
   useEffect(() => {
@@ -43,9 +39,7 @@ export default function DialogueWidget({
   return (
     <div id="dialogue">
       {currentLine && <p>{currentLine}</p>}
-      {(hasMoreLinesToShow || showNextButton) && (
-        <button onClick={handleNext}>Next</button>
-      )}
+      {(hasMoreLinesToShow || showNextButton) && <button onClick={handleNext}>Next</button>}
     </div>
   );
 }

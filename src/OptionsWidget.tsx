@@ -9,7 +9,7 @@ export interface OptionsWidgetProps {
 
 export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWidgetProps) {
   const getFirstUnvisited = (opts: DialogueOption[]) => {
-    const idx = opts.findIndex(o => !o.visited);
+    const idx = opts.findIndex((o) => !o.visited);
     return idx === -1 ? 0 : idx;
   };
 
@@ -26,11 +26,11 @@ export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWi
       switch (event.code) {
         case 'ArrowUp':
           event.preventDefault();
-          setSelectedIndex(prev => prev > 0 ? prev - 1 : options.length - 1);
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
           break;
         case 'ArrowDown':
           event.preventDefault();
-          setSelectedIndex(prev => prev < options.length - 1 ? prev + 1 : 0);
+          setSelectedIndex((prev) => (prev < options.length - 1 ? prev + 1 : 0));
           break;
         case 'Space':
         case 'Enter':
@@ -65,11 +65,7 @@ export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWi
             if (isSelected) classes.push('selected');
             if (option.visited) classes.push('visited');
             return (
-              <button
-                key={index}
-                onClick={() => onChoose(index)}
-                className={classes.join(' ')}
-              >
+              <button key={index} onClick={() => onChoose(index)} className={classes.join(' ')}>
                 {option.text}
               </button>
             );

@@ -11,26 +11,26 @@ export interface RoomDialogueData {
 }
 
 export const roomDialogueData: Record<LevelName, RoomDialogueData> = {
-  'cryoroom': {
+  cryoroom: {
     dialogue: cryoroomDialogue,
-    start: 'CryoRoom_Intro'
+    start: 'CryoRoom_Intro',
   },
-  'test': {
+  test: {
     dialogue: testChoiceDialogue,
-    start: 'ChoiceNode'
+    start: 'ChoiceNode',
   },
-  'sector7': {
+  sector7: {
     dialogue: sector7Dialogue,
-    start: 'Sector7_Start'
+    start: 'Sector7_Start',
   },
-  'mall': {
+  mall: {
     dialogue: mallDialogue,
-    start: 'Mall_Start'
+    start: 'Mall_Start',
   },
-  'bookstore': {
+  bookstore: {
     dialogue: bookstoreDialogue,
-    start: 'Bookstore_Start'
-  }
+    start: 'Bookstore_Start',
+  },
 };
 
 export function getRoomDialogue(roomName: LevelName): string {

@@ -26,7 +26,7 @@ describe('parseGab', () => {
     expect(result[0]).toEqual({
       title: 'Start',
       body: 'Hello world\n-> Option 1\n    Response\n-> Option 2\n    Another',
-      metadata: {}
+      metadata: {},
     } as GabNode);
     expect(result[1].title).toBe('Next');
     expect(result[1].metadata).toEqual({ position: '0,0' });
@@ -42,20 +42,19 @@ describe('parseGab', () => {
 describe('loadLevel validation', () => {
   it('validates that all loadLevel commands reference existing levels', () => {
     const dialogueDir = path.join(__dirname, 'dialogue');
-    
+
     // Get all available levels from the actual levels object
     const availableLevels = Object.keys(levels);
-    
+
     // Get all gab files
-    const gabFiles = fs.readdirSync(dialogueDir)
-      .filter(file => file.endsWith('.gab'));
-    
+    const gabFiles = fs.readdirSync(dialogueDir).filter((file) => file.endsWith('.gab'));
+
     const invalidReferences: { file: string; level: string; line: number }[] = [];
-    
+
     for (const gabFile of gabFiles) {
       const content = fs.readFileSync(path.join(dialogueDir, gabFile), 'utf-8');
       const lines = content.split(/\r?\n/);
-      
+
       lines.forEach((line, index) => {
         const loadLevelMatch = line.match(/<<\s*loadLevel\s+([A-Za-z0-9_]+)\s*>>/);
         if (loadLevelMatch) {
@@ -64,13 +63,13 @@ describe('loadLevel validation', () => {
             invalidReferences.push({
               file: gabFile,
               level: referencedLevel,
-              line: index + 1
+              line: index + 1,
             });
           }
         }
       });
     }
-    
+
     if (invalidReferences.length > 0) {
       expect(invalidReferences).toEqual([]);
     }
@@ -163,7 +162,7 @@ Speaker: test line
     expect(result[0]).toEqual({
       title: 'Title',
       body: 'Speaker: test line',
-      metadata: { tags: 'tags' }
+      metadata: { tags: 'tags' },
     } as GabNode);
   });
 });
@@ -204,7 +203,7 @@ Bob: I don't know.
     const result = validateSpeakers(gabFile);
     expect(result.undefinedSpeakers).toEqual([
       { speaker: 'Charlie', node: 'Conversation', line: 'Charlie: Who is this Charlie guy?' },
-      { speaker: 'Bob', node: 'Conversation', line: 'Bob: I don\'t know.' }
+      { speaker: 'Bob', node: 'Conversation', line: "Bob: I don't know." },
     ]);
   });
 
@@ -221,7 +220,7 @@ User123: This speaker is not defined.
     const gabFile = parseGabFile(content);
     const result = validateSpeakers(gabFile);
     expect(result.undefinedSpeakers).toEqual([
-      { speaker: 'User123', node: 'FutureChat', line: 'User123: This speaker is not defined.' }
+      { speaker: 'User123', node: 'FutureChat', line: 'User123: This speaker is not defined.' },
     ]);
   });
 
@@ -262,37 +261,37 @@ Charlie: I'm undefined in node 2.
     const gabFile = parseGabFile(content);
     const result = validateSpeakers(gabFile);
     expect(result.undefinedSpeakers).toEqual([
-      { speaker: 'Bob', node: 'Node1', line: 'Bob: I\'m undefined in node 1.' },
-      { speaker: 'Charlie', node: 'Node2', line: 'Charlie: I\'m undefined in node 2.' }
+      { speaker: 'Bob', node: 'Node1', line: "Bob: I'm undefined in node 1." },
+      { speaker: 'Charlie', node: 'Node2', line: "Charlie: I'm undefined in node 2." },
     ]);
   });
 
   it('validates speakers in actual gab files', () => {
     const dialogueDir = path.join(__dirname, 'dialogue');
-    const gabFiles = fs.readdirSync(dialogueDir)
-      .filter(file => file.endsWith('.gab'));
-    
+    const gabFiles = fs.readdirSync(dialogueDir).filter((file) => file.endsWith('.gab'));
+
     const issues: { file: string; speaker: string; node: string }[] = [];
-    
+
     for (const gabFile of gabFiles) {
       const content = fs.readFileSync(path.join(dialogueDir, gabFile), 'utf-8');
       const parsedFile = parseGabFile(content);
       const result = validateSpeakers(parsedFile);
-      
+
       for (const issue of result.undefinedSpeakers) {
         issues.push({
           file: gabFile,
           speaker: issue.speaker,
-          node: issue.node
+          node: issue.node,
         });
       }
     }
-    
+
     if (issues.length > 0) {
-      const errorMessage = 'Undefined speakers found in gab files:\n' +
-        issues.map(issue =>
-          `  ${issue.file} - Speaker "${issue.speaker}" in node "${issue.node}"`
-        ).join('\n');
+      const errorMessage =
+        'Undefined speakers found in gab files:\n' +
+        issues
+          .map((issue) => `  ${issue.file} - Speaker "${issue.speaker}" in node "${issue.node}"`)
+          .join('\n');
 
       console.log(errorMessage);
       expect(issues).toEqual([]);

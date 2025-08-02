@@ -20,11 +20,13 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 ### Core Systems
 
 **Character Animation System**
+
 - `CharacterDef` interface defines sprites with animation frames (`src/character.ts`)
 - Frame data parsed from JSON animation files in `data/characters/` using `parseFrames()` (`src/frame-utils.ts`)
 - Characters organized in `src/characters/` with dedicated modules (e.g., `overlord.ts`)
 
 **Dialogue System Architecture**
+
 - `DialogueManager` class handles custom dialogue files (`src/dialog-manager.ts`)
 - Parses `.gab` files from `src/dialogue/` using `parseGabFile()` (`src/gab-utils.ts`)
 - Supports speaker-based animations, branching choices, visited state tracking, and custom commands
@@ -32,12 +34,14 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - Key methods: `start()`, `nextLines()`, `follow()`, `choose()`, `getCurrent()`
 
 **UI Component Architecture**
+
 - `App.tsx` manages dialogue state and coordinates between components
 - `DialogueWidget` displays dialogue lines one at a time with spacebar advancement
 - `OptionsWidget` provides full-screen overlay for dialogue choices with keyboard navigation
 - Clean separation: App owns DialogueManager, widgets handle presentation
 
 **Game Loop & Rendering**
+
 - `GameCanvas` component handles canvas rendering and animation timing using requestAnimationFrame
 - Character animations synchronized with dialogue speaker changes
 - Level system with background images loaded as static assets from `data/locations/`
@@ -45,12 +49,14 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 - The game should run at a 16:9 aspect ratio, that's what all the backgrounds should be
 
 **Puzzle System**
+
 - Modular puzzle components in `src/puzzles/` (currently Tower of Hanoi)
 - Integrated with dialogue system via commands
 
 ### Dialogue Flow Control
 
 **DialogueManager State Management:**
+
 - Uses generator-based flow: `start()` initializes state, `advance()` returns generator
 - Generator yields `DialogueEvent` objects (line, choice, command types)
 - Choice events require `DialogueAdvanceParam` passed to `gen.next({ type: 'choice', optionIndex })`
@@ -80,7 +86,7 @@ This is a browser-based sprite animation prototype built with TypeScript, Vite, 
 Tests use Vitest and focus on:
 
 - Asset validation for character definitions
-- Dialogue parsing and validation  
+- Dialogue parsing and validation
 - Frame parsing utilities
 - Gab file integrity
 - Dialogue flow validation ensuring all nodes are reachable and terminate properly

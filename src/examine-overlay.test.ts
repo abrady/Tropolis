@@ -4,8 +4,22 @@ import { ExamineRect, ExamineRectType, NoneExamineRect } from './examine';
 
 describe('getRectAtPosition', () => {
   const rects: ExamineRect[] = [
-    { type: ExamineRectType.None, x: 10, y: 10, width: 20, height: 30, args: 'A' } as NoneExamineRect,
-    { type: ExamineRectType.None, x: 50, y: 50, width: 40, height: 40, args: 'B' } as NoneExamineRect
+    {
+      type: ExamineRectType.None,
+      x: 10,
+      y: 10,
+      width: 20,
+      height: 30,
+      args: 'A',
+    } as NoneExamineRect,
+    {
+      type: ExamineRectType.None,
+      x: 50,
+      y: 50,
+      width: 40,
+      height: 40,
+      args: 'B',
+    } as NoneExamineRect,
   ];
 
   it('returns matching rect for coordinates', () => {
@@ -24,7 +38,7 @@ describe('ExamineOverlay dialogue functionality', () => {
   it('should call onDialogue callback when clicking on dialogue examinerect', () => {
     const dialogueCallback = vi.fn();
     const onExitCallback = vi.fn();
-    
+
     const dialogueRect: ExamineRect = {
       type: ExamineRectType.Dialogue,
       x: 10,
@@ -32,21 +46,21 @@ describe('ExamineOverlay dialogue functionality', () => {
       width: 20,
       height: 20,
       level: 'test',
-      dialogueNode: 'TestDialogueNode'
+      dialogueNode: 'TestDialogueNode',
     };
-    
+
     const rects = [dialogueRect];
-    
+
     // Simulate clicking on the dialogue rect
     const clickedRect = getRectAtPosition(rects, 15, 15);
     expect(clickedRect).toBe(dialogueRect);
-    
+
     // Simulate the click handler logic from ExamineOverlay
     if (clickedRect && clickedRect.type === ExamineRectType.Dialogue) {
       dialogueCallback(clickedRect.dialogueNode);
     }
     onExitCallback();
-    
+
     expect(dialogueCallback).toHaveBeenCalledWith('TestDialogueNode');
     expect(onExitCallback).toHaveBeenCalled();
   });
@@ -54,35 +68,35 @@ describe('ExamineOverlay dialogue functionality', () => {
   it('should not call onDialogue callback for non-dialogue examinerects', () => {
     const dialogueCallback = vi.fn();
     const onExitCallback = vi.fn();
-    
+
     const inventoryRect: ExamineRect = {
       type: ExamineRectType.AddToInventory,
       x: 10,
       y: 10,
       width: 20,
       height: 20,
-      item: 'SomeItem'
+      item: 'SomeItem',
     };
-    
+
     const rects = [inventoryRect];
-    
+
     // Simulate clicking on the inventory rect
     const clickedRect = getRectAtPosition(rects, 15, 15);
     expect(clickedRect).toBe(inventoryRect);
-    
+
     // Simulate the click handler logic from ExamineOverlay
     if (clickedRect && clickedRect.type === ExamineRectType.Dialogue) {
       dialogueCallback((clickedRect as any).dialogueNode);
     }
     onExitCallback();
-    
+
     expect(dialogueCallback).not.toHaveBeenCalled();
     expect(onExitCallback).toHaveBeenCalled();
   });
 
   it('should handle multiple examinerects and only trigger dialogue for dialogue type', () => {
     const dialogueCallback = vi.fn();
-    
+
     const rects: ExamineRect[] = [
       {
         type: ExamineRectType.None,
@@ -90,7 +104,7 @@ describe('ExamineOverlay dialogue functionality', () => {
         y: 10,
         width: 20,
         height: 20,
-        args: 'NoneRect'
+        args: 'NoneRect',
       },
       {
         type: ExamineRectType.Dialogue,
@@ -99,7 +113,7 @@ describe('ExamineOverlay dialogue functionality', () => {
         width: 30,
         height: 30,
         level: 'test',
-        dialogueNode: 'DialogueNode'
+        dialogueNode: 'DialogueNode',
       },
       {
         type: ExamineRectType.AddToInventory,
@@ -107,32 +121,32 @@ describe('ExamineOverlay dialogue functionality', () => {
         y: 100,
         width: 25,
         height: 25,
-        item: 'InventoryItem'
-      }
+        item: 'InventoryItem',
+      },
     ];
-    
+
     // Test clicking on dialogue rect
     const dialogueRect = getRectAtPosition(rects, 60, 60);
     expect(dialogueRect?.type).toBe(ExamineRectType.Dialogue);
-    
+
     if (dialogueRect && dialogueRect.type === ExamineRectType.Dialogue) {
       dialogueCallback(dialogueRect.dialogueNode);
     }
-    
+
     expect(dialogueCallback).toHaveBeenCalledWith('DialogueNode');
-    
+
     // Test clicking on non-dialogue rects
     dialogueCallback.mockClear();
-    
+
     const noneRect = getRectAtPosition(rects, 15, 15);
     const inventoryRect = getRectAtPosition(rects, 110, 110);
-    
-    [noneRect, inventoryRect].forEach(rect => {
+
+    [noneRect, inventoryRect].forEach((rect) => {
       if (rect && rect.type === ExamineRectType.Dialogue) {
         dialogueCallback((rect as any).dialogueNode);
       }
     });
-    
+
     expect(dialogueCallback).not.toHaveBeenCalled();
   });
 });

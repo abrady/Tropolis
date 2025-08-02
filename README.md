@@ -33,33 +33,33 @@ nodes.
 
 ## Dialogue architectural needs
 
-* show a set of lines
-* show choices that result in jumping to different nodes or other in-game actions
+- show a set of lines
+- show choices that result in jumping to different nodes or other in-game actions
 
 Normal flow:
 
-* show dialog > show choices > goto new node > recurse > jump back
+- show dialog > show choices > goto new node > recurse > jump back
 
 Exceptions:
 
-* show diaog > show choices > USER escapes to options menu > chooses examine
-  * for this we should push the current dialogue state during examine and create a new one
-  * then pop after or just restart that node
+- show diaog > show choices > USER escapes to options menu > chooses examine
+  - for this we should push the current dialogue state during examine and create a new one
+  - then pop after or just restart that node
 
 So:
 
-* examine: when clicking on a dialog examine: start a new dialog
-* options > talk: start a new dialog.
+- examine: when clicking on a dialog examine: start a new dialog
+- options > talk: start a new dialog.
 
 ## how dialogue works
 
-* DialogueManager: the in-code representation of a .gob file
-  * stores dialog-related assets: dialgue nodes and speaker info.
-  * NOT CURRENTLY USED: takes callback handlers in the ctor for various game actions like loading a puzzle.
-  * has a 'getAnimationForSpeaker' helper
-  * start() : inits the dialog
-  * advance() : a Generator that you iterate over to move through the dialog. it has these internal states which progress linearly:
-    * 'line': where it is returning lines of dialog
-    * 'choice': where it returns a set of options for the player and expects a choice param back
-    * 'command': NOT USED which it returns to the caller
-    * 'next'/'return': if there's a next node, it jumps to that and goes back to 'line' state.
+- DialogueManager: the in-code representation of a .gob file
+  - stores dialog-related assets: dialgue nodes and speaker info.
+  - NOT CURRENTLY USED: takes callback handlers in the ctor for various game actions like loading a puzzle.
+  - has a 'getAnimationForSpeaker' helper
+  - start() : inits the dialog
+  - advance() : a Generator that you iterate over to move through the dialog. it has these internal states which progress linearly:
+    - 'line': where it is returning lines of dialog
+    - 'choice': where it returns a set of options for the player and expects a choice param back
+    - 'command': NOT USED which it returns to the caller
+    - 'next'/'return': if there's a next node, it jumps to that and goes back to 'line' state.
