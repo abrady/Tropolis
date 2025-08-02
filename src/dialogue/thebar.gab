@@ -1,0 +1,35 @@
+speaker: You
+---
+talkAnim: none
+===
+
+title: TheBar_Start
+---
+You: The bar smells of old smoke and spilled spirits. Better take a look around.
+===
+
+# ================= Examinables =================
+
+title: TheBar_Counter
+tags: examine
+---
+You: The counter is scarred and sticky, a testament to countless rough nights.
+===
+
+title: TheBar_Jukebox
+tags: examine
+---
+You: A dusty jukebox still hums softly, waiting for someone to drop a coin.
+===
+
+title: TheBar_Patrons
+tags: examine
+---
+You: Empty stools circle the room like ghosts at a wake.
+===
+
+title: TheBar_Door
+tags: examine
+---
+You: The back door hangs ajar, creaking with every breath of wind.
+===
