@@ -1,0 +1,15 @@
+{
+  "scopeName": "source.gab",
+  "patterns": [
+    { "name": "keyword.other.gab", "match": "\\b(speaker|title)\\b" },
+    { "name": "keyword.operator.arrow.gab", "match": "->" },
+    {
+      "name": "meta.command.gab",
+      "begin": "<<",
+      "end": ">>",
+      "patterns": [
+        { "match": "\\b[A-Za-z0-9_]+\\b", "name": "support.function.gab" }
+      ]
+    }
+  ]
+}
