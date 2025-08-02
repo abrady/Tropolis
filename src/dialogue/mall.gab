@@ -1,10 +1,10 @@
 speaker: Overlord
 ---
-talkAnim overlordTalk
+talkAnim: overlordTalk
 ===
 speaker: You
 ---
-talkAnim none
+talkAnim: none
 ===
 title: Mall_Start
 tags: mall, intro

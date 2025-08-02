@@ -83,10 +83,12 @@ export function parseGabFile(content: string): GabFile {
       while (i < lines.length && stripComment(lines[i]).trim() !== '===') {
         const l = stripComment(lines[i]).trim();
         if (l) {
-          const parts = l.split(/\s+/);
-          const key = parts[0];
-          const value = parts.slice(1).join(' ');
-          if (key === 'talkAnim') data.talkAnim = value;
+          const sep = l.indexOf(':');
+          if (sep !== -1) {
+            const key = l.slice(0, sep).trim();
+            const value = l.slice(sep + 1).trim();
+            if (key === 'talkAnim') data.talkAnim = value;
+          }
         }
         i++;
       }
