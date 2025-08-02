@@ -1,0 +1,26 @@
+{
+  "name": "gab-language",
+  "displayName": "GAB Language Support",
+  "description": "Syntax highlighting and diagnostics for .gab files",
+  "version": "0.0.1",
+  "engines": { "vscode": "^1.84.0" },
+  "categories": ["Programming Languages"],
+  "activationEvents": ["onLanguage:gab"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      { "id": "gab", "extensions": [".gab"], "aliases": ["Gab"] }
+    ],
+    "grammars": [
+      { "language": "gab", "scopeName": "source.gab", "path": "./syntaxes/gab.tmLanguage.json" }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "test": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.84.0",
+    "typescript": "^5.8.3"
+  }
+}
