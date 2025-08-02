@@ -41,10 +41,6 @@ export default function ActionMenu({ isVisible, onAction, onClose }: ActionMenuP
           event.preventDefault();
           onAction(actions[selectedIndex].type);
           break;
-        case 'Escape':
-          event.preventDefault();
-          onClose();
-          break;
       }
     };
 

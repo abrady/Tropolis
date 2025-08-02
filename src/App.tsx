@@ -133,6 +133,12 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const [examineDebugMode, setExamineDebugMode] = useState(false);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
+  const clearDialogueState = useCallback(() => {
+    setCurrentEvent(null);
+    setDialogueGenerator(undefined);
+    setDisplayLines([]);
+  }, []);
+
   const processNextEvent = useCallback(
     (param?: DialogueAdvanceParam) => {
       if (!dialogueGenerator) return;
@@ -141,10 +147,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
 
       if (result.done) {
         console.log('Dialogue ended');
-        setCurrentEvent(null);
-        setDialogueGenerator(undefined);
-        setDisplayLines([]);
-
+        clearDialogueState();
         setShowActionMenu(true);
         return;
       }
@@ -195,7 +198,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
           break;
       }
     },
-    [dialogueGenerator]
+    [dialogueGenerator, clearDialogueState]
   );
 
   // Remove the separate handleDialogueAction function since it's now inline
@@ -215,9 +218,8 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
         const currentLevel = gameStateRef.current!.currentLevel;
         const startNode = getRoomDialogueStart(currentLevel);
         if (startNode) {
-          // Clear current state
-          setCurrentEvent(null);
-          setDisplayLines([]);
+          // Clear current state and start fresh
+          clearDialogueState();
 
           // Start new dialogue
           const gameState = gameStateRef.current!;
@@ -238,8 +240,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const handleLocationSelect = (location: LevelName) => {
     setShowMoveMenu(false);
     // Clear current dialogue state first
-    setCurrentEvent(null);
-    setDisplayLines([]);
+    clearDialogueState();
     const gs = gameStateRef.current!;
     gs.gotoLevel(location);
     const newBg = gs.getBackground();
@@ -249,9 +250,9 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   };
 
   const handleDialogueFromExamine = (dialogueId: string) => {
-    // Clear current dialogue state first
-    setCurrentEvent(null);
-    setDisplayLines([]);
+    // Clear current dialogue state and start fresh
+    clearDialogueState();
+    setShowExamine(false);
 
     const generator = gameStateRef.current!.startDialogue(dialogueId);
     setDialogueGenerator(generator);
@@ -266,10 +267,6 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     handleDialogueFromExamine(dialogueId);
   };
 
-  const handleOptionsEscape = () => {
-    setDisplayLines([]);
-    setShowActionMenu(true);
-  };
 
   const handleNextLine = () => {
     if (currentEvent?.type === 'line') {
@@ -309,12 +306,16 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
         return;
       }
 
-      // Only allow action menu when not in dialogue/options/puzzle/move menu
-      if (showPuzzle || showMoveMenu || currentEvent?.type === 'choice' || displayLines.length > 0)
-        return;
+      // Only prevent action menu during puzzles and move menu
+      if (showPuzzle || showMoveMenu) return;
 
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
+        clearDialogueState(); // Clear any dialogue state when opening action menu
+        setShowActionMenu(true);
+      } else if (event.code === 'Escape' || event.code === 'Backspace') {
+        event.preventDefault();
+        clearDialogueState(); // Clear any dialogue state when escaping
         setShowActionMenu(true);
       } else if (event.code === 'KeyE') {
         event.preventDefault();
@@ -322,9 +323,9 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showPuzzle, showMoveMenu, showExamine, currentEvent?.type, displayLines.length]);
+    window.addEventListener('keydown', handleKeyPress, true); // Use capture phase
+    return () => window.removeEventListener('keydown', handleKeyPress, true);
+  }, [showPuzzle, showMoveMenu, showExamine, clearDialogueState]);
 
   return (
     <div id="game-container" style={{ width: viewportSize.width, height: viewportSize.height }}>
@@ -370,13 +371,14 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
                   : []
             }
             onChoose={handleOptionSelect}
-            onEscape={handleOptionsEscape}
           />
-          <ActionMenu
-            isVisible={showActionMenu}
-            onAction={handleMenuAction}
-            onClose={() => setShowActionMenu(false)}
-          />
+          {showActionMenu && (
+            <ActionMenu
+              isVisible={showActionMenu}
+              onAction={handleMenuAction}
+              onClose={() => setShowActionMenu(false)}
+            />
+          )}
           <MoveMenu
             isVisible={showMoveMenu}
             availableLocations={gameStateRef.current!.getAvailableLocations()}

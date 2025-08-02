@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { DialogueOption } from './dialog-manager';
+import { DialogueOption } from './dialogue-manager';
 
 export interface OptionsWidgetProps {
   options: DialogueOption[];
   onChoose: (index: number) => void;
-  onEscape?: () => void;
 }
 
-export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWidgetProps) {
+export default function OptionsWidget({ options, onChoose }: OptionsWidgetProps) {
   const getFirstUnvisited = (opts: DialogueOption[]) => {
     const idx = opts.findIndex((o) => !o.visited);
     return idx === -1 ? 0 : idx;
@@ -37,19 +36,12 @@ export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWi
           event.preventDefault();
           onChoose(selectedIndex);
           break;
-        case 'Backspace':
-        case 'Escape':
-          event.preventDefault();
-          if (onEscape) {
-            onEscape();
-          }
-          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [options, selectedIndex, onChoose, onEscape]);
+  }, [options, selectedIndex, onChoose]);
 
   if (options.length === 0) {
     return null;
