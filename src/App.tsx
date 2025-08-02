@@ -110,6 +110,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const [showExamine, setShowExamine] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
+  const [examineDebugMode, setExamineDebugMode] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
@@ -269,6 +270,9 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           event.preventDefault();
           setShowExamine(false);
           setShowExamineEditor(true);
+        } else if (event.code === 'KeyD') {
+          event.preventDefault();
+          setExamineDebugMode(prev => !prev);
         }
         return;
       }
@@ -300,6 +304,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           rects={levels.CryoRoom.examine}
           onExit={() => setShowExamine(false)}
           onDialogue={handleDialogueFromExamine}
+          debugMode={examineDebugMode}
         />
       )}
       {showExamineEditor && (
@@ -354,6 +359,11 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           }}
         >
           <h2 style={{ color: 'white', marginBottom: '20px' }}>Tower of Hanoi Puzzle</h2>
+        </div>
+      )}
+      {showExamine && examineDebugMode && (
+        <div className="debug-indicator">
+          DEBUG [D]
         </div>
       )}
     </div>

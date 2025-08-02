@@ -20,9 +20,10 @@ interface ExamineOverlayProps {
   rects: ExamineRect[];
   onExit?: () => void;
   onDialogue?: (dialogueId: string) => void;
+  debugMode?: boolean;
 }
 
-export default function ExamineOverlay({ width, height, rects, onExit, onDialogue }: ExamineOverlayProps) {
+export default function ExamineOverlay({ width, height, rects, onExit, onDialogue, debugMode = false }: ExamineOverlayProps) {
   const [hover, setHover] = useState<ExamineRect | null>(null);
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -60,9 +61,54 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
   return (
     <div
       className="examine-overlay"
-      style={{ width, height, cursor: hover ? 'pointer' : 'crosshair' }}
+      style={{ 
+        width, 
+        height, 
+        cursor: hover ? 'pointer' : 'crosshair', 
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 2500
+      }}
       onMouseMove={handleMove}
       onClick={handleClick}
-    />
+    >
+      {debugMode && (
+        <svg
+          width={width}
+          height={height}
+          style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 1000 }}
+        >
+          {rects.map((rect, i) => (
+            <rect
+              key={i}
+              x={Math.min(rect.x, rect.x + rect.width)}
+              y={Math.min(rect.y, rect.y + rect.height)}
+              width={Math.abs(rect.width)}
+              height={Math.abs(rect.height)}
+              fill="rgba(255,0,0,0.3)"
+              stroke={rect === hover ? 'yellow' : 'red'}
+              strokeWidth="2"
+            />
+          ))}
+          {rects.map((rect, i) => (
+            <text
+              key={`text-${i}`}
+              x={Math.min(rect.x, rect.x + rect.width) + 5}
+              y={Math.min(rect.y, rect.y + rect.height) + 15}
+              fill="white"
+              fontSize="12"
+              stroke="black"
+              strokeWidth="0.5"
+              style={{ pointerEvents: 'none' }}
+            >
+              {rect.type === ExamineRectType.Dialogue ? `D: ${rect.dialogueNode}` : 
+               rect.type === ExamineRectType.AddToInventory ? `I: ${rect.item}` : 
+               `N: ${rect.args}`}
+            </text>
+          ))}
+        </svg>
+      )}
+    </div>
   );
 }
