@@ -1,6 +1,6 @@
 speaker: Overlord
 ---
-talkAnim overlordTalk
+talkAnim: overlordTalk
 ===
 
 title: ChoiceNode

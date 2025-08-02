@@ -1,6 +1,6 @@
 speaker: You
 ---
-talkAnim none
+talkAnim: none
 ===
 title: Sector7_Start
 tags: sector7

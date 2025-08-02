@@ -147,11 +147,11 @@ Overlord: You chose option 2
     const sampleLines = `
 speaker: Alice
 ---
-talkAnim aliceTalk
+talkAnim: aliceTalk
 ===
 speaker: Bob  
 ---
-talkAnim bobTalk
+talkAnim: bobTalk
 ===
 title: LinesNode
 ---

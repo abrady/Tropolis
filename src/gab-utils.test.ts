@@ -106,7 +106,7 @@ Some dialogue
   it('handles comments in speaker sections', () => {
     const content = `speaker: Overlord # main character
 ---
-talkAnim overlordTalk # animation name
+talkAnim: overlordTalk # animation name
 ===
 title: Start
 ---
@@ -155,11 +155,11 @@ describe('speaker validation', () => {
   it('validates that all referenced speakers are defined', () => {
     const content = `speaker: Alice
 ---
-talkAnim aliceTalk
+talkAnim: aliceTalk
 ===
 speaker: Bob
 ---
-talkAnim bobTalk
+talkAnim: bobTalk
 ===
 title: Conversation
 ---
@@ -175,7 +175,7 @@ Alice: I'm doing well, thanks.
   it('detects undefined speakers', () => {
     const content = `speaker: Alice
 ---
-talkAnim aliceTalk
+talkAnim: aliceTalk
 ===
 title: Conversation
 ---
@@ -194,7 +194,7 @@ Bob: I don't know.
   it('handles speakers with underscores and numbers', () => {
     const content = `speaker: AI_Bot_2
 ---
-talkAnim robotTalk
+talkAnim: robotTalk
 ===
 title: FutureChat
 ---
@@ -211,7 +211,7 @@ User123: This speaker is not defined.
   it('ignores lines that do not match speaker pattern', () => {
     const content = `speaker: Alice
 ---
-talkAnim aliceTalk
+talkAnim: aliceTalk
 ===
 title: Test
 ---
@@ -230,7 +230,7 @@ Some random text without colon
   it('validates speakers across multiple nodes', () => {
     const content = `speaker: Alice
 ---
-talkAnim aliceTalk
+talkAnim: aliceTalk
 ===
 title: Node1
 ---
