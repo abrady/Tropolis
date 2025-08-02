@@ -12,7 +12,7 @@ Hello world
 -> Option 2
     Another
 ===
-
+# inter node comment
 title: Next
 position: 0,0
 ---
@@ -74,5 +74,79 @@ describe('loadLevel validation', () => {
       
       expect(invalidReferences).toEqual([]);
     }
+  });
+});
+
+describe('comment support', () => {
+  it('strips # comments from lines', () => {
+    const content = `title: Start # this is a comment
+---
+Hello world # another comment
+-> Option 1 # comment on option
+    Response
+===`;
+    const result = parseGab(content);
+    expect(result.length).toBe(1);
+    expect(result[0].title).toBe('Start');
+    expect(result[0].body).toBe('Hello world \n-> Option 1 \n    Response');
+  });
+
+  it('handles comments in metadata', () => {
+    const content = `title: Test
+tags: cryo, intro # these are tags
+position: 0,0 # coordinates
+---
+Some dialogue
+===`;
+    const result = parseGab(content);
+    expect(result.length).toBe(1);
+    expect(result[0].metadata).toEqual({ tags: 'cryo, intro', position: '0,0' });
+  });
+
+  it('handles comments in speaker sections', () => {
+    const content = `speaker: Overlord # main character
+---
+talkAnim overlordTalk # animation name
+===
+title: Start
+---
+Test dialogue
+===`;
+    const result = parseGabFile(content);
+    expect(result.speakers.Overlord).toEqual({ talkAnim: 'overlordTalk' });
+    expect(result.nodes.length).toBe(1);
+    expect(result.nodes[0].title).toBe('Start');
+  });
+
+  it('strips # comments from anywhere in line', () => {
+    const content = `title: HashTag
+---
+User: I love #hashtags
+Bot: Use # for comments though
+===`;
+    const result = parseGab(content);
+    expect(result[0].body).toBe('User: I love \nBot: Use ');
+  });
+
+  it('handles empty lines with comments', () => {
+    const content = `title: Test
+---
+Line 1
+# this is just a comment line
+Line 2
+===`;
+    const result = parseGab(content);
+    expect(result[0].body).toBe('Line 1\n\nLine 2');
+  });
+
+  it('handles comments at different positions', () => {
+    const content = `title: Position Test
+---
+Start of line # end comment
+   # comment with leading spaces
+	# comment with tab
+===`;
+    const result = parseGab(content);
+    expect(result[0].body).toBe('Start of line \n   \n\t');
   });
 });

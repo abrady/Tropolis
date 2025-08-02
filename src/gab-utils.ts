@@ -4,13 +4,19 @@ export interface GabNode {
   metadata: Record<string, string>;
 }
 
+function stripComment(line: string): string {
+  const commentIndex = line.indexOf('#');
+  if (commentIndex === -1) return line;
+  return line.slice(0, commentIndex);
+}
+
 export function parseGab(content: string): GabNode[] {
   const nodes: GabNode[] = [];
   const lines = content.split(/\r?\n/);
   let i = 0;
 
   while (i < lines.length) {
-    let line = lines[i].trim();
+    let line = stripComment(lines[i]).trim();
     if (!line) { i++; continue; }
     if (line.startsWith('title:')) {
       const node: GabNode = { title: line.slice(6).trim(), body: '', metadata: {} };
@@ -18,7 +24,8 @@ export function parseGab(content: string): GabNode[] {
       // parse metadata until ---
       let inBody = false;
       for (; i < lines.length; i++) {
-        line = lines[i];
+        const rawLine = lines[i];
+        line = stripComment(rawLine);
         const trimmed = line.trim();
         if (!inBody) {
           if (trimmed === '---') {
@@ -66,15 +73,15 @@ export function parseGabFile(content: string): GabFile {
   const lines = content.split(/\r?\n/);
   let i = 0;
   while (i < lines.length) {
-    const line = lines[i].trim();
+    const line = stripComment(lines[i]).trim();
     if (line.startsWith('title:')) break;
     if (line.startsWith('speaker:')) {
       const name = line.slice('speaker:'.length).trim();
       const data: Speaker = {};
       i++;
-      if (i < lines.length && lines[i].trim() === '---') i++;
-      while (i < lines.length && lines[i].trim() !== '===') {
-        const l = lines[i].trim();
+      if (i < lines.length && stripComment(lines[i]).trim() === '---') i++;
+      while (i < lines.length && stripComment(lines[i]).trim() !== '===') {
+        const l = stripComment(lines[i]).trim();
         if (l) {
           const parts = l.split(/\s+/);
           const key = parts[0];
@@ -83,7 +90,7 @@ export function parseGabFile(content: string): GabFile {
         }
         i++;
       }
-      if (i < lines.length && lines[i].trim() === '===') i++;
+      if (i < lines.length && stripComment(lines[i]).trim() === '===') i++;
       speakers[name] = data;
       continue;
     }
