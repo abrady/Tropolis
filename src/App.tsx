@@ -5,6 +5,7 @@ import { DialogueManager, DialogueOption, DialogueEvent, DialogueAdvanceParam } 
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
+import MoveMenu from './MoveMenu';
 import { startTowerOfHanoi } from './puzzles';
 import ExamineEditor, { ExamineRect } from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
@@ -108,6 +109,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const [showExamineEditor, setShowExamineEditor] = useState(false);
   const [showExamine, setShowExamine] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
@@ -208,9 +210,19 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
         setShowExamine(true);
         break;
       case 'move':
-        // TODO: Implement move functionality
+        setShowMoveMenu(true);
         break;
     }
+  };
+
+  const handleLocationSelect = (location: string) => {
+    setShowMoveMenu(false);
+    const gs = gameStateRef.current!;
+    gs.gotoLevel(location);
+    setBackground(gs.getBackground());
+    setAnimation(null); // Clear character display when changing levels
+    const gen = gs.getManager().advance();
+    setDialogueGenerator(gen);
   };
 
   const handleDialogueFromExamine = (dialogueId: string) => {
@@ -261,8 +273,8 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
         return;
       }
 
-      // Only allow action menu when not in dialogue/options/puzzle
-      if (showPuzzle || currentEvent?.type === 'choice' || displayLines.length > 0) return;
+      // Only allow action menu when not in dialogue/options/puzzle/move menu
+      if (showPuzzle || showMoveMenu || currentEvent?.type === 'choice' || displayLines.length > 0) return;
 
       if (event.code === 'KeyA' || event.code === 'Space') {
         event.preventDefault();
@@ -275,7 +287,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showPuzzle, showExamine, currentEvent?.type, displayLines.length]);
+  }, [showPuzzle, showMoveMenu, showExamine, currentEvent?.type, displayLines.length]);
 
 
   return (
@@ -306,7 +318,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
             onNext={handleNextLine}
           />
           <OptionsWidget
-            options={showActionMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}
+            options={showActionMenu || showMoveMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}
             onChoose={handleOptionSelect}
             onEscape={handleOptionsEscape}
           />
@@ -314,6 +326,13 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
             isVisible={showActionMenu}
             onAction={handleMenuAction}
             onClose={() => setShowActionMenu(false)}
+          />
+          <MoveMenu
+            isVisible={showMoveMenu}
+            availableLocations={Object.keys(levels)}
+            currentLocation={gameStateRef.current!.currentLevel}
+            onLocationSelect={handleLocationSelect}
+            onClose={() => setShowMoveMenu(false)}
           />
         </>
       )}
