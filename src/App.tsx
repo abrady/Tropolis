@@ -220,8 +220,14 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
 
   const handleLocationSelect = (location: LevelName) => {
     setShowMoveMenu(false);
+    // Clear current dialogue state first
+    setCurrentEvent(null);
+    setDisplayLines([]);
     const gs = gameStateRef.current!;
     gs.gotoLevel(location);
+    const newBg = gs.getBackground();
+    if (newBg) setBackground(newBg);
+    setAnimation(null); // Clear character display when changing levels
     setDialogueGenerator(gs.getDialogueGenerator());
   };
 
@@ -255,10 +261,10 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   // call this one time once we have the dialogue manager and generator set up
   // to pump the state forward
   useEffect(() => {
-    if (dialogueGenerator && !currentEvent) {
+    if (dialogueGenerator) {
       processNextEvent(); 
     }
-  }, [dialogueGenerator, processNextEvent, currentEvent]);
+  }, [dialogueGenerator, processNextEvent]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
