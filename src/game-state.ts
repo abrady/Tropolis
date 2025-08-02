@@ -1,59 +1,64 @@
+import type { LevelName } from './examine/levels';
+
 export interface LevelData {
   image: HTMLImageElement;
   dialogue: string;
   start: string;
   examine: any[]; // using any to avoid circular import; callers can cast
-  connections: string[];
+  connections: LevelName[];
 }
 
 export type GameStateListener = (state: GameState) => void;
 
-import { DialogueManager } from './dialogue-manager';
+import { DialogueManager, DialogueGenerator } from './dialogue-manager';
 
 export class GameState {
-  private levels: Record<string, LevelData>;
-  private manager: DialogueManager;
+  private levels: Record<LevelName, LevelData>;
   private background: HTMLImageElement;
   private listeners: GameStateListener[] = [];
+  private dialogueManager?: DialogueManager;
+  private dialogueGenerator?: DialogueGenerator;
 
   inventory = new Set<string>();
   visited = new Set<string>();
   flags: Record<string, boolean> = {};
-  currentLevel: string;
+  currentLevel: LevelName;
 
-  constructor(levels: Record<string, LevelData>, initialLevel: string) {
+  constructor(levels: Record<LevelName, LevelData>, initialLevel: LevelName) {
     if (!levels[initialLevel]) {
       throw new Error(`Unknown level: ${initialLevel}`);
     }
     this.levels = levels;
     this.currentLevel = initialLevel;
     const data = levels[initialLevel];
-    this.manager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
-    this.manager.start(data.start);
+    this.dialogueManager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
+    this.dialogueManager.start(data.start);
+    this.dialogueGenerator = this.dialogueManager.advance();
     this.background = data.image;
     this.visited.add(initialLevel);
   }
 
-  gotoLevel(level: string) {
+  gotoLevel(level: LevelName) {
     const data = this.levels[level];
     if (!data) throw new Error(`Unknown level: ${level}`);
     this.currentLevel = level;
-    this.manager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
-    this.manager.start(data.start);
+    this.dialogueManager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
+    this.dialogueManager.start(data.start);
+    this.dialogueGenerator = this.dialogueManager.advance();
     this.background = data.image;
     this.visited.add(level);
     this.emit();
   }
 
-  getManager() {
-    return this.manager;
+  public getDialogueGenerator(): DialogueGenerator | undefined {
+    return this.dialogueGenerator;
   }
 
   getBackground() {
     return this.background;
   }
 
-  getAvailableLocations() {
+  getAvailableLocations(): LevelName[] {
     const currentLevelData = this.levels[this.currentLevel];
     return currentLevelData ? currentLevelData.connections : [];
   }

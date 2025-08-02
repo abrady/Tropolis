@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import type { LevelName } from './examine/levels';
 
 interface MoveMenuProps {
   isVisible: boolean;
-  availableLocations: string[];
-  currentLocation: string;
-  onLocationSelect: (location: string) => void;
+  availableLocations: LevelName[];
+  currentLocation: LevelName;
+  onLocationSelect: (location: LevelName) => void;
   onClose: () => void;
 }
 

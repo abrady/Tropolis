@@ -10,7 +10,7 @@ import { startTowerOfHanoi } from './puzzles';
 import ExamineEditor from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
 import { GameState } from './game-state';
-import { levels } from './examine/levels';
+import { levels, type LevelName } from './examine/levels';
 import { getRoomDialogueStart } from './dialogue/dialogues';
 
 function useViewportSize() {
@@ -91,7 +91,7 @@ function GameCanvas({ frames, background, width, height }: { frames: Frame[] | n
 }
 
 interface AppProps {
-  initialLevel?: keyof typeof levels;
+  initialLevel?: LevelName;
 }
 
 export default function App({ initialLevel = 'cryoroom' }: AppProps) {
@@ -100,7 +100,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   if (!gameStateRef.current) {
     gameStateRef.current = new GameState(levels, initialLevel);
   }
-  const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
+  const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | undefined>();
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[] | null>(Overlord.animations.idle);
@@ -136,8 +136,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
       gs.gotoLevel(args[0]);
       setBackground(gs.getBackground());
       setAnimation(null); // Clear character display when changing levels
-      const gen = gs.getManager().advance();
-      setDialogueGenerator(gen);
+      setDialogueGenerator(gs.getDialogueGenerator());
     }
     // Auto-advance after processing action
     else {
@@ -165,7 +164,6 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     const event = result.value;
     setCurrentEvent(event);
     
-    const manager = gameStateRef.current!.getManager();
     switch (event.type) {
       case 'line':
         setDisplayLines([event.text]);
@@ -205,10 +203,9 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
           setDisplayLines([]);
           
           // Start new dialogue
-          const manager = gameStateRef.current!.getManager();
-          manager.start(startNode);
-          const generator = manager.advance();
-          setDialogueGenerator(generator);
+          const gameState = gameStateRef.current!;
+          gameState.gotoLevel(currentLevel);
+          setDialogueGenerator(gameState.getDialogueGenerator());
         }
         break;
       }
@@ -221,14 +218,11 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     }
   };
 
-  const handleLocationSelect = (location: string) => {
+  const handleLocationSelect = (location: LevelName) => {
     setShowMoveMenu(false);
     const gs = gameStateRef.current!;
     gs.gotoLevel(location);
-    setBackground(gs.getBackground());
-    setAnimation(null); // Clear character display when changing levels
-    const gen = gs.getManager().advance();
-    setDialogueGenerator(gen);
+    setDialogueGenerator(gs.getDialogueGenerator());
   };
 
   const handleDialogueFromExamine = (dialogueId: string) => {

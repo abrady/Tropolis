@@ -16,7 +16,11 @@ export interface DialogueCommand {
   args: string[];
 }
 
+export type DialogueNodeTag = 'examine';
+
 export interface DialogueNode {
+  title: string;
+  tags: Set<DialogueNodeTag>;
   lines: string[];
   options: DialogueOption[];
   next: string | null;
@@ -47,6 +51,7 @@ export interface DialogueLines {
 
 import { parseGabFile, GabNode, Speaker } from './gab-utils';
 
+export type DialogueGenerator = Generator<DialogueEvent, void, DialogueAdvanceParam>;
 
 // The DialogueManager class manages has:
 // - state: the current state of the dialogue including the current node, line index, speaker, variables, flags, and whether a command has been processed.
@@ -63,6 +68,7 @@ export class DialogueManager {
   private visited = new Set<string>();
   private returnStack: string[] = [];
   private currentEvent: DialogueEvent | null = null;
+  private currentGenerator?: DialogueGenerator;
 
   private commandHandlers: CommandHandlers;
 
@@ -86,19 +92,21 @@ export class DialogueManager {
   }
 
   isCurrentNodeExamine(): boolean {
-    if (!this.state.currentNode) return false;
-    const node = this.nodes[this.state.currentNode];
-    if (!node) return false;
-    const tags = node.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
-    return tags.includes('examine');
+    if (!this.state.currentNode || !this.state.content) return false;
+    return this.state.content.tags.has('examine');
+  }
+
+  getCurrenGenerator(): DialogueGenerator | undefined {
+    return this.currentGenerator;
   }
 
   start(startNode: string): void {
     this.goto(startNode); // set the initial state
+    
+    this.currentGenerator = this.advance();
   }
 
-
-  public *advance(): Generator<DialogueEvent, void, DialogueAdvanceParam> {
+  public *advance(): DialogueGenerator {
     while (true) {
       // advance through any dialogue to show.
       while (this.state.content && this.state.lineIndex < this.state.content.lines?.length) {
@@ -184,7 +192,7 @@ export class DialogueManager {
     }
     
     // If skipToChoices is true, set lineIndex to skip all lines
-    const content = parseNodeBody(this.nodes[nodeName].body, this.visited);
+    const content = parseNodeBody(this.nodes[nodeName], this.visited);
     const lineIndex = skipToChoices ? content.lines.length : 0;
 
     this.state = {
@@ -199,7 +207,21 @@ export class DialogueManager {
   }
 }
 
-function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueNode {
+function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNode {
+  const body = gabNode.body;
+  const title = gabNode.title;
+  const tagString = gabNode.metadata['tags'] || '';
+  const tags = new Set<DialogueNodeTag>();
+  
+  if (tagString) {
+    const tagArray = tagString.split(',').map(s => s.trim());
+    for (const tag of tagArray) {
+      if (tag === 'examine') {
+        tags.add(tag);
+      }
+    }
+  }
+  
   const lines = body.split(/\r?\n/);
   const texts: string[] = [];
   const options: DialogueOption[] = [];
@@ -274,6 +296,6 @@ function parseNodeBody(body: string, visitedNodes: Set<string>): DialogueNode {
       options.push({ text, target, visited: target ? visitedNodes.has(target) : false, detour });
     }
   }
-  return { lines: texts, options, next, command };
+  return { title, tags, lines: texts, options, next, command };
 }
 

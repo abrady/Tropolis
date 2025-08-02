@@ -6,13 +6,28 @@ import { LevelData } from '../game-state';
 import { getRoomDialogueData } from '../dialogue';
 import { getRoomExamineRects } from './rooms';
 
+// Type-safe level names to prevent case mismatches
+export type LevelName = 'cryoroom' | 'test' | 'mall' | 'bookstore' | 'sector7';
+
+// Runtime validation for level names
+export function isValidLevelName(name: string): name is LevelName {
+  return ['cryoroom', 'test', 'mall', 'bookstore', 'sector7'].includes(name);
+}
+
+export function assertValidLevelName(name: string): LevelName {
+  if (!isValidLevelName(name)) {
+    throw new Error(`Invalid level name: "${name}". Valid levels: cryoroom, test, mall, bookstore, sector7`);
+  }
+  return name;
+}
+
 const cryoroomDialogueData = getRoomDialogueData('cryoroom')!;
 const testDialogueData = getRoomDialogueData('test')!;
 const mallDialogueData = getRoomDialogueData('mall')!;
 const bookstoreDialogueData = getRoomDialogueData('bookstore')!;
 const sector7DialogueData = getRoomDialogueData('sector7')!;
 
-const levels: Record<string, LevelData> = {
+const levels: Record<LevelName, LevelData> = {
   cryoroom: {
     image: new Image(),
     dialogue: cryoroomDialogueData.dialogue,

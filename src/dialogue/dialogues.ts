@@ -3,13 +3,14 @@ import testChoiceDialogue from './test-choice.gab?raw';
 import sector7Dialogue from './sector7.gab?raw';
 import mallDialogue from './mall.gab?raw';
 import bookstoreDialogue from './bookstore.gab?raw';
+import type { LevelName } from '../examine/levels';
 
 export interface RoomDialogueData {
   dialogue: string;
   start: string;
 }
 
-export const roomDialogueData: Record<string, RoomDialogueData> = {
+export const roomDialogueData: Record<LevelName, RoomDialogueData> = {
   'cryoroom': {
     dialogue: cryoroomDialogue,
     start: 'CryoRoom_Intro'
@@ -32,16 +33,16 @@ export const roomDialogueData: Record<string, RoomDialogueData> = {
   }
 };
 
-export function getRoomDialogue(roomName: string): string {
+export function getRoomDialogue(roomName: LevelName): string {
   const room = roomDialogueData[roomName];
   return room ? room.dialogue : '';
 }
 
-export function getRoomDialogueStart(roomName: string): string {
+export function getRoomDialogueStart(roomName: LevelName): string {
   const room = roomDialogueData[roomName];
   return room ? room.start : '';
 }
 
-export function getRoomDialogueData(roomName: string): RoomDialogueData | null {
+export function getRoomDialogueData(roomName: LevelName): RoomDialogueData | null {
   return roomDialogueData[roomName] || null;
 }
