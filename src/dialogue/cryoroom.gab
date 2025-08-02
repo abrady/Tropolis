@@ -24,7 +24,7 @@ title: CryoRoom_Branch
     <<detour TheCity>>
 -> {WhereAmI} Why can't I remember any of this?
     <<detour WhyCantRemember>>
--> {WhyCantRemember} If the city needs me, let's go
+-> If the city needs me, let's go
     <<jump LetsContinue>>
 ===
 
@@ -43,13 +43,13 @@ Overlord: You were selected because of your skills.
 
 title: LetsContinue
 ---
-Overlord: Good. Your first task is to repair the power grid in Sector 7.
-Overlord: The maintenance tunnels will take you there safely.
-Overlord: Be careful - some areas may still be unstable.
-Overlord: Before you go, prove your focus with a simple test.
-Overlord: Move all five rings to the far right peg without placing a larger ring on top of a smaller one.
-<<loadPuzzle TowerOfHanoi>>
-<<jump CryoRoom_AfterPuzzle_Start>>
+Overlord: Good. Go to Sector 7. The maintenance tunnels will take you there safely.
+Overlord: I'm afraid I can't go with you, so come back here if you have any questions.
+<<loadLevel Sector7>>
+# Overlord: Before you go, prove your focus with a simple test.
+# Overlord: Move all five rings to the far right peg without placing a larger ring on top of a smaller one.
+# <<loadPuzzle TowerOfHanoi>>
+# <<jump CryoRoom_AfterPuzzle_Start>>
 ===
 
 title: TheCity
@@ -66,46 +66,41 @@ Overlord: Your memories should return gradually as your neural pathways reestabl
 Overlord: The important thing is that your skills and knowledge remain intact.
 ===
 
-title: MemoryQuestionAvailable
-tags: disabled
----
-===
-
-title: CryoRoom_AfterPuzzle_Start
-tags: cryo
----
-Overlord: Well done. You solved the test.
--> Thanks, that was fun
-    <<jump CryoRoom_AfterPuzzle_Pleased>>
--> That's a child's toy
-    <<jump CryoRoom_AfterPuzzle_Toy>>
-===
-
-title: CryoRoom_AfterPuzzle_Pleased
----
-You: Thanks, that was fun.
-Overlord: I'm glad your mind is sharp after cryostasis.
-<<jump CryoRoom_AfterPuzzle_End>>
-===
-
-title: CryoRoom_AfterPuzzle_Toy
----
-You: That's a child's toy.
-Overlord: It may be simple, but it confirms your cognitive functions survived cryostasis.
-<<jump CryoRoom_AfterPuzzle_End>>
-===
-
-title: CryoRoom_AfterPuzzle_End
----
-Overlord: Excellent work. You're ready to face the challenges ahead.
-Overlord: I must remain here, but you may explore the city as you see fit.
-Overlord: Remember, your skills are vital to our survival.
-Overlord: Good luck, 11235.
-<<loadLevel Sector7>>
-===
-
-title: CryoRoom_ExamineCryoChambers
-tags: examine
----
-You: Thousands of identical chambers extend into the distance
-===
+# title: CryoRoom_AfterPuzzle_Start
+# tags: cryo
+# ---
+# Overlord: Well done. You solved the test.
+# -> Thanks, that was fun
+#     <<jump CryoRoom_AfterPuzzle_Pleased>>
+# -> That's a child's toy
+#     <<jump CryoRoom_AfterPuzzle_Toy>>
+# ===
+# 
+# title: CryoRoom_AfterPuzzle_Pleased
+# ---
+# You: Thanks, that was fun.
+# Overlord: I'm glad your mind is sharp after cryostasis.
+# <<jump CryoRoom_AfterPuzzle_End>>
+# ===
+# 
+# title: CryoRoom_AfterPuzzle_Toy
+# ---
+# You: That's a child's toy.
+# Overlord: It may be simple, but it confirms your cognitive functions survived cryostasis.
+# <<jump CryoRoom_AfterPuzzle_End>>
+# ===
+# 
+# title: CryoRoom_AfterPuzzle_End
+# ---
+# Overlord: Excellent work. You're ready to face the challenges ahead.
+# Overlord: I must remain here, but you may explore the city as you see fit.
+# Overlord: Remember, your skills are vital to our survival.
+# Overlord: Good luck, 11235.
+# <<loadLevel Sector7>>
+# ===
+# 
+# title: CryoRoom_ExamineCryoChambers
+# tags: examine
+# ---
+# You: Thousands of identical chambers extend into the distance
+# ===

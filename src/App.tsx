@@ -146,7 +146,6 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
       dialogueGenerator.next();
 
     if (result.done) {
-      console.error('Dialogue generator reached done state unexpectedly');
       setCurrentEvent(null);
       setDialogueGenerator(null);
       setDisplayLines([]);
