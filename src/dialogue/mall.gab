@@ -1,55 +1,30 @@
-speaker: Overlord
----
-talkAnim: overlordTalk
-===
 speaker: You
 ---
 talkAnim: none
 ===
 title: Mall_Start
-tags: mall, intro
 ---
-Overlord: Welcome to the Central Mall, 11235.
-Overlord: This place was once the heart of commerce in the city.
-Overlord: Now it serves as a hub connecting various districts.
--> Explore the shops
-    <<jump Mall_Shops>>
--> Ask about the mall's history
-    <<jump Mall_History>>
--> Continue to another location
-    <<jump Mall_Travel>>
+You: Let's all go... to the mall!
+You: Whoof, this place has seen better days. Better look around and see what we can find.
 ===
+
+# ================= Examinables =================
 
 title: Mall_Shops
+tag: examine
 ---
-Overlord: Most of the shops are closed now, but some automated systems still function.
-Overlord: The bookstore down the hall might have information you need.
-Overlord: The food court's water systems could be useful for hydration.
--> Check out the bookstore
-    <<loadLevel bookstore>>
--> Return to main area
-    <<jump Mall_Start>>
+You: Mostly ruins, but some lights are still on, and odd sounds indicate some automated systems still function.
 ===
 
-title: Mall_History
+title: Mall_Tree
+tag: examine
 ---
-Overlord: Before the collapse, thousands of people would visit daily.
-Overlord: It contained over 200 shops, restaurants, and entertainment venues.
-Overlord: The central fountain was a meeting point for citizens.
-Overlord: Now it stands as a reminder of what we're working to rebuild.
--> Interesting, what else can I do here?
-    <<jump Mall_Start>>
+You: A large tree grows in the center of the mall, its branches reaching up towards the glass ceiling.
+You: It's a reminder of nature's resilience, even in a place like this.
 ===
 
-title: Mall_Travel
+title: Mall_Upstairs
+tag: examine
 ---
-Overlord: From here you can access several key locations.
-Overlord: The bookstore contains archives that might be helpful.
-Overlord: Other districts are accessible through the transit tunnels.
--> Visit the bookstore
-    <<loadLevel bookstore>>
--> Go back to the cryo room
-    <<loadLevel CryoRoom>>
--> Visit Sector 7
-    <<loadLevel Sector7>>
+You: The upstairs is mostly intact, but it doesn't look too safe. let's try downstairs first.
 ===

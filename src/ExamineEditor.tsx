@@ -44,15 +44,52 @@ interface ExamineEditorProps {
   height: number;
   background: HTMLImageElement;
   onClose?: () => void;
+  initialRects?: ExamineRect[];
 }
 
-export default function ExamineEditor({ width, height, background, onClose }: ExamineEditorProps) {
+export default function ExamineEditor({ width, height, background, onClose, initialRects = [] }: ExamineEditorProps) {
   const [rectangles, setRectangles] = useState<ExamineRect[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [drawingIndex, setDrawingIndex] = useState<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [start, setStart] = useState<{x: number; y: number} | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Calculate scaling factors for converting viewport coords to original coords
+  const scaleToOriginal = {
+    x: ORIGINAL_WIDTH / width,
+    y: ORIGINAL_HEIGHT / height
+  };
+
+  const scaleToViewport = {
+    x: width / ORIGINAL_WIDTH,
+    y: height / ORIGINAL_HEIGHT
+  };
+
+  // Convert viewport rectangle to original coordinates for export
+  const convertToOriginalCoords = (rect: ExamineRect): ExamineRect => ({
+    ...rect,
+    x: rect.x * scaleToOriginal.x,
+    y: rect.y * scaleToOriginal.y,
+    width: rect.width * scaleToOriginal.x,
+    height: rect.height * scaleToOriginal.y,
+  });
+
+  // Convert original coordinates to viewport coordinates for editing
+  const convertToViewportCoords = (rect: ExamineRect): ExamineRect => ({
+    ...rect,
+    x: rect.x * scaleToViewport.x,
+    y: rect.y * scaleToViewport.y,
+    width: rect.width * scaleToViewport.x,
+    height: rect.height * scaleToViewport.y,
+  });
+
+  // Initialize rectangles from initial rects converted to viewport coordinates
+  React.useEffect(() => {
+    if (initialRects.length > 0) {
+      setRectangles(initialRects.map(convertToViewportCoords));
+    }
+  }, [initialRects, width, height]);
 
   const getPointerPos = (e: React.MouseEvent) => {
     const rect = svgRef.current!.getBoundingClientRect();
@@ -200,7 +237,7 @@ export default function ExamineEditor({ width, height, background, onClose }: Ex
         ) : (
           <div>No rectangle selected</div>
         )}
-        <button onClick={() => console.log(exportRectangles(rectangles))}>Export</button>
+        <button onClick={() => console.log(exportRectangles(rectangles.map(convertToOriginalCoords)))}>Export</button>
         {onClose && <button onClick={onClose}>Close</button>}
       </div>
     </div>

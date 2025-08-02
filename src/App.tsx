@@ -295,7 +295,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
         <ExamineOverlay
           width={viewportSize.width}
           height={viewportSize.height}
-          rects={levels.CryoRoom.examine}
+          rects={levels[gameStateRef.current!.currentLevel].examine}
           onExit={() => setShowExamine(false)}
           onDialogue={handleDialogueFromExamine}
           debugMode={examineDebugMode}
@@ -307,6 +307,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           height={viewportSize.height}
           background={background}
           onClose={() => setShowExamineEditor(false)}
+          initialRects={levels[gameStateRef.current!.currentLevel].examine}
         />
       )}
       {!showPuzzle && !showExamine && (
