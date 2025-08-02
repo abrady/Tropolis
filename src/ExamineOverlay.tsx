@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ExamineRect, ExamineRectType } from './ExamineEditor';
+import { ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './ExamineEditor';
 
 // Original background image dimensions
 const ORIGINAL_WIDTH = 1536;
 const ORIGINAL_HEIGHT = 1024;
 
-function scaleRect(rect: ExamineRect, scaleX: number, scaleY: number): ExamineRect {
+function scaleRect<T extends ExamineRect>(rect: T, scaleX: number, scaleY: number): T {
   return {
     ...rect,
     x: rect.x * scaleX,
@@ -123,9 +123,9 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
               strokeWidth="0.5"
               style={{ pointerEvents: 'none' }}
             >
-              {rect.type === ExamineRectType.Dialogue ? `D: ${rects[i].dialogueNode}` : 
-               rect.type === ExamineRectType.AddToInventory ? `I: ${rects[i].item}` : 
-               `N: ${rects[i].args}`}
+              {rect.type === ExamineRectType.Dialogue ? `D: ${(rect as DialogueExamineRect).dialogueNode}` : 
+               rect.type === ExamineRectType.AddToInventory ? `I: ${(rect as InventoryExamineRect).item}` : 
+               `N: ${(rect as NoneExamineRect).args}`}
             </text>
           ))}
         </svg>
