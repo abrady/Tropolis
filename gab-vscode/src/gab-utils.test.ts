@@ -112,8 +112,8 @@ Speaker: This should return
       expect(result.nonterminating).not.toContain('ReturnNode');
     });
 
-        it('recognizes nodes that do not terminate', () => {
-      const content = `title: Bookstore_Start
+  it('recognizes nodes that do not terminate', () => {
+    const content = `title: Bookstore_Start
 ---
 Overlord: This is the old Central Library Bookstore, 11235.
 Overlord: The automated archive system is still functional.
@@ -142,8 +142,37 @@ Speaker: You chose option 2
       const nodes = parseGab(content);
       const result = validateGab(nodes, 'Bookstore_Start');
 
-      expect(result.nonterminating).toContain('Bookstore_Start');
-    });
+    expect(result.nonterminating).toContain('Bookstore_Start');
+  });
+
+  it('treats examine nodes as additional start points for non-termination checks', () => {
+    const content = `title: Start
+---
+Speaker: start
+===
+
+title: Examine_Start
+tags: examine
+---
+Speaker: examining
+-> Go
+    <<jump Loop>>
+===
+
+title: Loop
+---
+Speaker: in loop
+-> Back
+    <<jump Examine_Start>>
+===`;
+
+    const nodes = parseGab(content);
+    const result = validateGab(nodes, 'Start');
+
+    expect(result.unreachable).toEqual([]);
+    expect(result.nonterminating).toContain('Loop');
+    expect(result.nonterminating).not.toContain('Examine_Start');
+  });
 
   });
 });
