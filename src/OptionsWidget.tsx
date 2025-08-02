@@ -38,6 +38,7 @@ export default function OptionsWidget({ options, onChoose, onEscape }: OptionsWi
           onChoose(selectedIndex);
           break;
         case 'Backspace':
+        case 'Escape':
           event.preventDefault();
           if (onEscape) {
             onEscape();

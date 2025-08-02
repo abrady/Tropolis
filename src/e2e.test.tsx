@@ -73,7 +73,7 @@ describe('Game boot', () => {
     expect(dialogueText).toBe('You chose option 2');
   });
 
-  it('hides options when the action menu is opened', async () => {
+  it('hides options when the action menu is opened with Backspace', async () => {
     await act(async () => {
       ReactDOM.createRoot(document.getElementById('root')!).render(
         <App initialLevel="Test" />
@@ -91,6 +91,34 @@ describe('Game boot', () => {
     // open action menu via Backspace
     await act(async () => {
       const evt = new KeyboardEvent('keydown', { code: 'Backspace' });
+      window.dispatchEvent(evt);
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    const options = document.querySelectorAll('.option-button');
+    expect(options.length).toBe(0);
+    const actions = document.querySelectorAll('.action-button');
+    expect(actions.length).toBe(3);
+  });
+
+  it('hides options when the action menu is opened with Escape', async () => {
+    await act(async () => {
+      ReactDOM.createRoot(document.getElementById('root')!).render(
+        <App initialLevel="Test" />
+      );
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // advance to choice
+    await act(async () => {
+      (document.querySelector('#dialogue button') as HTMLButtonElement).click();
+    });
+    await new Promise(r => setTimeout(r, 0));
+
+    // open action menu via Escape
+    await act(async () => {
+      const evt = new KeyboardEvent('keydown', { code: 'Escape' });
       window.dispatchEvent(evt);
     });
     await new Promise(r => setTimeout(r, 0));
