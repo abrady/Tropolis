@@ -152,6 +152,39 @@ Bob: I'm doing well, thanks.
     });
   });
 
+  describe('gating conditions', () => {
+    const gatedDialogue = `title: Intro
+---
+{!Intro} Overlord: Welcome
+<<jump Next>>
+===
+title: Next
+---
+Overlord: After
+===`;
+
+    it('shows negated gated line only on first visit', () => {
+      const dm = new DialogueManager(gatedDialogue, noopHandlers);
+
+      dm.start('Intro');
+      let gen = dm.advance();
+      let event = gen.next().value;
+      expect(event.type).toBe('line');
+      expect(event.text).toBe('Welcome');
+
+      event = gen.next().value;
+      expect(event.type).toBe('line');
+      expect(event.text).toBe('After');
+      expect(gen.next().done).toBe(true);
+
+      dm.start('Intro');
+      gen = dm.advance();
+      event = gen.next().value;
+      expect(event.type).toBe('line');
+      expect(event.text).toBe('After');
+    });
+  });
+
   describe('examine node detection', () => {
     const examineDialogue = `title: RegularNode
 ---
