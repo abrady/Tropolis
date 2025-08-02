@@ -172,6 +172,10 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
     if (command && terminatingCommands.includes(command)) {
       finalNodes.add(n.title);
     }
+    // If node has no outgoing edges and no commands, it's naturally terminating
+    if (targets.length === 0 && !command) {
+      finalNodes.add(n.title);
+    }
     for (const t of targets) {
       addEdge(n.title, t.target);
       if (t.detour) addEdge(t.target, n.title);

@@ -1,8 +1,19 @@
 {
   "scopeName": "source.gab",
   "patterns": [
-    { "name": "keyword.other.gab", "match": "\\b(speaker|title)\\b" },
+    { "name": "comment.line.number-sign.gab", "match": "#.*$" },
+    { "name": "punctuation.definition.block.begin.gab", "match": "^---\\s*$" },
+    { "name": "punctuation.definition.block.end.gab", "match": "^===\\s*$" },
+    { "name": "keyword.other.gab", "match": "\\b(speaker|title|tags)\\b" },
     { "name": "keyword.operator.arrow.gab", "match": "->" },
+    {
+      "name": "meta.dialogue.line.gab",
+      "match": "^\\s*([A-Za-z0-9_]+)\\s*:\\s*(.*)$",
+      "captures": {
+        "1": { "name": "variable.other.speaker.gab" },
+        "2": { "name": "string.quoted.dialogue.gab" }
+      }
+    },
     {
       "name": "meta.command.gab",
       "begin": "<<",
