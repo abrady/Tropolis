@@ -3,6 +3,7 @@ export interface LevelData {
   dialogue: string;
   start: string;
   examine: any[]; // using any to avoid circular import; callers can cast
+  connections: string[];
 }
 
 export type GameStateListener = (state: GameState) => void;
@@ -50,6 +51,11 @@ export class GameState {
 
   getBackground() {
     return this.background;
+  }
+
+  getAvailableLocations() {
+    const currentLevelData = this.levels[this.currentLevel];
+    return currentLevelData ? currentLevelData.connections : [];
   }
 
   addItem(item: string) {

@@ -17,31 +17,36 @@ const levels: Record<string, LevelData> = {
     image: new Image(),
     dialogue: cryoroomDialogueData.dialogue,
     start: cryoroomDialogueData.start,
-    examine: getRoomExamineRects('cryoroom')
+    examine: getRoomExamineRects('cryoroom'),
+    connections: ['mall', 'Sector7']
   },
   Test: { 
       image: new Image(), 
       dialogue: testDialogueData.dialogue, 
       start: testDialogueData.start,
      examine: [],
+     connections: []
     },
   mall: {
     image: new Image(),
     dialogue: mallDialogueData.dialogue,
     start: mallDialogueData.start,
-    examine: getRoomExamineRects('mall')
+    examine: getRoomExamineRects('mall'),
+    connections: ['bookstore', 'CryoRoom']
   },
   bookstore: {
     image: new Image(),
     dialogue: bookstoreDialogueData.dialogue,
     start: bookstoreDialogueData.start,
-    examine: getRoomExamineRects('bookstore')
+    examine: getRoomExamineRects('bookstore'),
+    connections: ['mall']
   },
   Sector7: {
     image: new Image(),
     dialogue: sector7DialogueData.dialogue,
     start: sector7DialogueData.start,
-    examine: getRoomExamineRects('sector7')
+    examine: getRoomExamineRects('sector7'),
+    connections: ['mall', 'CryoRoom']
   },
 };
 

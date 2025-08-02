@@ -329,7 +329,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           />
           <MoveMenu
             isVisible={showMoveMenu}
-            availableLocations={Object.keys(levels)}
+            availableLocations={gameStateRef.current!.getAvailableLocations()}
             currentLocation={gameStateRef.current!.currentLevel}
             onLocationSelect={handleLocationSelect}
             onClose={() => setShowMoveMenu(false)}
