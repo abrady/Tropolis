@@ -22,10 +22,12 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
-    "test": "npm run compile"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@types/vscode": "^1.84.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }

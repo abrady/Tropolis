@@ -1,4 +1,4 @@
-import { ExamineRect, ExamineRectType } from '../ExamineEditor';
+import { ExamineRect, ExamineRectType, DialogueExamineRect } from '../ExamineEditor';
 
 export const cryoroomExamineRects: ExamineRect[] = [
   {
@@ -7,6 +7,7 @@ export const cryoroomExamineRects: ExamineRect[] = [
     y: 297,
     width: 1708,
     height: 666,
-    args: 'CryoRoom_ExamineCryoChambers'
-  }
+    level: 'cryoroom',
+    dialogueNode: 'CryoRoom_ExamineCryoChambers'
+  } as DialogueExamineRect
 ];

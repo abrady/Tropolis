@@ -1,18 +1,18 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getRectAtPosition } from './ExamineOverlay';
-import { ExamineRect, ExamineRectType } from './ExamineEditor';
+import { ExamineRect, ExamineRectType, NoneExamineRect } from './ExamineEditor';
 
 describe('getRectAtPosition', () => {
   const rects: ExamineRect[] = [
-    { type: ExamineRectType.None, x: 10, y: 10, width: 20, height: 30, args: 'A' },
-    { type: ExamineRectType.None, x: 50, y: 50, width: 40, height: 40, args: 'B' }
+    { type: ExamineRectType.None, x: 10, y: 10, width: 20, height: 30, args: 'A' } as NoneExamineRect,
+    { type: ExamineRectType.None, x: 50, y: 50, width: 40, height: 40, args: 'B' } as NoneExamineRect
   ];
 
   it('returns matching rect for coordinates', () => {
     const r1 = getRectAtPosition(rects, 15, 20);
-    expect(r1?.args).toBe('A');
+    expect((r1 as NoneExamineRect)?.args).toBe('A');
     const r2 = getRectAtPosition(rects, 70, 70);
-    expect(r2?.args).toBe('B');
+    expect((r2 as NoneExamineRect)?.args).toBe('B');
   });
 
   it('returns null when no match', () => {
@@ -31,7 +31,8 @@ describe('ExamineOverlay dialogue functionality', () => {
       y: 10,
       width: 20,
       height: 20,
-      args: 'TestDialogueNode'
+      level: 'test',
+      dialogueNode: 'TestDialogueNode'
     };
     
     const rects = [dialogueRect];
@@ -42,7 +43,7 @@ describe('ExamineOverlay dialogue functionality', () => {
     
     // Simulate the click handler logic from ExamineOverlay
     if (clickedRect && clickedRect.type === ExamineRectType.Dialogue) {
-      dialogueCallback(clickedRect.args);
+      dialogueCallback(clickedRect.dialogueNode);
     }
     onExitCallback();
     
@@ -60,7 +61,7 @@ describe('ExamineOverlay dialogue functionality', () => {
       y: 10,
       width: 20,
       height: 20,
-      args: 'SomeItem'
+      item: 'SomeItem'
     };
     
     const rects = [inventoryRect];
@@ -71,7 +72,7 @@ describe('ExamineOverlay dialogue functionality', () => {
     
     // Simulate the click handler logic from ExamineOverlay
     if (clickedRect && clickedRect.type === ExamineRectType.Dialogue) {
-      dialogueCallback(clickedRect.args);
+      dialogueCallback((clickedRect as any).dialogueNode);
     }
     onExitCallback();
     
@@ -97,7 +98,8 @@ describe('ExamineOverlay dialogue functionality', () => {
         y: 50,
         width: 30,
         height: 30,
-        args: 'DialogueNode'
+        level: 'test',
+        dialogueNode: 'DialogueNode'
       },
       {
         type: ExamineRectType.AddToInventory,
@@ -105,7 +107,7 @@ describe('ExamineOverlay dialogue functionality', () => {
         y: 100,
         width: 25,
         height: 25,
-        args: 'InventoryItem'
+        item: 'InventoryItem'
       }
     ];
     
@@ -114,7 +116,7 @@ describe('ExamineOverlay dialogue functionality', () => {
     expect(dialogueRect?.type).toBe(ExamineRectType.Dialogue);
     
     if (dialogueRect && dialogueRect.type === ExamineRectType.Dialogue) {
-      dialogueCallback(dialogueRect.args);
+      dialogueCallback(dialogueRect.dialogueNode);
     }
     
     expect(dialogueCallback).toHaveBeenCalledWith('DialogueNode');
@@ -127,7 +129,7 @@ describe('ExamineOverlay dialogue functionality', () => {
     
     [noneRect, inventoryRect].forEach(rect => {
       if (rect && rect.type === ExamineRectType.Dialogue) {
-        dialogueCallback(rect.args);
+        dialogueCallback((rect as any).dialogueNode);
       }
     });
     

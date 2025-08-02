@@ -151,6 +151,23 @@ Start of line # end comment
   });
 });
 
+describe('basic node parsing', () => {
+  it('parses a simple node with title, tags, and speaker dialogue', () => {
+    const content = `title: Title
+tags: tags
+---
+Speaker: test line
+===`;
+    const result = parseGab(content);
+    expect(result.length).toBe(1);
+    expect(result[0]).toEqual({
+      title: 'Title',
+      body: 'Speaker: test line',
+      metadata: { tags: 'tags' }
+    } as GabNode);
+  });
+});
+
 describe('speaker validation', () => {
   it('validates that all referenced speakers are defined', () => {
     const content = `speaker: Alice

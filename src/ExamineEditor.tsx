@@ -6,14 +6,30 @@ export enum ExamineRectType {
   AddToInventory = 'inventory',
 }
 
-export interface ExamineRect {
-  type: ExamineRectType;
+interface BaseExamineRect {
   x: number; 
   y: number;
   width: number;
   height: number;
+}
+
+export interface DialogueExamineRect extends BaseExamineRect {
+  type: ExamineRectType.Dialogue;
+  level: string;
+  dialogueNode: string;
+}
+
+export interface InventoryExamineRect extends BaseExamineRect {
+  type: ExamineRectType.AddToInventory;
+  item: string;
+}
+
+export interface NoneExamineRect extends BaseExamineRect {
+  type: ExamineRectType.None;
   args: string;
 }
+
+export type ExamineRect = DialogueExamineRect | InventoryExamineRect | NoneExamineRect;
 
 export function exportRectangles(rects: ExamineRect[]): string {
   return JSON.stringify(rects);
@@ -50,7 +66,14 @@ export default function ExamineEditor({ width, height, background, onClose }: Ex
       setDraggingIndex(idx);
       setStart(pos);
     } else {
-      const newRect: ExamineRect = { x: pos.x, y: pos.y, width: 0, height: 0, label: '' };
+      const newRect: NoneExamineRect = { 
+        type: ExamineRectType.None,
+        x: pos.x, 
+        y: pos.y, 
+        width: 0, 
+        height: 0, 
+        args: '' 
+      };
       setRectangles(prev => [...prev, newRect]);
       const newIndex = rectangles.length;
       setSelected(newIndex);
@@ -78,9 +101,27 @@ export default function ExamineEditor({ width, height, background, onClose }: Ex
     setStart(null);
   };
 
-  const updateField = (field: keyof ExamineRect, value: string | number) => {
+  const updateField = (field: string, value: string | number | ExamineRectType) => {
     if (selected === null) return;
-    setRectangles(prev => prev.map((r, i) => i === selected ? { ...r, [field]: value } : r));
+    setRectangles(prev => prev.map((r, i) => {
+      if (i !== selected) return r;
+      
+      // Handle type changes
+      if (field === 'type') {
+        const baseRect = { x: r.x, y: r.y, width: r.width, height: r.height };
+        switch (value) {
+          case ExamineRectType.Dialogue:
+            return { ...baseRect, type: ExamineRectType.Dialogue, level: '', dialogueNode: '' } as DialogueExamineRect;
+          case ExamineRectType.AddToInventory:
+            return { ...baseRect, type: ExamineRectType.AddToInventory, item: '' } as InventoryExamineRect;
+          case ExamineRectType.None:
+          default:
+            return { ...baseRect, type: ExamineRectType.None, args: '' } as NoneExamineRect;
+        }
+      }
+      
+      return { ...r, [field]: value };
+    }));
   };
 
   const selectedRect = selected !== null ? rectangles[selected] : null;
@@ -124,8 +165,33 @@ export default function ExamineEditor({ width, height, background, onClose }: Ex
               height: <input type="number" value={selectedRect.height} onChange={e => updateField('height', Number(e.target.value))} />
             </label>
             <label>
-              label: <input type="text" value={selectedRect.label} onChange={e => updateField('label', e.target.value)} />
+              type: 
+              <select value={selectedRect.type} onChange={e => updateField('type', e.target.value as ExamineRectType)}>
+                <option value={ExamineRectType.None}>None</option>
+                <option value={ExamineRectType.Dialogue}>Dialogue</option>
+                <option value={ExamineRectType.AddToInventory}>Add to Inventory</option>
+              </select>
             </label>
+            {selectedRect.type === ExamineRectType.Dialogue && (
+              <>
+                <label>
+                  level: <input type="text" value={selectedRect.level} onChange={e => updateField('level', e.target.value)} />
+                </label>
+                <label>
+                  dialogueNode: <input type="text" value={selectedRect.dialogueNode} onChange={e => updateField('dialogueNode', e.target.value)} />
+                </label>
+              </>
+            )}
+            {selectedRect.type === ExamineRectType.AddToInventory && (
+              <label>
+                item: <input type="text" value={selectedRect.item} onChange={e => updateField('item', e.target.value)} />
+              </label>
+            )}
+            {selectedRect.type === ExamineRectType.None && (
+              <label>
+                args: <input type="text" value={selectedRect.args} onChange={e => updateField('args', e.target.value)} />
+              </label>
+            )}
           </div>
         ) : (
           <div>No rectangle selected</div>

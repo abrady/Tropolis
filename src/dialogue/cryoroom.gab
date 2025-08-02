@@ -99,8 +99,8 @@ Overlord: The important thing is that your skills and knowledge remain intact.
 # <<loadLevel Sector7>>
 # ===
 # 
-# title: CryoRoom_ExamineCryoChambers
-# tags: examine
-# ---
-# You: Thousands of identical chambers extend into the distance
-# ===
+title: CryoRoom_ExamineCryoChambers
+tags: examine
+---
+You: Thousands of identical chambers extend into the distance
+===

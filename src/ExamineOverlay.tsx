@@ -35,9 +35,13 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
 
   const handleClick = () => {
     if (hover) {
-      console.log(`${hover.args} clicked`);
       if (hover.type === ExamineRectType.Dialogue && onDialogue) {
-        onDialogue(hover.args);
+        console.log(`${hover.dialogueNode} clicked`);
+        onDialogue(hover.dialogueNode);
+      } else if (hover.type === ExamineRectType.None) {
+        console.log(`${hover.args} clicked`);
+      } else if (hover.type === ExamineRectType.AddToInventory) {
+        console.log(`${hover.item} clicked`);
       }
       if (onExit) onExit();
     }
