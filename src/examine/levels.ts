@@ -2,22 +2,23 @@ import cryoroomImg from '../../data/locations/cryoroom.png';
 import mallImg from '../../data/locations/mall.png';
 import bookstoreImg from '../../data/locations/bookstore.png';
 import sector7Img from '../../data/locations/sector7.png';
+import thebarImg from '../../data/locations/thebar.png';
 import { LevelData } from '../game-state';
 import { getRoomDialogueData } from '../dialogue';
 import { getRoomExamineRects } from './rooms';
 
 // Type-safe level names to prevent case mismatches
-export type LevelName = 'cryoroom' | 'test' | 'mall' | 'bookstore' | 'sector7';
+export type LevelName = 'cryoroom' | 'test' | 'mall' | 'bookstore' | 'sector7' | 'thebar';
 
 // Runtime validation for level names
 export function isValidLevelName(name: string): name is LevelName {
-  return ['cryoroom', 'test', 'mall', 'bookstore', 'sector7'].includes(name);
+  return ['cryoroom', 'test', 'mall', 'bookstore', 'sector7', 'thebar'].includes(name);
 }
 
 export function assertValidLevelName(name: string): LevelName {
   if (!isValidLevelName(name)) {
     throw new Error(
-      `Invalid level name: "${name}". Valid levels: cryoroom, test, mall, bookstore, sector7`
+      `Invalid level name: "${name}". Valid levels: cryoroom, test, mall, bookstore, sector7, thebar`
     );
   }
   return name;
@@ -28,6 +29,7 @@ const testDialogueData = getRoomDialogueData('test')!;
 const mallDialogueData = getRoomDialogueData('mall')!;
 const bookstoreDialogueData = getRoomDialogueData('bookstore')!;
 const sector7DialogueData = getRoomDialogueData('sector7')!;
+const thebarDialogueData = getRoomDialogueData('thebar')!;
 
 const levels: Record<LevelName, LevelData> = {
   cryoroom: {
@@ -35,7 +37,7 @@ const levels: Record<LevelName, LevelData> = {
     dialogue: cryoroomDialogueData.dialogue,
     start: cryoroomDialogueData.start,
     examine: getRoomExamineRects('cryoroom'),
-    connections: ['mall', 'sector7'],
+    connections: ['mall', 'sector7', 'thebar'],
   },
   test: {
     image: new Image(),
@@ -49,7 +51,7 @@ const levels: Record<LevelName, LevelData> = {
     dialogue: mallDialogueData.dialogue,
     start: mallDialogueData.start,
     examine: getRoomExamineRects('mall'),
-    connections: ['bookstore', 'cryoroom'],
+    connections: ['bookstore', 'cryoroom', 'thebar'],
   },
   bookstore: {
     image: new Image(),
@@ -65,6 +67,13 @@ const levels: Record<LevelName, LevelData> = {
     examine: getRoomExamineRects('sector7'),
     connections: ['mall', 'cryoroom'],
   },
+  thebar: {
+    image: new Image(),
+    dialogue: thebarDialogueData.dialogue,
+    start: thebarDialogueData.start,
+    examine: getRoomExamineRects('thebar'),
+    connections: ['mall', 'cryoroom', 'sector7'],
+  },
 };
 
 levels.test.image.src = cryoroomImg;
@@ -72,5 +81,6 @@ levels.cryoroom.image.src = cryoroomImg;
 levels.mall.image.src = mallImg;
 levels.bookstore.image.src = bookstoreImg;
 levels.sector7.image.src = sector7Img;
+levels.thebar.image.src = thebarImg;
 
 export { levels };

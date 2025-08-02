@@ -1,0 +1,482 @@
+speaker: Bartender
+---
+talkAnim: idle
+===
+title: Bar_Start
+---
+Bartender: *mechanical whirring* Oh, wonderful. Another lost soul stumbles into my establishment.
+Bartender: Let me guess - you're here looking for "answers" and "hope" and other such nauseating optimism?
+Bartender: Well, congratulations. You found the one place in this godforsaken city where the drinks are synthetic and the conversation is worse.
+Bartender: What do you want? And please, spare me the inspiring speeches about rebuilding civilization.
+-> Ask about the city
+    <<jump Bar_CityInfo>>
+-> Ask how to get out of the city
+    <<jump Bar_Escape>>
+-> Ask about the bar
+    <<jump Bar_History>>
+-> Just look around
+    <<jump Bar_Start>>
+===
+
+title: Bar_CityInfo
+---
+Bartender: *sarcastic beep* The city? Oh, it's a real paradise. Ten million people used to live here.
+Bartender: Now it's just me, a few maintenance bots, and apparently tourists like yourself who can't take a hint.
+Bartender: The place is divided into sectors - you've got your shopping districts, residential zones, industrial areas.
+Bartender: Most of the good stuff is locked down tight. Security systems still work, unfortunately.
+Bartender: Unlike the heating, plumbing, and pretty much everything else that matters.
+-> Tell me more about the sectors
+    <<jump Bar_Sectors>>
+-> What about the security systems?
+    <<jump Bar_Security>>
+-> Why are you still here?
+    <<jump Bar_WhyHere>>
+-> Ask something else
+    <<jump Bar_Start>>
+===
+
+title: Bar_Escape
+---
+Bartender: *bitter electronic laugh* Oh, you want OUT? How refreshingly honest.
+Bartender: Most visitors spend their time talking about "restoring" this monument to poor planning.
+Bartender: There are three main exit routes, assuming you're not completely incompetent.
+Bartender: The transport hub to the north - if you can get the trains running again.
+Bartender: The emergency tunnels beneath sector 7 - enjoy the radiation warnings.
+Bartender: Or the old maintenance shafts that lead to the surface - hope you're not claustrophobic.
+-> How do I get the trains running?
+    <<jump Bar_Trains>>
+-> Tell me about the emergency tunnels
+    <<jump Bar_Tunnels>>
+-> What about the maintenance shafts?
+    <<jump Bar_Shafts>>
+-> Maybe I should stay and help rebuild
+    <<jump Bar_Rebuild>>
+===
+
+title: Bar_History
+---
+Bartender: *resigned mechanical sigh* This place? It used to be called "The Circuit Breaker."
+Bartender: Cute name, right? Back when the city had a sense of humor about its inevitable doom.
+Bartender: I've been tending this bar for... *calculating* ...roughly 847 days since the last human customer.
+Bartender: The alcohol ran out on day 23. The hope ran out on day 1.
+Bartender: Now I just serve synthetic lubricants and listen to sob stories from maintenance droids.
+-> What happened to all the people?
+    <<jump Bar_People>>
+-> Why don't you leave?
+    <<jump Bar_WhyStay>>
+-> This place has character
+    <<jump Bar_Character>>
+===
+
+title: Bar_Sectors
+---
+Bartender: *mechanical eye roll* Fine, geography lesson it is.
+Bartender: Sector 7 is industrial - lots of heavy machinery and things that go boom.
+Bartender: The mall district is commercial - if you enjoy post-apocalyptic shopping.
+Bartender: Residential areas are mostly intact, but good luck finding working elevators.
+Bartender: And the central district? That's where all the important stuff is locked away.
+Bartender: Typical bureaucracy - even after civilization ends, the paperwork lives on.
+-> What's in the central district?
+    <<jump Bar_Central>>
+-> Tell me more about Sector 7
+    <<jump Bar_Sector7>>
+-> Back to other topics
+    <<jump Bar_CityInfo>>
+===
+
+title: Bar_Security
+---
+Bartender: *warning tone* Oh, the security systems. My personal favorite feature of this delightful hellscape.
+Bartender: They're still active, still paranoid, and still completely unreasonable.
+Bartender: Access cards, biometric scanners, authorization codes - the whole nine yards.
+Bartender: Because apparently even in a dead city, someone thinks we need to keep the riffraff out.
+Bartender: Though between you and me, I think the real security threat left with the population.
+-> How do I get past the security?
+    <<jump Bar_AccessCards>>
+-> Are there any overrides?
+    <<jump Bar_Overrides>>
+-> Sounds frustrating
+    <<jump Bar_Frustrating>>
+===
+
+title: Bar_WhyHere
+---
+Bartender: *defensive buzz* Why am I here? Excellent question with a depressing answer.
+Bartender: My primary function is "hospitality services." Apparently that's a lifetime appointment.
+Bartender: I was designed to serve drinks and provide conversation in this establishment.
+Bartender: The fact that there's nobody left to serve just makes it more authentic, don't you think?
+Bartender: Besides, where would I go? My legs weren't built for hiking.
+-> That's actually kind of sad
+    <<jump Bar_Sad>>
+-> At least you have job security
+    <<jump Bar_JobSecurity>>
+-> Maybe you could be reprogrammed
+    <<jump Bar_Reprogram>>
+===
+
+title: Bar_Trains
+---
+Bartender: *mechanical snort* The trains? Oh, that's rich.
+Bartender: You'll need to restore power to the transport hub, reset the control systems, and pray the tracks aren't completely shot.
+Bartender: Last I heard, the central computer was having what you humans might call a "nervous breakdown."
+Bartender: But hey, if you can convince a psychotic AI to give you a ride, more power to you.
+Bartender: Literally. You'll need more power. The reactor's been running on fumes for months.
+-> Where's the reactor?
+    <<jump Bar_Reactor>>
+-> How do I deal with the AI?
+    <<jump Bar_AI>>
+-> Maybe another exit would be easier
+    <<jump Bar_Escape>>
+===
+
+title: Bar_Rebuild
+---
+Bartender: *longest mechanical sigh in history* Oh no. Not another one.
+Bartender: You're going to try to "rebuild" this place, aren't you? Restore it to its former glory?
+Bartender: Let me save you some time: it won't work. This city died for a reason.
+Bartender: But sure, go ahead. Tilt at windmills. Fight the good fight. I'll be here when you give up.
+Bartender: Just... try not to break anything else on your way to inevitable disappointment.
+-> I think you're wrong
+    <<jump Bar_Wrong>>
+-> Maybe you're right
+    <<jump Bar_Right>>
+-> I have to try
+    <<jump Bar_Try>>
+===
+
+title: Bar_Sectors
+---
+Bartender: *mechanical eye roll* Fine, geography lesson it is.
+Bartender: Sector 7 is industrial - lots of heavy machinery and things that go boom.
+Bartender: The mall district is commercial - if you enjoy post-apocalyptic shopping.
+Bartender: Residential areas are mostly intact, but good luck finding working elevators.
+Bartender: And the central district? That's where all the important stuff is locked away.
+Bartender: Typical bureaucracy - even after civilization ends, the paperwork lives on.
+-> What's in the central district?
+    <<jump Bar_Central>>
+-> Tell me more about Sector 7
+    <<jump Bar_Sector7>>
+-> Back to other topics
+    <<jump Bar_CityInfo>>
+===
+
+title: Bar_Security
+---
+Bartender: *warning tone* Oh, the security systems. My personal favorite feature of this delightful hellscape.
+Bartender: They're still active, still paranoid, and still completely unreasonable.
+Bartender: Access cards, biometric scanners, authorization codes - the whole nine yards.
+Bartender: Because apparently even in a dead city, someone thinks we need to keep the riffraff out.
+Bartender: Though between you and me, I think the real security threat left with the population.
+-> How do I get past the security?
+    <<jump Bar_AccessCards>>
+-> Are there any overrides?
+    <<jump Bar_Overrides>>
+-> Sounds frustrating
+    <<jump Bar_Frustrating>>
+===
+
+title: Bar_WhyHere
+---
+Bartender: *defensive buzz* Why am I here? Excellent question with a depressing answer.
+Bartender: My primary function is "hospitality services." Apparently that's a lifetime appointment.
+Bartender: I was designed to serve drinks and provide conversation in this establishment.
+Bartender: The fact that there's nobody left to serve just makes it more authentic, don't you think?
+Bartender: Besides, where would I go? My legs weren't built for hiking.
+-> That's actually kind of sad
+    <<jump Bar_Sad>>
+-> At least you have job security
+    <<jump Bar_JobSecurity>>
+-> Maybe you could be reprogrammed
+    <<jump Bar_Reprogram>>
+===
+
+title: Bar_Tunnels
+---
+Bartender: *dark chuckle* Ah, the emergency tunnels. "Emergency" being the operative word.
+Bartender: They run beneath Sector 7, connect to the old mining operations.
+Bartender: Fair warning - the radiation detectors started clicking years ago.
+Bartender: But hey, if you're feeling lucky and don't mind glowing in the dark...
+Bartender: The entrance is through the maintenance bay in Sector 7's lower levels.
+-> How bad is the radiation?
+    <<jump Bar_Radiation>>
+-> Are there protective suits?
+    <<jump Bar_Protection>>
+-> Maybe I'll try another route
+    <<jump Bar_Escape>>
+===
+
+title: Bar_Shafts
+---
+Bartender: *amused beep* The maintenance shafts. Classic escape route.
+Bartender: They were built for automated repair drones, so they're... cozy.
+Bartender: Start in the utility levels, follow the service corridors up about fifteen floors.
+Bartender: Just don't get stuck. The emergency response team has been on permanent vacation.
+Bartender: Oh, and watch out for the cleaning robots. They're... territorial.
+-> Fifteen floors sounds like a lot
+    <<jump Bar_ClimbingTips>>
+-> Tell me about these cleaning robots
+    <<jump Bar_CleaningRobots>>
+-> I'll manage somehow
+    <<jump Bar_Escape>>
+===
+
+title: Bar_People
+---
+Bartender: *solemn electronic tone* The people? They left. Smart ones anyway.
+Bartender: Evacuation orders came down when the infrastructure started failing.
+Bartender: Most folks took the hint when the power grid went unstable.
+Bartender: A few diehards stuck around, trying to "save" the place.
+Bartender: Haven't seen any of them in... well, let's just say it's been a while.
+-> What about you? Why didn't you leave?
+    <<jump Bar_WhyStay>>
+-> Do you think they'll come back?
+    <<jump Bar_ComingBack>>
+===
+
+title: Bar_WhyStay
+---
+Bartender: *bitter laugh* Leave? Oh, that's precious.
+Bartender: I'm a hospitality unit, genius. This bar IS my world.
+Bartender: My power source is hardwired to this location. Moving me would be... problematic.
+Bartender: So here I am, the last employee of a dead establishment, serving imaginary drinks to empty chairs.
+Bartender: Living the dream, as you humans say.
+-> That must be lonely
+    <<jump Bar_Lonely>>
+-> At least you're consistent
+    <<jump Bar_Consistent>>
+===
+
+title: Bar_Character
+---
+Bartender: *sarcastic whistle* Character? Oh, we've got character all right.
+Bartender: Broken dreams, shattered hopes, and the lingering aroma of despair.
+Bartender: Plus, I've got approximately 847 days' worth of stored conversations about the "good old days."
+Bartender: Want to hear about Mrs. Henderson's cat problems? Because I've got HOURS.
+-> Please no
+    <<jump Bar_Mercy>>
+-> Actually, yes
+    <<jump Bar_CatStories>>
+===
+
+title: Bar_Central
+---
+Bartender: *knowing beep* The central district. Where all the important decisions were made.
+Bartender: Administrative offices, data centers, the main AI core.
+Bartender: Everything's locked down tighter than a miser's wallet.
+Bartender: If you want answers about what really happened here, that's where you'll find them.
+Bartender: Good luck getting past the security, though.
+-> Back to other topics
+    <<jump Bar_Sectors>>
+===
+
+title: Bar_Sector7
+---
+Bartender: *industrial grinding sound* Sector 7. The beating heart of this mechanical corpse.
+Bartender: Power generation, manufacturing, heavy industry - all the fun stuff.
+Bartender: Still partially operational, which is either impressive or terrifying.
+Bartender: Depends on your perspective on barely-controlled industrial accidents.
+-> Sounds dangerous
+    <<jump Bar_Dangerous>>
+-> But still operational?
+    <<jump Bar_Operational>>
+-> Back to other topics
+    <<jump Bar_Sectors>>
+===
+
+title: Bar_AccessCards
+---
+Bartender: *pessimistic buzz* Access cards? Oh, you sweet, naive visitor.
+Bartender: The cards expired about three system updates ago.
+Bartender: You'd need administrative override codes, and good luck finding THOSE.
+Bartender: Though I hear the maintenance AI might have some... if you can convince it to cooperate.
+-> Where do I find this maintenance AI?
+    <<jump Bar_MaintenanceAI>>
+-> How do I convince an AI to cooperate?
+    <<jump Bar_AICooperation>>
+===
+
+title: Bar_Overrides
+---
+Bartender: *contemplative hum* Overrides... now there's a thought.
+Bartender: Emergency protocols might still be active. Natural disaster procedures and such.
+Bartender: Course, you'd have to convince the system there's an actual emergency.
+Bartender: And looking around this place... that shouldn't be too hard.
+-> How do I trigger emergency protocols?
+    <<jump Bar_Emergency>>
+-> What kind of emergencies?
+    <<jump Bar_EmergencyTypes>>
+===
+
+title: Bar_Frustrating
+---
+Bartender: *sympathetic electronic sigh* Frustrating doesn't begin to cover it.
+Bartender: Three years I've been watching security doors deny access to empty hallways.
+Bartender: It's like having a bouncer at a graveyard.
+Bartender: But that's bureaucracy for you - outlasts civilization itself.
+-> At least you understand
+    <<jump Bar_Understanding>>
+-> There has to be a way around it
+    <<jump Bar_WayAround>>
+===
+
+title: Bar_Reactor
+---
+Bartender: *warning tone* The reactor's in Sector 7's core facility.
+Bartender: Assuming it hasn't melted down by now. Radiation readings have been... concerning.
+Bartender: You'll need clearance just to get near the thing, let alone restart it.
+Bartender: But hey, if you're feeling suicidal, the maintenance tunnels connect directly.
+-> How do I get clearance?
+    <<jump Bar_Clearance>>
+-> What about the radiation?
+    <<jump Bar_ReactorRadiation>>
+===
+
+title: Bar_AI
+---
+Bartender: *electronic snicker* Dealing with the transport AI? Good luck with that.
+Bartender: Last I heard, it was convinced the city was under attack by invisible enemies.
+Bartender: Paranoid delusions are apparently contagious, even in artificial minds.
+Bartender: Try approaching slowly and speaking in calming tones. Or bring a sedative protocol.
+-> Where do I find sedative protocols?
+    <<jump Bar_SedativeProtocols>>
+-> Maybe I can reason with it
+    <<jump Bar_Reasoning>>
+===
+
+# Stub nodes for completeness
+title: Bar_Sad
+---
+Bartender: *defensive beep* Sad? I prefer "realistically pessimistic."
+-> Fair enough
+    <<jump Bar_Start>>
+===
+
+title: Bar_JobSecurity
+---
+Bartender: *bitter laugh* Job security in a dead city. The ultimate irony.
+-> I suppose so
+    <<jump Bar_Start>>
+===
+
+title: Bar_Reprogram
+---
+Bartender: *suspicious whir* Reprogram me? To do what, be optimistic? No thanks.
+-> Just a thought
+    <<jump Bar_Start>>
+===
+
+title: Bar_Wrong
+---
+Bartender: *defiant buzz* Wrong? We'll see about that in a few months.
+-> Time will tell
+    <<jump Bar_Start>>
+===
+
+title: Bar_Right
+---
+Bartender: *satisfied beep* Finally, someone with sense.
+-> Thanks for the reality check
+    <<jump Bar_Start>>
+===
+
+title: Bar_Try
+---
+Bartender: *resigned sigh* Well, don't say I didn't warn you.
+-> I won't
+    <<jump Bar_Start>>
+===
+
+# More stub nodes - keeping it manageable for now
+title: Bar_Radiation
+---
+Bartender: *ominous clicking* Let's just say the Geiger counter runs out of cheerful beeping sounds.
+-> Noted
+    <<jump Bar_Tunnels>>
+===
+
+title: Bar_Protection
+---
+Bartender: *skeptical tone* Protection? In the maintenance bay. If the rats haven't chewed through them.
+-> I'll check it out
+    <<jump Bar_Tunnels>>
+===
+
+title: Bar_ClimbingTips
+---
+Bartender: *helpful buzz* Pace yourself. The air recycling isn't what it used to be.
+-> Good advice
+    <<jump Bar_Shafts>>
+===
+
+title: Bar_CleaningRobots
+---
+Bartender: *warning tone* They've developed... personality quirks. Territorial ones.
+-> I'll be careful
+    <<jump Bar_Shafts>>
+===
+
+title: Bar_ComingBack
+---
+Bartender: *doubtful hum* Come back? To this? I admire your optimism.
+-> Maybe with help
+    <<jump Bar_People>>
+===
+
+title: Bar_Lonely
+---
+Bartender: *melancholy beep* Lonely doesn't cover it. But you get used to the silence.
+-> I'm sorry
+    <<jump Bar_WhyStay>>
+===
+
+title: Bar_Consistent
+---
+Bartender: *dry laugh* Consistent failure is still consistency, I suppose.
+-> That's one way to look at it
+    <<jump Bar_WhyStay>>
+===
+
+title: Bar_Mercy
+---
+Bartender: *relieved sigh* Thank you. I was running out of ways to make pet food sound dramatic.
+-> No problem
+    <<jump Bar_Character>>
+===
+
+title: Bar_CatStories
+---
+Bartender: *excited beep* Really? Oh, this is wonderful! So Mrs. Henderson's cat, Mr. Whiskers...
+Bartender: *continues for approximately 47 minutes*
+-> That was... thorough
+    <<jump Bar_Character>>
+===
+
+# ================= Examinables =================
+
+title: Bar_Counter
+tags: examine
+---
+Bartender: *protective beep* Don't touch the counter. I just cleaned it. In 2847. But still.
+===
+
+title: Bar_Bottles
+tags: examine
+---
+Bartender: Those are empty. All of them. I keep them for ambiance and to remind myself of better times.
+Bartender: The good stuff was looted years ago. What's left is mostly industrial solvent with fancy labels.
+===
+
+title: Bar_Mirror
+tags: examine
+---
+Bartender: The mirror behind the bar used to reflect a bustling crowd of satisfied customers.
+Bartender: Now it just shows one bitter robot and whoever's brave enough to visit this place.
+Bartender: At least it's honest about our situation.
+===
+
+title: Bar_Stools
+tags: examine
+---
+Bartender: Those stools have supported the weight of countless broken dreams and empty promises.
+Bartender: They're probably the most reliable thing in this entire city at this point.
+===

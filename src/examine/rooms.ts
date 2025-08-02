@@ -3,6 +3,7 @@ import { cryoroomExamineRects } from './cryoroom';
 import { mallExamineRects } from './mall';
 import { sector7ExamineRects } from './sector7';
 import { bookstoreExamineRects } from './bookstore';
+import { thebarExamineRects } from './thebar';
 
 export interface RoomExamineData {
   rects: ExamineRect[];
@@ -20,6 +21,9 @@ export const roomExamineData: Record<string, RoomExamineData> = {
   },
   bookstore: {
     rects: bookstoreExamineRects,
+  },
+  thebar: {
+    rects: thebarExamineRects,
   },
 };
 

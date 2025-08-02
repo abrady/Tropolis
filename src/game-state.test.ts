@@ -38,6 +38,13 @@ const levels: Record<LevelName, LevelData> = {
     examine: [],
     connections: [],
   },
+  thebar: {
+    image: new Image(),
+    dialogue: 'title: TheBar\n---\nGuide: thebar\n===',
+    start: 'Bar_Start',
+    examine: [],
+    connections: [],
+  },
 };
 
 describe('GameState', () => {

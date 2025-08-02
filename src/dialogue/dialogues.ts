@@ -3,6 +3,7 @@ import testChoiceDialogue from './test-choice.gab?raw';
 import sector7Dialogue from './sector7.gab?raw';
 import mallDialogue from './mall.gab?raw';
 import bookstoreDialogue from './bookstore.gab?raw';
+import thebarDialogue from './thebar.gab?raw';
 import type { LevelName } from '../examine/levels';
 
 export interface RoomDialogueData {
@@ -30,6 +31,10 @@ export const roomDialogueData: Record<LevelName, RoomDialogueData> = {
   bookstore: {
     dialogue: bookstoreDialogue,
     start: 'Bookstore_Start',
+  },
+  thebar: {
+    dialogue: thebarDialogue,
+    start: 'Bar_Start',
   },
 };
 
