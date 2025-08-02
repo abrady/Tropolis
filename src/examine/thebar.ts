@@ -1,4 +1,4 @@
-import { ExamineRect } from '../examine';
+import { ExamineRect, ExamineRectType } from '../examine';
 
 export const thebarExamineRects: ExamineRect[] = [
   {
@@ -6,7 +6,7 @@ export const thebarExamineRects: ExamineRect[] = [
     y: 400,
     width: 400,
     height: 100,
-    type: 'dialogue',
+    type: ExamineRectType.Dialogue,
     level: 'thebar',
     dialogueNode: 'Bar_Counter',
   },
@@ -15,7 +15,7 @@ export const thebarExamineRects: ExamineRect[] = [
     y: 200,
     width: 300,
     height: 200,
-    type: 'dialogue',
+    type: ExamineRectType.Dialogue,
     level: 'thebar',
     dialogueNode: 'Bar_Bottles',
   },
@@ -24,7 +24,7 @@ export const thebarExamineRects: ExamineRect[] = [
     y: 150,
     width: 200,
     height: 150,
-    type: 'dialogue',
+    type: ExamineRectType.Dialogue,
     level: 'thebar',
     dialogueNode: 'Bar_Mirror',
   },
@@ -33,7 +33,7 @@ export const thebarExamineRects: ExamineRect[] = [
     y: 450,
     width: 150,
     height: 50,
-    type: 'dialogue',
+    type: ExamineRectType.Dialogue,
     level: 'thebar',
     dialogueNode: 'Bar_Stools',
   },
@@ -42,7 +42,7 @@ export const thebarExamineRects: ExamineRect[] = [
     y: 450,
     width: 150,
     height: 50,
-    type: 'dialogue',
+    type: ExamineRectType.Dialogue,
     level: 'thebar',
     dialogueNode: 'Bar_Stools',
   },
