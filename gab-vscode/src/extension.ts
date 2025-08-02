@@ -24,7 +24,7 @@ function refreshDiagnostics(doc: vscode.TextDocument, collection: vscode.Diagnos
       const line = findLine(t);
       if (line !== -1) {
         const range = new vscode.Range(line, 0, line, lines[line].length);
-        diagnostics.push(new vscode.Diagnostic(range, `Non-terminating node: ${t}`, vscode.DiagnosticSeverity.Warning));
+        diagnostics.push(new vscode.Diagnostic(range, `Non-terminating node: ${t} (cannot reach any ending - has infinite loops or jumps to missing nodes)`, vscode.DiagnosticSeverity.Warning));
       }
     }
   } catch (err: any) {

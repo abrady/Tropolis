@@ -105,5 +105,39 @@ Speaker: This should return
       // This should be terminating because of the return command
       expect(result.nonterminating).not.toContain('ReturnNode');
     });
+
+        it('recognizes nodes that do not terminate', () => {
+      const content = `title: Bookstore_Start
+---
+Overlord: This is the old Central Library Bookstore, 11235.
+Overlord: The automated archive system is still functional.
+Overlord: You might find useful information about the city's infrastructure here.
+-> Search the archives
+    <<jump Bookstore_Archives>>
+===
+
+title: Bookstore_Archives
+---
+Speaker: Choose an option
+-> Option 1
+    <<jump Bookstore_Start>>
+===
+
+title: Target1
+---
+Speaker: You chose option 1
+===
+
+title: Target2
+---
+Speaker: You chose option 2
+===`;
+      
+      const nodes = parseGab(content);
+      const result = validateGab(nodes, 'Bookstore_Start');
+
+      expect(result.nonterminating).toContain('Bookstore_Start');
+    });
+
   });
 });
