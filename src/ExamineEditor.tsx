@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ORIGINAL_WIDTH, ORIGINAL_HEIGHT, ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './examine';
 
 export function exportRectangles(rects: ExamineRect[]): string {
@@ -42,13 +42,13 @@ export default function ExamineEditor({ width, height, background, onClose, init
   });
 
   // Convert original coordinates to viewport coordinates for editing
-  const convertToViewportCoords = (rect: ExamineRect): ExamineRect => ({
+  const convertToViewportCoords = useCallback((rect: ExamineRect): ExamineRect => ({
     ...rect,
     x: rect.x * scaleToViewport.x,
     y: rect.y * scaleToViewport.y,
     width: rect.width * scaleToViewport.x,
     height: rect.height * scaleToViewport.y,
-  }, [rect]);
+  }), [scaleToViewport.x, scaleToViewport.y]);
 
   // Initialize rectangles from initial rects converted to viewport coordinates
   React.useEffect(() => {
