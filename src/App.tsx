@@ -55,7 +55,7 @@ function useViewportSize() {
   return size;
 }
 
-function GameCanvas({ frames, background, width, height }: { frames: Frame[]; background: HTMLImageElement; width: number; height: number }) {
+function GameCanvas({ frames, background, width, height }: { frames: Frame[] | null; background: HTMLImageElement; width: number; height: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -63,20 +63,24 @@ function GameCanvas({ frames, background, width, height }: { frames: Frame[]; ba
     let frameIndex = 0;
     let lastSwitch = performance.now();
     function draw(ts: number) {
-      const f = frames[frameIndex];
-      if (ts - lastSwitch > f.duration) {
-        frameIndex = (frameIndex + 1) % frames.length;
-        lastSwitch = ts;
-      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      ctx.drawImage(
-        Overlord.image,
-        f.x, f.y, f.w, f.h,
-        (canvas.width - f.w) / 2,
-        (canvas.height / 2) - f.h,
-        f.w, f.h
-      );
+      
+      // Only draw character if frames are provided
+      if (frames && frames.length > 0) {
+        const f = frames[frameIndex];
+        if (ts - lastSwitch > f.duration) {
+          frameIndex = (frameIndex + 1) % frames.length;
+          lastSwitch = ts;
+        }
+        ctx.drawImage(
+          Overlord.image,
+          f.x, f.y, f.w, f.h,
+          (canvas.width - f.w) / 2,
+          (canvas.height / 2) - f.h,
+          f.w, f.h
+        );
+      }
       requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
@@ -98,7 +102,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
-  const [animation, setAnimation] = useState<Frame[]>(Overlord.animations.idle);
+  const [animation, setAnimation] = useState<Frame[] | null>(Overlord.animations.idle);
   const [background, setBackground] = useState(() => gameStateRef.current!.getBackground());
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showExamineEditor, setShowExamineEditor] = useState(false);
@@ -129,6 +133,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
       const gs = gameStateRef.current!;
       gs.gotoLevel(args[0]);
       setBackground(gs.getBackground());
+      setAnimation(null); // Clear character display when changing levels
       const gen = gs.getManager().advance();
       setDialogueGenerator(gen);
     }
