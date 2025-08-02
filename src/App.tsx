@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
 import { DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
@@ -104,7 +104,11 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
   const [animation, setAnimation] = useState<Frame[] | null>(Overlord.animations.idle);
-  const [background, setBackground] = useState(() => gameStateRef.current!.getBackground());
+  const [background, setBackground] = useState<HTMLImageElement>(() => {
+    const bg = gameStateRef.current!.getBackground();
+    if (!bg) throw new Error('No background image available');
+    return bg;
+  });
   const [showPuzzle, setShowPuzzle] = useState(false);
   const [showExamineEditor, setShowExamineEditor] = useState(false);
   const [showExamine, setShowExamine] = useState(false);
@@ -113,38 +117,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const [examineDebugMode, setExamineDebugMode] = useState(false);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleDialogueAction = (command: string, args: string[]) => {
-    if (command === 'loadPuzzle') {
-      if(args[0] !== 'TowerOfHanoi') {
-        throw new Error(`Unknown puzzle type: ${args[0]}`);
-      }
-      setShowPuzzle(true);
-      
-      setTimeout(() => {
-        const container = puzzleContainerRef.current;
-        if (container) {
-          container.innerHTML = '';
-          startTowerOfHanoi(container, 4, () => {
-            setShowPuzzle(false);
-            // Continue dialogue after puzzle completion
-            processNextEvent();
-          });
-        }
-      }, 100);
-    } else if (command === 'loadLevel') {
-      const gs = gameStateRef.current!;
-      gs.gotoLevel(args[0]);
-      setBackground(gs.getBackground());
-      setAnimation(null); // Clear character display when changing levels
-      setDialogueGenerator(gs.getDialogueGenerator());
-    }
-    // Auto-advance after processing action
-    else {
-      throw new Error(`Unknown command: ${command}`);
-    }
-  };
-
-  const processNextEvent = (param?: DialogueAdvanceParam) => {
+  const processNextEvent = useCallback((param?: DialogueAdvanceParam) => {
     if (!dialogueGenerator) return;
     
     const result = param ?
@@ -154,7 +127,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     if (result.done) {
       console.log('Dialogue ended');
       setCurrentEvent(null);
-      setDialogueGenerator(null);
+      setDialogueGenerator(undefined);
       setDisplayLines([]);
       
       setShowActionMenu(true);
@@ -167,21 +140,48 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     switch (event.type) {
       case 'line':
         setDisplayLines([event.text]);
-        if (event.speaker && manager) {
-          const animName = manager.getAnimationForSpeaker(event.speaker);
-          if (animName && Overlord.animations[animName as keyof typeof Overlord.animations]) {
-            setAnimation(Overlord.animations[animName as keyof typeof Overlord.animations]);
-          }
-        }
+        // For now, we'll skip speaker animations since we don't have a direct way to access the manager
         break;
       case 'choice':
         // Choice event handled by rendering OptionsWidget
         break;
       case 'command':
-        handleDialogueAction(event.command, event.args);
+        if (event.command === 'loadPuzzle') {
+          if(event.args[0] !== 'TowerOfHanoi') {
+            throw new Error(`Unknown puzzle type: ${event.args[0]}`);
+          }
+          setShowPuzzle(true);
+          
+          setTimeout(() => {
+            const container = puzzleContainerRef.current;
+            if (container) {
+              container.innerHTML = '';
+              startTowerOfHanoi(container, 4, () => {
+                setShowPuzzle(false);
+                // Continue dialogue after puzzle completion
+                processNextEvent();
+              });
+            }
+          }, 100);
+        } else if (event.command === 'loadLevel') {
+          const gs = gameStateRef.current!;
+          const levelName = event.args[0] as LevelName;
+          if (!(levelName in levels)) {
+            throw new Error(`Unknown level: ${levelName}`);
+          }
+          gs.gotoLevel(levelName);
+          const newBg = gs.getBackground();
+          if (newBg) setBackground(newBg);
+          setAnimation(null); // Clear character display when changing levels
+          setDialogueGenerator(gs.getDialogueGenerator());
+        } else {
+          throw new Error(`Unknown command: ${event.command}`);
+        }
         break;
     }
-  };
+  }, [dialogueGenerator]);
+
+  // Remove the separate handleDialogueAction function since it's now inline
     
   const handleOptionSelect = (optionIndex: number) => {
     if (!dialogueGenerator) return;
@@ -229,10 +229,8 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     // Clear current dialogue state first
     setCurrentEvent(null);
     setDisplayLines([]);
-    
-    const manager = gameStateRef.current!.getManager();
-    manager.start(dialogueId);
-    const generator = manager.advance();
+
+    const generator = gameStateRef.current!.startDialogue(dialogueId);
     setDialogueGenerator(generator);
   };
 
@@ -250,8 +248,8 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   // our run-once effect to initialize the dialogue manager and start the dialogue
   useEffect(() => {
     const gs = gameStateRef.current!;
-    const m = gs.getManager();
-    setDialogueGenerator(m.advance());
+    const generator = gs.getDialogueGenerator();
+    setDialogueGenerator(generator);
   }, []);
 
   // call this one time once we have the dialogue manager and generator set up

@@ -28,10 +28,10 @@ export interface DialogueNode {
 }
 
 export type DialogueEvent = 
-  | { type: 'line'; text: string; speaker: string | null }
-  | { type: 'choice'; options: DialogueOption[] }
-  // | { type: 'pause'; duration?: number }
-  | { type: 'command'; command: string; args: string[] };
+  | { type: 'line'; text: string; speaker: string | null; node: DialogueNode }
+  | { type: 'choice'; options: DialogueOption[]; node: DialogueNode }
+  // | { type: 'pause'; duration?: number; node: DialogueNode }
+  | { type: 'command'; command: string; args: string[]; node: DialogueNode };
 
 export type DialogueAdvanceParam =
 | { type: 'choice'; optionIndex: number };
@@ -40,7 +40,7 @@ interface DialogueState {
   currentNode: string;
   content?: DialogueNode; 
   lineIndex: number;
-  variables: Record<string, any>;   // e.g. { "$hasKey": true, "$score": 10 }
+  variables: Record<string, string>;   // e.g. { "$hasKey": true, "$score": 10 }
   flags: Record<string, boolean>;   // e.g. { "saw_dialog_Intro": true }
 }
 
@@ -92,8 +92,7 @@ export class DialogueManager {
   }
 
   isCurrentNodeExamine(): boolean {
-    if (!this.state.currentNode || !this.state.content) return false;
-    return this.state.content.tags.has('examine');
+    return this.currentEvent?.node?.tags.has('examine') || false;
   }
 
   getCurrenGenerator(): DialogueGenerator | undefined {
@@ -102,7 +101,7 @@ export class DialogueManager {
 
   start(startNode: string): void {
     this.goto(startNode); // set the initial state
-    
+
     this.currentGenerator = this.advance();
   }
 
@@ -122,6 +121,7 @@ export class DialogueManager {
           type: 'line',
           text: textOnly,
           speaker: speaker,
+          node: this.state.content
         };
         yield this.currentEvent;
         this.state.lineIndex++;
@@ -132,6 +132,7 @@ export class DialogueManager {
         this.currentEvent = {
           type: 'choice',
           options: this.state.content.options,
+          node: this.state.content
         };
         const result = yield this.currentEvent;
         if (result && result.type === 'choice') {
@@ -159,6 +160,7 @@ export class DialogueManager {
           type: 'command',
           command: this.state.content.command.name,
           args: this.state.content.command.args,
+          node: this.state.content
         };
         yield this.currentEvent;
       }

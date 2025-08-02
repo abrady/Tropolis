@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './ExamineEditor';
-
-// Original background image dimensions
-const ORIGINAL_WIDTH = 1536;
-const ORIGINAL_HEIGHT = 1024;
+import { ORIGINAL_WIDTH, ORIGINAL_HEIGHT, ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './examine';
 
 function scaleRect<T extends ExamineRect>(rect: T, scaleX: number, scaleY: number): T {
   return {

@@ -1,39 +1,5 @@
 import React, { useState, useRef } from 'react';
-
-// Original background image dimensions - should match ExamineOverlay
-const ORIGINAL_WIDTH = 1536;
-const ORIGINAL_HEIGHT = 1024;
-
-export enum ExamineRectType {
-  None = 'none',
-  Dialogue = 'dialogue',
-  AddToInventory = 'inventory',
-}
-
-interface BaseExamineRect {
-  x: number; 
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface DialogueExamineRect extends BaseExamineRect {
-  type: ExamineRectType.Dialogue;
-  level: string;
-  dialogueNode: string;
-}
-
-export interface InventoryExamineRect extends BaseExamineRect {
-  type: ExamineRectType.AddToInventory;
-  item: string;
-}
-
-export interface NoneExamineRect extends BaseExamineRect {
-  type: ExamineRectType.None;
-  args: string;
-}
-
-export type ExamineRect = DialogueExamineRect | InventoryExamineRect | NoneExamineRect;
+import { ORIGINAL_WIDTH, ORIGINAL_HEIGHT, ExamineRect, ExamineRectType, DialogueExamineRect, InventoryExamineRect, NoneExamineRect } from './examine';
 
 export function exportRectangles(rects: ExamineRect[]): string {
   return JSON.stringify(rects);
@@ -82,7 +48,7 @@ export default function ExamineEditor({ width, height, background, onClose, init
     y: rect.y * scaleToViewport.y,
     width: rect.width * scaleToViewport.x,
     height: rect.height * scaleToViewport.y,
-  });
+  }, [rect]);
 
   // Initialize rectangles from initial rects converted to viewport coordinates
   React.useEffect(() => {

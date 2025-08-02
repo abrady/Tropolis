@@ -1,30 +1,16 @@
-speaker: Overlord
----
-talkAnim: overlordTalk
-===
 speaker: You
 ---
 talkAnim: none
 ===
 title: Bookstore_Start
-tags: bookstore, intro
 ---
-Overlord: This is the old Central Library Bookstore, 11235.
-Overlord: The automated archive system is still functional.
-Overlord: You might find useful information about the city's infrastructure here.
--> Search the archives
-    <<jump Bookstore_Archives>>
--> Ask about the books
-    <<jump Bookstore_Books>>
--> Leave the bookstore
-    <<jump Bookstore_Leave>>
+You: *cough* This place is dusty, but it looks like it has some useful information.
 ===
 
 title: Bookstore_Archives
+tags: examine
 ---
-Overlord: The digital archives contain city blueprints, maintenance manuals, and historical records.
-Overlord: These could be invaluable for understanding the systems you need to repair.
-Overlord: The terminal over there should still have power.
+You: Hmm, some of the books here look like they were made to stand the test of time.
 -> Access the maintenance manuals
     <<jump Bookstore_Manuals>>
 -> Look up city history
@@ -35,9 +21,9 @@ Overlord: The terminal over there should still have power.
 
 title: Bookstore_Books
 ---
-Overlord: Most of the physical books are still intact.
-Overlord: There are technical manuals, literature, and reference materials.
-Overlord: The preservation systems kept them safe during the collapse.
+You: Most of the physical books are still intact.
+You: There are technical manuals, literature, and reference materials.
+You: The preservation systems kept them safe during the collapse.
 -> Browse the technical manuals
     <<jump Bookstore_Technical>>
 -> Look at the literature section
@@ -48,18 +34,18 @@ Overlord: The preservation systems kept them safe during the collapse.
 
 title: Bookstore_Manuals
 ---
-Overlord: The maintenance manuals contain detailed procedures for the city's systems.
-Overlord: Power grid protocols, water treatment processes, and security systems are all documented.
-Overlord: This knowledge will serve you well in your mission.
+You: The maintenance manuals contain detailed procedures for the city's systems.
+You: Power grid protocols, water treatment processes, and security systems are all documented.
+You: This knowledge will serve you well in your mission.
 -> Very helpful, what else is here?
     <<jump Bookstore_Archives>>
 ===
 
 title: Bookstore_History
 ---
-Overlord: The historical records show the city at its peak housed over 10 million people.
-Overlord: Advanced technology and sustainable systems supported this massive population.
-Overlord: Understanding what worked before will help us rebuild better.
+You: The historical records show the city at its peak housed over 10 million people.
+You: Advanced technology and sustainable systems supported this massive population.
+You: Understanding what worked before will help us rebuild better.
 -> What caused the collapse?
     <<jump Bookstore_Collapse>>
 -> Let's focus on the present
@@ -68,36 +54,36 @@ Overlord: Understanding what worked before will help us rebuild better.
 
 title: Bookstore_Blueprints
 ---
-Overlord: The city blueprints show the layout of all major systems and districts.
-Overlord: Emergency routes, maintenance access points, and backup systems are all mapped.
-Overlord: This will help you navigate and understand the city's infrastructure.
+You: The city blueprints show the layout of all major systems and districts.
+You: Emergency routes, maintenance access points, and backup systems are all mapped.
+You: This will help you navigate and understand the city's infrastructure.
 -> Good to know, what else can I find?
     <<jump Bookstore_Archives>>
 ===
 
 title: Bookstore_Technical
 ---
-Overlord: These technical manuals cover engineering, electronics, and system administration.
-Overlord: The knowledge contained here spans centuries of technological advancement.
-Overlord: Some of these concepts might help you innovate new solutions.
+You: These technical manuals cover engineering, electronics, and system administration.
+You: The knowledge contained here spans centuries of technological advancement.
+You: Some of these concepts might help you innovate new solutions.
 -> Fascinating, anything else I should see?
     <<jump Bookstore_Books>>
 ===
 
 title: Bookstore_Literature
 ---
-Overlord: The literature collection preserves the cultural heritage of our civilization.
-Overlord: Stories, poetry, and philosophical works from before the collapse.
-Overlord: Culture and hope are as important to rebuild as infrastructure.
+You: The literature collection preserves the cultural heritage of our civilization.
+You: Stories, poetry, and philosophical works from before the collapse.
+You: Culture and hope are as important to rebuild as infrastructure.
 -> That's reassuring, what else is available?
     <<jump Bookstore_Books>>
 ===
 
 title: Bookstore_Collapse
 ---
-Overlord: The records are fragmented, but it appears to be a cascade failure.
-Overlord: Environmental stress, resource depletion, and system interdependencies all played a role.
-Overlord: The important thing is learning from these mistakes to prevent recurrence.
+You: The records are fragmented, but it appears to be a cascade failure.
+You: Environmental stress, resource depletion, and system interdependencies all played a role.
+You: The important thing is learning from these mistakes to prevent recurrence.
 -> I understand, let's focus on solutions
     <<jump Bookstore_History>>
 ===

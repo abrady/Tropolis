@@ -4,47 +4,48 @@ export interface LevelData {
   image: HTMLImageElement;
   dialogue: string;
   start: string;
-  examine: any[]; // using any to avoid circular import; callers can cast
+  examine: ExamineRect[]; // using unknown instead of any for better type safety
   connections: LevelName[];
 }
 
 export type GameStateListener = (state: GameState) => void;
 
 import { DialogueManager, DialogueGenerator } from './dialogue-manager';
+import { ExamineRect } from './examine';
 
 export class GameState {
   private levels: Record<LevelName, LevelData>;
-  private background: HTMLImageElement;
+  private background?: HTMLImageElement;
   private listeners: GameStateListener[] = [];
-  private dialogueManager?: DialogueManager;
   private dialogueGenerator?: DialogueGenerator;
 
   inventory = new Set<string>();
   visited = new Set<string>();
   flags: Record<string, boolean> = {};
-  currentLevel: LevelName;
+  currentLevel: LevelName = 'test';
 
   constructor(levels: Record<LevelName, LevelData>, initialLevel: LevelName) {
     if (!levels[initialLevel]) {
       throw new Error(`Unknown level: ${initialLevel}`);
     }
     this.levels = levels;
-    this.currentLevel = initialLevel;
-    const data = levels[initialLevel];
-    this.dialogueManager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
-    this.dialogueManager.start(data.start);
-    this.dialogueGenerator = this.dialogueManager.advance();
-    this.background = data.image;
-    this.visited.add(initialLevel);
+    this.gotoLevel(initialLevel);
+  }
+
+  startDialogue(dialogueId: string): DialogueGenerator {
+    const data = this.levels[this.currentLevel];
+    if (!data) throw new Error(`Unknown level: ${this.currentLevel}`);
+    const manager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
+    manager.start(dialogueId);
+    this.dialogueGenerator = manager.advance();
+    return this.dialogueGenerator;
   }
 
   gotoLevel(level: LevelName) {
     const data = this.levels[level];
     if (!data) throw new Error(`Unknown level: ${level}`);
     this.currentLevel = level;
-    this.dialogueManager = new DialogueManager(data.dialogue, { loadPuzzle: () => {}, loadLevel: () => {}, return: () => {} });
-    this.dialogueManager.start(data.start);
-    this.dialogueGenerator = this.dialogueManager.advance();
+    this.startDialogue(data.start);
     this.background = data.image;
     this.visited.add(level);
     this.emit();

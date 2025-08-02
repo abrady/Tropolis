@@ -10,6 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test` - Run tests with Vitest
 - `npm run test -- src/path/to/file.test.ts` - Run specific test file
 - `npm run test -- --watch` - Run tests in watch mode
+- `npm run format` - Format all files with Prettier
+- `npm run format:check` - Check if files are formatted correctly
 
 ## Architecture Overview
 
