@@ -66,4 +66,33 @@ describe('GameState', () => {
     gs.removeItem('key');
     expect(gs.hasItem('key')).toBe(false);
   });
+
+  it('persists visited dialogue nodes across sessions', () => {
+    const gatedLevels: Record<LevelName, LevelData> = {
+      ...levels,
+      cryoroom: {
+        image: new Image(),
+        dialogue:
+          'title: Intro\n---\n{!Intro} Guide: Welcome\n<<jump Next>>\n===\ntitle: Next\n---\nGuide: After\n===',
+        start: 'Intro',
+        examine: [],
+        connections: [],
+      },
+    };
+
+    const gs = new GameState(gatedLevels, 'cryoroom');
+    let gen = gs.getDialogueGenerator()!;
+    let ev = gen.next().value;
+    expect(ev.type).toBe('line');
+    expect(ev.text).toBe('Welcome');
+    ev = gen.next().value;
+    expect(ev.type).toBe('line');
+    expect(ev.text).toBe('After');
+    expect(gen.next().done).toBe(true);
+
+    gen = gs.startDialogue('Intro');
+    ev = gen.next().value;
+    expect(ev.type).toBe('line');
+    expect(ev.text).toBe('After');
+  });
 });

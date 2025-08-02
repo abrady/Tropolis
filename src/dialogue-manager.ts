@@ -64,20 +64,25 @@ export class DialogueManager {
     flags: {},
   };
   private speakerInfo: Record<string, Speaker> = {};
-  private visited = new Set<string>();
+  private visited: Record<string, boolean>;
   private returnStack: string[] = [];
   private currentEvent: DialogueEvent | null = null;
   private currentGenerator?: DialogueGenerator;
 
   private commandHandlers: CommandHandlers;
 
-  constructor(gabText: string, handlers: CommandHandlers) {
+  constructor(
+    gabText: string,
+    handlers: CommandHandlers,
+    visitedNodes: Record<string, boolean> = {}
+  ) {
     const { nodes, speakers } = parseGabFile(gabText);
     this.speakerInfo = speakers;
     for (const n of nodes) {
       this.nodes[n.title] = n;
     }
     this.commandHandlers = handlers;
+    this.visited = visitedNodes;
   }
 
   getAnimationForSpeaker(name: string): string | undefined {
@@ -203,12 +208,15 @@ export class DialogueManager {
       variables: this.state.variables,
       flags: this.state.flags,
     };
-    this.visited.add(nodeName);
+    this.visited[nodeName] = true;
     this.currentEvent = null; // Reset current event
   }
 }
 
-function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNode {
+function parseNodeBody(
+  gabNode: GabNode,
+  visitedNodes: Record<string, boolean>
+): DialogueNode {
   const body = gabNode.body;
   const title = gabNode.title;
   const tagString = gabNode.metadata['tags'] || '';
@@ -268,7 +276,7 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
         const negate = gateMatch[1] === '!';
         const condition = gateMatch[2];
         const lineText = gateMatch[3];
-        const visited = visitedNodes.has(condition);
+        const visited = !!visitedNodes[condition];
         const shouldShow = negate ? !visited : visited;
         if (shouldShow && lineText) {
           texts.push(lineText);
@@ -292,7 +300,7 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
         const negate = gateMatch[1] === '!';
         const condition = gateMatch[2];
         text = gateMatch[3].trim();
-        const visited = visitedNodes.has(condition);
+        const visited = !!visitedNodes[condition];
         const shouldShow = negate ? !visited : visited;
         if (!shouldShow) {
           // skip option if condition not met
@@ -311,7 +319,12 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
           i++; // consume command line
         }
       }
-      options.push({ text, target, visited: target ? visitedNodes.has(target) : false, detour });
+      options.push({
+        text,
+        target,
+        visited: target ? !!visitedNodes[target] : false,
+        detour,
+      });
     }
   }
   return { title, tags, lines: texts, options, next, command };
