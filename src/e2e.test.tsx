@@ -23,7 +23,7 @@ describe('Game boot', () => {
   it('follows detour and jump choices', async () => {
     await act(async () => {
       ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="Test" />
+        <App initialLevel="test" />
       );
     });
 
@@ -76,7 +76,7 @@ describe('Game boot', () => {
   it('hides options when the action menu is opened with Backspace', async () => {
     await act(async () => {
       ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="Test" />
+        <App initialLevel="test" />
       );
     });
 
@@ -104,7 +104,7 @@ describe('Game boot', () => {
   it('hides options when the action menu is opened with Escape', async () => {
     await act(async () => {
       ReactDOM.createRoot(document.getElementById('root')!).render(
-        <App initialLevel="Test" />
+        <App initialLevel="test" />
       );
     });
 

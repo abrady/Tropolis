@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Frame } from './frame-utils';
 import { Overlord } from './characters';
-import { DialogueManager, DialogueOption, DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
+import { DialogueEvent, DialogueAdvanceParam } from './dialogue-manager';
 import DialogueWidget from './DialogueWidget';
 import OptionsWidget from './OptionsWidget';
 import ActionMenu, { ActionType } from './ActionMenu';
 import MoveMenu from './MoveMenu';
 import { startTowerOfHanoi } from './puzzles';
-import ExamineEditor, { ExamineRect } from './ExamineEditor';
+import ExamineEditor from './ExamineEditor';
 import ExamineOverlay from './ExamineOverlay';
-import { getRoomExamineRects } from './examine/rooms';
-import { GameState, LevelData } from './game-state';
+import { GameState } from './game-state';
 import { levels } from './examine/levels';
+import { getRoomDialogueStart } from './dialogue/dialogues';
 
 function useViewportSize() {
   const [size, setSize] = useState(() => {
@@ -94,7 +94,7 @@ interface AppProps {
   initialLevel?: keyof typeof levels;
 }
 
-export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
+export default function App({ initialLevel = 'cryoroom' }: AppProps) {
   const viewportSize = useViewportSize();
   const gameStateRef = useRef<GameState>(null);
   if (!gameStateRef.current) {
@@ -111,7 +111,6 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [examineDebugMode, setExamineDebugMode] = useState(false);
-  const [previousOptions, setPreviousOptions] = useState<DialogueOption[]>([]);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleDialogueAction = (command: string, args: string[]) => {
@@ -196,11 +195,23 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
     console.log(`Action selected: ${action}`);
     
     switch (action) {
-      case 'talk':
-        if (previousOptions.length > 0 && currentEvent?.type === 'choice') {
-          // Restore previous choice options
+      case 'talk': {
+        // Start main dialogue for current level
+        const currentLevel = gameStateRef.current!.currentLevel;
+        const startNode = getRoomDialogueStart(currentLevel);
+        if (startNode) {
+          // Clear current state
+          setCurrentEvent(null);
+          setDisplayLines([]);
+          
+          // Start new dialogue
+          const manager = gameStateRef.current!.getManager();
+          manager.start(startNode);
+          const generator = manager.advance();
+          setDialogueGenerator(generator);
         }
         break;
+      }
       case 'examine':
         setShowExamine(true);
         break;
@@ -221,6 +232,10 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   };
 
   const handleDialogueFromExamine = (dialogueId: string) => {
+    // Clear current dialogue state first
+    setCurrentEvent(null);
+    setDisplayLines([]);
+    
     const manager = gameStateRef.current!.getManager();
     manager.start(dialogueId);
     const generator = manager.advance();
@@ -228,9 +243,6 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   };
 
   const handleOptionsEscape = () => {
-    if (currentEvent?.type === 'choice') {
-      setPreviousOptions(currentEvent.options);
-    }
     setDisplayLines([]);
     setShowActionMenu(true);
   };
@@ -251,8 +263,10 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   // call this one time once we have the dialogue manager and generator set up
   // to pump the state forward
   useEffect(() => {
-    processNextEvent(); 
-  }, [dialogueGenerator]);
+    if (dialogueGenerator && !currentEvent) {
+      processNextEvent(); 
+    }
+  }, [dialogueGenerator, processNextEvent, currentEvent]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {

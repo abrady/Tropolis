@@ -161,26 +161,6 @@ export interface SpeakerValidationResult {
   undefinedSpeakers: { speaker: string; node: string; line: string }[];
 }
 
-function extractSpeakersFromNode(node: GabNode): string[] {
-  const speakers: string[] = [];
-  const lines = node.body.split(/\r?\n/);
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    
-    // Match speaker pattern: "SpeakerName: dialogue text"
-    const speakerMatch = trimmed.match(/^([A-Za-z][A-Za-z0-9_]*)\s*:\s*.+$/);
-    if (speakerMatch) {
-      const speaker = speakerMatch[1];
-      if (!speakers.includes(speaker)) {
-        speakers.push(speaker);
-      }
-    }
-  }
-  
-  return speakers;
-}
 
 export function validateSpeakers(gabFile: GabFile): SpeakerValidationResult {
   const undefinedSpeakers: { speaker: string; node: string; line: string }[] = [];

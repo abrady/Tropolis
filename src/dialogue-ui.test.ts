@@ -1,25 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DialogueManager } from './dialogue-manager';
 
-// Mock DOM elements for testing UI behavior
-const mockElement = () => ({
-  innerHTML: '',
-  style: { display: 'none' },
-  classList: {
-    add: vi.fn(),
-    remove: vi.fn()
-  },
-  appendChild: vi.fn(),
-  textContent: '',
-  onclick: null
-});
 
-const mockButton = () => ({
-  ...mockElement(),
-  click: vi.fn(),
-  textContent: '',
-  id: ''
-});
 
 describe('Dialogue UI Rendering Tests', () => {
   const handlers = {

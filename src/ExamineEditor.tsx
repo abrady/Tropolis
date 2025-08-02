@@ -89,7 +89,7 @@ export default function ExamineEditor({ width, height, background, onClose, init
     if (initialRects.length > 0) {
       setRectangles(initialRects.map(convertToViewportCoords));
     }
-  }, [initialRects, width, height]);
+  }, [initialRects, width, height, convertToViewportCoords]);
 
   const getPointerPos = (e: React.MouseEvent) => {
     const rect = svgRef.current!.getBoundingClientRect();

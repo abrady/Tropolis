@@ -13,14 +13,14 @@ const bookstoreDialogueData = getRoomDialogueData('bookstore')!;
 const sector7DialogueData = getRoomDialogueData('sector7')!;
 
 const levels: Record<string, LevelData> = {
-  CryoRoom: {
+  cryoroom: {
     image: new Image(),
     dialogue: cryoroomDialogueData.dialogue,
     start: cryoroomDialogueData.start,
     examine: getRoomExamineRects('cryoroom'),
-    connections: ['mall', 'Sector7']
+    connections: ['mall', 'sector7']
   },
-  Test: { 
+  test: { 
       image: new Image(), 
       dialogue: testDialogueData.dialogue, 
       start: testDialogueData.start,
@@ -32,7 +32,7 @@ const levels: Record<string, LevelData> = {
     dialogue: mallDialogueData.dialogue,
     start: mallDialogueData.start,
     examine: getRoomExamineRects('mall'),
-    connections: ['bookstore', 'CryoRoom']
+    connections: ['bookstore', 'cryoroom']
   },
   bookstore: {
     image: new Image(),
@@ -41,19 +41,19 @@ const levels: Record<string, LevelData> = {
     examine: getRoomExamineRects('bookstore'),
     connections: ['mall']
   },
-  Sector7: {
+  sector7: {
     image: new Image(),
     dialogue: sector7DialogueData.dialogue,
     start: sector7DialogueData.start,
     examine: getRoomExamineRects('sector7'),
-    connections: ['mall', 'CryoRoom']
+    connections: ['mall', 'cryoroom']
   },
 };
 
-levels.Test.image.src = cryoroomImg;
-levels.CryoRoom.image.src = cryoroomImg;
+levels.test.image.src = cryoroomImg;
+levels.cryoroom.image.src = cryoroomImg;
 levels.mall.image.src = mallImg;
 levels.bookstore.image.src = bookstoreImg;
-levels.Sector7.image.src = sector7Img;
+levels.sector7.image.src = sector7Img;
 
 export { levels };

@@ -45,7 +45,7 @@ title: LetsContinue
 ---
 Overlord: Good. Go to Sector 7. The maintenance tunnels will take you there safely.
 Overlord: I'm afraid I can't go with you, so come back here if you have any questions.
-<<loadLevel Sector7>>
+<<loadLevel sector7>>
 # Overlord: Before you go, prove your focus with a simple test.
 # Overlord: Move all five rings to the far right peg without placing a larger ring on top of a smaller one.
 # <<loadPuzzle TowerOfHanoi>>
@@ -96,7 +96,7 @@ Overlord: The important thing is that your skills and knowledge remain intact.
 # Overlord: I must remain here, but you may explore the city as you see fit.
 # Overlord: Remember, your skills are vital to our survival.
 # Overlord: Good luck, 11235.
-# <<loadLevel Sector7>>
+# <<loadLevel sector7>>
 # ===
 # 
 

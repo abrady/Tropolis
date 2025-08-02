@@ -1,4 +1,4 @@
-import { parseFrames, Frame } from './frame-utils';
+import { parseFrames } from './frame-utils';
 import { describe, it, expect } from 'vitest';
 
 describe('parseFrames', () => {

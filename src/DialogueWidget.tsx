@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface DialogueWidgetProps {
   lines: string[];
@@ -17,13 +17,13 @@ export default function DialogueWidget({
     setCurrentLineIndex(0);
   }, [lines]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentLineIndex < lines.length - 1) {
       setCurrentLineIndex(currentLineIndex + 1);
     } else {
       onNext();
     }
-  };
+  }, [currentLineIndex, lines.length, onNext]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {

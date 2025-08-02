@@ -1,4 +1,4 @@
-import { ExamineRect, ExamineRectType, DialogueExamineRect } from '../ExamineEditor';
+import { ExamineRect } from '../ExamineEditor';
 
 export const mallExamineRects: ExamineRect[] = [
   {

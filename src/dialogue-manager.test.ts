@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { DialogueManager, DialogueEvent } from './dialogue-manager';
+import { describe, it, expect } from 'vitest';
+import { DialogueManager } from './dialogue-manager';
 
 describe('DialogueManager Tests', () => {
-  let commandCalls: { name: string; args: string[] }[] = [];
 
   const noopHandlers = {
     loadPuzzle: () => {},
@@ -10,21 +9,6 @@ describe('DialogueManager Tests', () => {
     return: () => {}
   };
   
-  const testHandlers = {
-    loadPuzzle: (args: string[]) => {
-      commandCalls.push({ name: 'loadPuzzle', args });
-    },
-    loadLevel: (args: string[]) => {
-      commandCalls.push({ name: 'loadLevel', args });
-    },
-    return: (args: string[]) => {
-      commandCalls.push({ name: 'return', args });
-    }
-  };
-
-  beforeEach(() => {
-    commandCalls = [];
-  });
 
   describe('Basic Command Parsing', () => {
     const samplePuzzle = `title: TestNode

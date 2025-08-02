@@ -67,11 +67,6 @@ describe('loadLevel validation', () => {
     }
     
     if (invalidReferences.length > 0) {
-      const errorMessage = 'Invalid loadLevel references found:\n' +
-        invalidReferences.map(ref => 
-          `  ${ref.file}:${ref.line} - loadLevel ${ref.level} (available: ${availableLevels.join(', ')})`
-        ).join('\n');
-      
       expect(invalidReferences).toEqual([]);
     }
   });
