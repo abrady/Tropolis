@@ -21,6 +21,7 @@ export class GameState {
 
   inventory = new Set<string>();
   visited = new Set<string>();
+  dialogueVisited: Record<string, boolean> = {};
   flags: Record<string, boolean> = {};
   currentLevel: LevelName = 'test';
 
@@ -35,11 +36,15 @@ export class GameState {
   startDialogue(dialogueId: string): DialogueGenerator {
     const data = this.levels[this.currentLevel];
     if (!data) throw new Error(`Unknown level: ${this.currentLevel}`);
-    const manager = new DialogueManager(data.dialogue, {
-      loadPuzzle: () => {},
-      loadLevel: () => {},
-      return: () => {},
-    });
+    const manager = new DialogueManager(
+      data.dialogue,
+      {
+        loadPuzzle: () => {},
+        loadLevel: () => {},
+        return: () => {},
+      },
+      this.dialogueVisited
+    );
     manager.start(dialogueId);
     this.dialogueGenerator = manager.advance();
     return this.dialogueGenerator;
