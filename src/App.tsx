@@ -291,6 +291,16 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if (showExamine) {
         if (event.code === 'Escape') {
           event.preventDefault();
