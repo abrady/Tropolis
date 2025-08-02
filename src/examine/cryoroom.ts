@@ -1,4 +1,4 @@
-import { ExamineRect, ExamineRectType, DialogueExamineRect } from '../ExamineEditor';
+import { ExamineRect, ExamineRectType, DialogueExamineRect } from '../examine';
 
 export const cryoroomExamineRects: ExamineRect[] = [
   {

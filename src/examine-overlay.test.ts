@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getRectAtPosition } from './ExamineOverlay';
-import { ExamineRect, ExamineRectType, NoneExamineRect } from './ExamineEditor';
+import { ExamineRect, ExamineRectType, NoneExamineRect } from './examine';
 
 describe('getRectAtPosition', () => {
   const rects: ExamineRect[] = [

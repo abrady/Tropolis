@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { exportRectangles, ExamineRect, ExamineRectType, NoneExamineRect } from './ExamineEditor';
+import { exportRectangles } from './ExamineEditor';
+import { ExamineRect, ExamineRectType, NoneExamineRect } from './examine';
 
 describe('exportRectangles', () => {
   it('returns JSON string of rectangles', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ExamineRect, ExamineRectType, DialogueExamineRect } from './ExamineEditor';
+import { ExamineRect, ExamineRectType, DialogueExamineRect } from './examine';
 import { parseGab } from './gab-utils';
 import { roomExamineData } from './examine/rooms';
 import { readFileSync } from 'fs';

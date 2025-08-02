@@ -92,7 +92,7 @@ export class DialogueManager {
   }
 
   isCurrentNodeExamine(): boolean {
-    return this.currentEvent?.node?.tags.has('examine') || false;
+    return this.state.content?.tags.has('examine') || false;
   }
 
   getCurrenGenerator(): DialogueGenerator | undefined {

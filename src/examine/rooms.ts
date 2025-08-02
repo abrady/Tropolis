@@ -1,4 +1,4 @@
-import { ExamineRect } from '../ExamineEditor';
+import { ExamineRect } from '../examine';
 import { cryoroomExamineRects } from './cryoroom';
 import { mallExamineRects } from './mall';
 import { sector7ExamineRects } from './sector7';
