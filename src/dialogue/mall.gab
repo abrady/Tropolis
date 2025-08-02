@@ -11,32 +11,32 @@ You: Whoof, this place has seen better days. Better look around and see what we 
 # ================= Examinables =================
 
 title: Mall_Shops
-tag: examine
+tags: examine
 ---
 You: Mostly ruins, but some lights are still on, and odd sounds indicate some automated systems still function.
 ===
 
 title: Mall_Tree
-tag: examine
+tags: examine
 ---
 You: A large tree grows in the center of the mall, its branches reaching up towards the glass ceiling.
 You: It's a reminder of nature's resilience, even in a place like this.
 ===
 
 title: Mall_Upstairs
-tag: examine
+tags: examine
 ---
 You: The upstairs is mostly intact, but it doesn't look too safe. let's try downstairs first.
 ===
 
 title: Mall_Shops2
-tag: examine
+tags: examine
 ---
 You: More shops, stretching off into the distance. Some are still lit, but most are dark and abandoned.
 ===
 
 title: Mall_FoodCourt
-tag: examine
+tags: examine
 ---
 You: The food court is eerily quiet, with overturned chairs and dead screens.
 You: Looks like the last meal was served a long time ago.

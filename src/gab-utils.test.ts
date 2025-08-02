@@ -32,6 +32,11 @@ describe('parseGab', () => {
     expect(result[1].metadata).toEqual({ position: '0,0' });
     expect(result[1].body).toBe('Next node text');
   });
+
+  it('throws on unknown metadata fields', () => {
+    const content = `title: Foo\n tag: bar\n---\n===`;
+    expect(() => parseGab(content)).toThrow("Unknown field 'tag' in node 'Foo'");
+  });
 });
 
 describe('loadLevel validation', () => {

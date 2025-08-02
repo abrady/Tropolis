@@ -1,18 +1,23 @@
 import * as vscode from 'vscode';
-import { parseGab, validateGab } from './gab-utils';
+import { parseGab, validateGab, GabParseError } from './gab-utils';
 
 function refreshDiagnostics(doc: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
   if (doc.languageId !== 'gab') return;
   const diagnostics: vscode.Diagnostic[] = [];
   const text = doc.getText();
   try {
-    const nodes = parseGab(text);
+    const errors: GabParseError[] = [];
+    const nodes = parseGab(text, errors);
     const start = nodes[0]?.title || '';
     const result = validateGab(nodes, start);
     const lines = text.split(/\r?\n/);
     const findLine = (title: string): number => {
       return lines.findIndex(l => l.startsWith('title:') && l.includes(title));
     };
+    for (const e of errors) {
+      const range = new vscode.Range(e.line, 0, e.line, lines[e.line].length);
+      diagnostics.push(new vscode.Diagnostic(range, e.message, vscode.DiagnosticSeverity.Error));
+    }
     for (const t of result.unreachable) {
       const line = findLine(t);
       if (line !== -1) {

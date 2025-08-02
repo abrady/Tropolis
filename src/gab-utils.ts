@@ -4,16 +4,22 @@ export interface GabNode {
   metadata: Record<string, string>;
 }
 
+export interface GabParseError {
+  line: number;
+  message: string;
+}
+
 function stripComment(line: string): string {
   const commentIndex = line.indexOf('#');
   if (commentIndex === -1) return line;
   return line.slice(0, commentIndex);
 }
 
-export function parseGab(content: string): GabNode[] {
+export function parseGab(content: string, errors?: GabParseError[]): GabNode[] {
   const nodes: GabNode[] = [];
   const lines = content.split(/\r?\n/);
   let i = 0;
+  const validFields = new Set(['tags', 'position']);
 
   while (i < lines.length) {
     let line = stripComment(lines[i]).trim();
@@ -36,7 +42,16 @@ export function parseGab(content: string): GabNode[] {
           if (sep !== -1) {
             const key = line.slice(0, sep).trim();
             const value = line.slice(sep + 1).trim();
-            node.metadata[key] = value;
+            if (validFields.has(key)) {
+              node.metadata[key] = value;
+            } else {
+              const msg = `Unknown field '${key}' in node '${node.title}'`;
+              if (errors) {
+                errors.push({ line: i, message: msg });
+              } else {
+                throw new Error(`${msg} (line ${i + 1})`);
+              }
+            }
             continue;
           }
         }
