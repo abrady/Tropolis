@@ -1,5 +1,9 @@
 import React, { useState, useRef } from 'react';
 
+// Original background image dimensions - should match ExamineOverlay
+const ORIGINAL_WIDTH = 1536;
+const ORIGINAL_HEIGHT = 1024;
+
 export enum ExamineRectType {
   None = 'none',
   Dialogue = 'dialogue',

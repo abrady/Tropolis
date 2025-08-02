@@ -154,18 +154,12 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
       dialogueGenerator.next();
 
     if (result.done) {
+      console.log('Dialogue ended');
       setCurrentEvent(null);
       setDialogueGenerator(null);
       setDisplayLines([]);
       
-      // Check if we were in an examine dialogue and should return to examine mode
-      const manager = gameStateRef.current!.getManager();
-      if (manager && manager.isCurrentNodeExamine()) {
-        setShowExamine(true);
-      } else {
-        // Fallback to action menu
-        setShowActionMenu(true);
-      }
+      setShowActionMenu(true);
       return;
     }
 

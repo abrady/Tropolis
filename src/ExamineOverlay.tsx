@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { ExamineRect, ExamineRectType } from './ExamineEditor';
 
+// Original background image dimensions
+const ORIGINAL_WIDTH = 1536;
+const ORIGINAL_HEIGHT = 1024;
+
+function scaleRect(rect: ExamineRect, scaleX: number, scaleY: number): ExamineRect {
+  return {
+    ...rect,
+    x: rect.x * scaleX,
+    y: rect.y * scaleY,
+    width: rect.width * scaleX,
+    height: rect.height * scaleY,
+  };
+}
+
 export function getRectAtPosition(rects: ExamineRect[], x: number, y: number): ExamineRect | null {
   for (const r of rects) {
     const minX = Math.min(r.x, r.x + r.width);
@@ -25,12 +39,19 @@ interface ExamineOverlayProps {
 
 export default function ExamineOverlay({ width, height, rects, onExit, onDialogue, debugMode = false }: ExamineOverlayProps) {
   const [hover, setHover] = useState<ExamineRect | null>(null);
+  
+  // Calculate scaling factors
+  const scaleX = width / ORIGINAL_WIDTH;
+  const scaleY = height / ORIGINAL_HEIGHT;
+  
+  // Scale all rects to current viewport
+  const scaledRects = rects.map(rect => scaleRect(rect, scaleX, scaleY));
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const bounds = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
     const x = e.clientX - bounds.left;
     const y = e.clientY - bounds.top;
-    const r = getRectAtPosition(rects, x, y);
+    const r = getRectAtPosition(scaledRects, x, y);
     setHover(r);
   };
 
@@ -79,7 +100,7 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
           height={height}
           style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 1000 }}
         >
-          {rects.map((rect, i) => (
+          {scaledRects.map((rect, i) => (
             <rect
               key={i}
               x={Math.min(rect.x, rect.x + rect.width)}
@@ -91,7 +112,7 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
               strokeWidth="2"
             />
           ))}
-          {rects.map((rect, i) => (
+          {scaledRects.map((rect, i) => (
             <text
               key={`text-${i}`}
               x={Math.min(rect.x, rect.x + rect.width) + 5}
@@ -102,9 +123,9 @@ export default function ExamineOverlay({ width, height, rects, onExit, onDialogu
               strokeWidth="0.5"
               style={{ pointerEvents: 'none' }}
             >
-              {rect.type === ExamineRectType.Dialogue ? `D: ${rect.dialogueNode}` : 
-               rect.type === ExamineRectType.AddToInventory ? `I: ${rect.item}` : 
-               `N: ${rect.args}`}
+              {rect.type === ExamineRectType.Dialogue ? `D: ${rects[i].dialogueNode}` : 
+               rect.type === ExamineRectType.AddToInventory ? `I: ${rects[i].item}` : 
+               `N: ${rects[i].args}`}
             </text>
           ))}
         </svg>
