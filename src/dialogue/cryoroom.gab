@@ -9,8 +9,8 @@ talkAnim: none
 title: CryoRoom_Intro
 tags: cryo, intro
 ---
-Overlord: Wake up 11235.
-Overlord: Wake up 11235. The city needs you.
+{!CryoRoom_Intro} Overlord: Wake up 11235.
+{!CryoRoom_Intro} Overlord: Wake up 11235. The city needs you.
 <<jump CryoRoom_Branch>>
 ===
 

@@ -262,7 +262,21 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
       i++;
       continue;
     }
-    if (trimmed) texts.push(lines[i]);
+    if (trimmed) {
+      const gateMatch = trimmed.match(/^\{(!?)([^}]+)\}\s*(.*)/);
+      if (gateMatch) {
+        const negate = gateMatch[1] === '!';
+        const condition = gateMatch[2];
+        const lineText = gateMatch[3];
+        const visited = visitedNodes.has(condition);
+        const shouldShow = negate ? !visited : visited;
+        if (shouldShow && lineText) {
+          texts.push(lineText);
+        }
+      } else {
+        texts.push(lines[i]);
+      }
+    }
     i++;
   }
 
@@ -272,12 +286,15 @@ function parseNodeBody(gabNode: GabNode, visitedNodes: Set<string>): DialogueNod
     if (!trimmed) continue;
     if (trimmed.startsWith('->')) {
       let text = trimmed.slice(2).trim();
-      // check for gating condition {Node}
-      const gateMatch = text.match(/^\{([^}]+)\}\s*(.*)/);
+      // check for gating condition {Node} or {!Node}
+      const gateMatch = text.match(/^\{(!?)([^}]+)\}\s*(.*)/);
       if (gateMatch) {
-        const condition = gateMatch[1];
-        text = gateMatch[2].trim();
-        if (!visitedNodes.has(condition)) {
+        const negate = gateMatch[1] === '!';
+        const condition = gateMatch[2];
+        text = gateMatch[3].trim();
+        const visited = visitedNodes.has(condition);
+        const shouldShow = negate ? !visited : visited;
+        if (!shouldShow) {
           // skip option if condition not met
           // also skip the following line with jump
           if (i + 1 < lines.length && lines[i + 1].trim().startsWith('<<')) i++;
