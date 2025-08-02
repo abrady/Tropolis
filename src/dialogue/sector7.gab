@@ -1,3 +1,7 @@
+speaker: Overlord
+---
+talkAnim overlordTalk
+===
 title: Sector7_Start
 tags: sector7
 ---

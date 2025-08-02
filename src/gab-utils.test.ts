@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseGab, GabNode, parseGabFile } from './gab-utils';
+import { parseGab, GabNode, parseGabFile, validateSpeakers } from './gab-utils';
 import { levels } from './examine/levels';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -148,5 +148,137 @@ Start of line # end comment
 ===`;
     const result = parseGab(content);
     expect(result[0].body).toBe('Start of line \n   \n\t');
+  });
+});
+
+describe('speaker validation', () => {
+  it('validates that all referenced speakers are defined', () => {
+    const content = `speaker: Alice
+---
+talkAnim aliceTalk
+===
+speaker: Bob
+---
+talkAnim bobTalk
+===
+title: Conversation
+---
+Alice: Hello there!
+Bob: Hi Alice, how are you?
+Alice: I'm doing well, thanks.
+===`;
+    const gabFile = parseGabFile(content);
+    const result = validateSpeakers(gabFile);
+    expect(result.undefinedSpeakers).toEqual([]);
+  });
+
+  it('detects undefined speakers', () => {
+    const content = `speaker: Alice
+---
+talkAnim aliceTalk
+===
+title: Conversation
+---
+Alice: Hello there!
+Charlie: Who is this Charlie guy?
+Bob: I don't know.
+===`;
+    const gabFile = parseGabFile(content);
+    const result = validateSpeakers(gabFile);
+    expect(result.undefinedSpeakers).toEqual([
+      { speaker: 'Charlie', node: 'Conversation', line: 'Charlie: Who is this Charlie guy?' },
+      { speaker: 'Bob', node: 'Conversation', line: 'Bob: I don\'t know.' }
+    ]);
+  });
+
+  it('handles speakers with underscores and numbers', () => {
+    const content = `speaker: AI_Bot_2
+---
+talkAnim robotTalk
+===
+title: FutureChat
+---
+AI_Bot_2: Greetings, human.
+User123: This speaker is not defined.
+===`;
+    const gabFile = parseGabFile(content);
+    const result = validateSpeakers(gabFile);
+    expect(result.undefinedSpeakers).toEqual([
+      { speaker: 'User123', node: 'FutureChat', line: 'User123: This speaker is not defined.' }
+    ]);
+  });
+
+  it('ignores lines that do not match speaker pattern', () => {
+    const content = `speaker: Alice
+---
+talkAnim aliceTalk
+===
+title: Test
+---
+Alice: This is valid dialogue.
+-> This is a choice option
+    Not speaker: dialogue
+Some random text without colon
+: Invalid speaker name starting with colon
+123Invalid: Numbers can't start speaker names
+===`;
+    const gabFile = parseGabFile(content);
+    const result = validateSpeakers(gabFile);
+    expect(result.undefinedSpeakers).toEqual([]);
+  });
+
+  it('validates speakers across multiple nodes', () => {
+    const content = `speaker: Alice
+---
+talkAnim aliceTalk
+===
+title: Node1
+---
+Alice: I'm in node 1.
+Bob: I'm undefined in node 1.
+===
+title: Node2
+---
+Alice: I'm in node 2.
+Charlie: I'm undefined in node 2.
+===`;
+    const gabFile = parseGabFile(content);
+    const result = validateSpeakers(gabFile);
+    expect(result.undefinedSpeakers).toEqual([
+      { speaker: 'Bob', node: 'Node1', line: 'Bob: I\'m undefined in node 1.' },
+      { speaker: 'Charlie', node: 'Node2', line: 'Charlie: I\'m undefined in node 2.' }
+    ]);
+  });
+
+  it('validates speakers in actual gab files', () => {
+    const dialogueDir = path.join(__dirname, 'dialogue');
+    const gabFiles = fs.readdirSync(dialogueDir)
+      .filter(file => file.endsWith('.gab'));
+    
+    const issues: { file: string; speaker: string; node: string }[] = [];
+    
+    for (const gabFile of gabFiles) {
+      const content = fs.readFileSync(path.join(dialogueDir, gabFile), 'utf-8');
+      const parsedFile = parseGabFile(content);
+      const result = validateSpeakers(parsedFile);
+      
+      for (const issue of result.undefinedSpeakers) {
+        issues.push({
+          file: gabFile,
+          speaker: issue.speaker,
+          node: issue.node
+        });
+      }
+    }
+    
+    if (issues.length > 0) {
+      const errorMessage = 'Undefined speakers found in gab files:\n' +
+        issues.map(issue => 
+          `  ${issue.file} - Speaker "${issue.speaker}" in node "${issue.node}"`
+        ).join('\n');
+      
+      console.log(errorMessage);
+      expect(issues).toEqual([]);
+    }
   });
 });

@@ -155,6 +155,59 @@ export interface GabValidationResult {
   nonterminating: string[];
 }
 
+export interface SpeakerValidationResult {
+  undefinedSpeakers: { speaker: string; node: string; line: string }[];
+}
+
+function extractSpeakersFromNode(node: GabNode): string[] {
+  const speakers: string[] = [];
+  const lines = node.body.split(/\r?\n/);
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // Match speaker pattern: "SpeakerName: dialogue text"
+    const speakerMatch = trimmed.match(/^([A-Za-z][A-Za-z0-9_]*)\s*:\s*.+$/);
+    if (speakerMatch) {
+      const speaker = speakerMatch[1];
+      if (!speakers.includes(speaker)) {
+        speakers.push(speaker);
+      }
+    }
+  }
+  
+  return speakers;
+}
+
+export function validateSpeakers(gabFile: GabFile): SpeakerValidationResult {
+  const undefinedSpeakers: { speaker: string; node: string; line: string }[] = [];
+  const definedSpeakers = Object.keys(gabFile.speakers);
+  
+  for (const node of gabFile.nodes) {
+    const lines = node.body.split(/\r?\n/);
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      
+      const speakerMatch = trimmed.match(/^([A-Za-z][A-Za-z0-9_]*)\s*:\s*.+$/);
+      if (speakerMatch) {
+        const speaker = speakerMatch[1];
+        if (!definedSpeakers.includes(speaker)) {
+          undefinedSpeakers.push({
+            speaker,
+            node: node.title,
+            line: trimmed
+          });
+        }
+      }
+    }
+  }
+  
+  return { undefinedSpeakers };
+}
+
 export function validateGab(nodes: GabNode[], start: string, terminatingCommands: string[] = ['loadPuzzle', 'loadLevel']): GabValidationResult {
   const nodeMap = new Map<string, GabNode>();
   for (const n of nodes) nodeMap.set(n.title, n);
