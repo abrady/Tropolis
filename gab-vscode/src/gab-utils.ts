@@ -227,7 +227,11 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   const nonterminating: string[] = [];
   for (const n of reachable) {
-    if (!canReachFinal.has(n)) nonterminating.push(n);
+    const node = nodeMap.get(n);
+    const tags = node?.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    if (!canReachFinal.has(n) && !tags.includes('examine')) {
+      nonterminating.push(n);
+    }
   }
 
   return { unreachable, nonterminating };
