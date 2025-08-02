@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseGab, GabNode, validateGab } from './gab-utils';
+import { parseGab, GabNode, validateGab, GabParseError } from './gab-utils';
 
 describe('gab-vscode linter', () => {
   describe('basic node parsing', () => {
@@ -60,6 +60,12 @@ Speaker1: Third line
       const result = parseGab(content);
       expect(result.length).toBe(1);
       expect(result[0].body).toBe('Speaker1: First line\nSpeaker2: Second line\nSpeaker1: Third line');
+    });
+    it('reports unknown metadata fields', () => {
+      const content = `title: Foo\n tag: bar\n---\n===`;
+      const errors: GabParseError[] = [];
+      parseGab(content, errors);
+      expect(errors).toEqual([{ line: 1, message: "Unknown field 'tag' in node 'Foo'" }]);
     });
   });
 
