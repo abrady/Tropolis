@@ -1,4 +1,58 @@
 import { ExamineRect, ExamineRectType, DialogueExamineRect } from '../ExamineEditor';
 
-export const cryoroomExamineRects: ExamineRect[] =
-[{"x":142.47963800904978,"y":5.491536785654433,"width":838.660633484163,"height":179.8478297301827,"type":"dialogue","level":"","dialogueNode":"Mall_Tree"},{"x":558.3348416289593,"y":186.71225071225072,"width":278.0090497737557,"height":726.2557399027987,"type":"dialogue","level":"","dialogueNode":"Mall_Tree"},{"type":"none","x":1017.0497737556562,"y":378.9160382101559,"width":0,"height":0,"args":""},{"x":1003.1493212669684,"y":363.8143120496062,"width":293.06787330316746,"height":486.00100553041733,"type":"dialogue","level":"","dialogueNode":"Mall_Upstairs"},{"x":13.900452488687783,"y":229.27166080107258,"width":531.6923076923077,"height":680.9505614211497,"type":"dialogue","level":"","dialogueNode":"Mall_Shops"},{"x":839.819004524887,"y":547.7807943690296,"width":156.38009049773757,"height":234.76319758672702,"type":"dialogue","level":"","dialogueNode":"Mall_Shops2"},{"x":1303.1674208144798,"y":479.1365845483493,"width":228.19909502262445,"height":363.8143120496062,"type":"dialogue","level":"","dialogueNode":"Mall_FoodCourt"}]
+export const mallExamineRects: ExamineRect[] = [
+  {
+    "x": 142.47963800904978,
+    "y": 5.491536785654433,
+    "width": 838.660633484163,
+    "height": 179.8478297301827,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_Tree"
+  },
+  {
+    "x": 558.3348416289593,
+    "y": 186.71225071225072,
+    "width": 278.0090497737557,
+    "height": 726.2557399027987,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_Tree"
+  },
+  {
+    "x": 1003.1493212669684,
+    "y": 363.8143120496062,
+    "width": 293.06787330316746,
+    "height": 486.00100553041733,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_Upstairs"
+  },
+  {
+    "x": 13.900452488687783,
+    "y": 229.27166080107258,
+    "width": 531.6923076923077,
+    "height": 680.9505614211497,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_Shops"
+  },
+  {
+    "x": 839.819004524887,
+    "y": 547.7807943690296,
+    "width": 156.38009049773757,
+    "height": 234.76319758672702,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_Shops2"
+  },
+  {
+    "x": 1303.1674208144798,
+    "y": 479.1365845483493,
+    "width": 228.19909502262445,
+    "height": 363.8143120496062,
+    "type": "dialogue",
+    "level": "mall",
+    "dialogueNode": "Mall_FoodCourt"
+  }
+]

@@ -28,3 +28,16 @@ tag: examine
 ---
 You: The upstairs is mostly intact, but it doesn't look too safe. let's try downstairs first.
 ===
+
+title: Mall_Shops2
+tag: examine
+---
+You: More shops, stretching off into the distance. Some are still lit, but most are dark and abandoned.
+===
+
+title: Mall_FoodCourt
+tag: examine
+---
+You: The food court is eerily quiet, with overturned chairs and dead screens.
+You: Looks like the last meal was served a long time ago.
+===
