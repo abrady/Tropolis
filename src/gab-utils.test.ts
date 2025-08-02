@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseGab, GabNode, parseGabFile, validateSpeakers } from './gab-utils';
+import { parseGab, GabNode, parseGabFile, validateSpeakers, validateGab } from './gab-utils';
 import { levels } from './examine/levels';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -290,12 +290,43 @@ Charlie: I'm undefined in node 2.
     
     if (issues.length > 0) {
       const errorMessage = 'Undefined speakers found in gab files:\n' +
-        issues.map(issue => 
+        issues.map(issue =>
           `  ${issue.file} - Speaker "${issue.speaker}" in node "${issue.node}"`
         ).join('\n');
-      
+
       console.log(errorMessage);
       expect(issues).toEqual([]);
     }
+  });
+});
+
+describe('validateGab', () => {
+  it('treats examine nodes as additional start points for cycle detection', () => {
+    const content = `title: Start
+---
+Speaker: start
+===
+
+title: Examine_Start
+tags: examine
+---
+Speaker: examining
+-> Go
+    <<jump Loop>>
+===
+
+title: Loop
+---
+Speaker: loop
+-> Back
+    <<jump Examine_Start>>
+===`;
+
+    const nodes = parseGab(content);
+    const result = validateGab(nodes, 'Start');
+
+    expect(result.unreachable).toEqual([]);
+    expect(result.nonterminating).toContain('Loop');
+    expect(result.nonterminating).not.toContain('Examine_Start');
   });
 });

@@ -211,6 +211,7 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   const edges = new Map<string, string[]>();
   const finalNodes = new Set<string>();
+  const examineStarts: string[] = [];
 
   const addEdge = (from: string, to: string) => {
     if (!edges.has(from)) edges.set(from, []);
@@ -219,18 +220,25 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   for (const n of nodes) {
     const { targets, command } = parseEdges(n.body);
+    const tags = n.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
     if (command && terminatingCommands.includes(command)) {
+      finalNodes.add(n.title);
+    }
+    if (targets.length === 0 && !command) {
       finalNodes.add(n.title);
     }
     for (const t of targets) {
       addEdge(n.title, t.target);
       if (t.detour) addEdge(t.target, n.title);
     }
+    if (tags.includes('examine')) examineStarts.push(n.title);
+    if (tags.includes('final')) finalNodes.add(n.title);
   }
 
   const reachable = new Set<string>();
   const queue: string[] = [];
   if (nodeMap.has(start)) queue.push(start);
+  for (const s of examineStarts) queue.push(s);
   while (queue.length) {
     const cur = queue.shift()!;
     if (reachable.has(cur)) continue;
@@ -246,7 +254,6 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
     if (!reachable.has(n.title) && !tags.includes('disabled') && !tags.includes('examine')) {
       unreachable.push(n.title);
     }
-    if (tags.includes('final')) finalNodes.add(n.title);
   }
 
   const reverse = new Map<string, string[]>();
@@ -271,7 +278,9 @@ export function validateGab(nodes: GabNode[], start: string, terminatingCommands
 
   const nonterminating: string[] = [];
   for (const n of reachable) {
-    if (!canReachFinal.has(n)) nonterminating.push(n);
+    const node = nodeMap.get(n);
+    const tags = node?.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    if (!canReachFinal.has(n) && !tags.includes('examine')) nonterminating.push(n);
   }
 
   return { unreachable, nonterminating };
