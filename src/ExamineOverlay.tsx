@@ -38,6 +38,7 @@ interface ExamineOverlayProps {
   rects: ExamineRect[];
   onExit?: () => void;
   onDialogue?: (dialogueId: string) => void;
+  onInventory?: (item: string) => void;
   debugMode?: boolean;
 }
 
@@ -47,6 +48,7 @@ export default function ExamineOverlay({
   rects,
   onExit,
   onDialogue,
+  onInventory,
   debugMode = false,
 }: ExamineOverlayProps) {
   const [hover, setHover] = useState<ExamineRect | null>(null);
@@ -74,7 +76,11 @@ export default function ExamineOverlay({
       } else if (hover.type === ExamineRectType.None) {
         console.log(`${hover.args} clicked`);
       } else if (hover.type === ExamineRectType.AddToInventory) {
+        if (!onInventory) {
+          throw new Error(`No onInventory handler provided for inventory item: ${hover.item}`);
+        }
         console.log(`${hover.item} clicked`);
+        onInventory(hover.item);
       }
       if (onExit) onExit();
     }

@@ -257,6 +257,15 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
     setDialogueGenerator(generator);
   };
 
+  const handleInventoryPickup = (item: string) => {
+    // Add item to inventory
+    gameStateRef.current!.addItem(item);
+    
+    // Start pickup dialogue - convert item name to dialogue node name
+    const dialogueId = `Pickup${item.charAt(0).toUpperCase() + item.slice(1)}`;
+    handleDialogueFromExamine(dialogueId);
+  };
+
   const handleOptionsEscape = () => {
     setDisplayLines([]);
     setShowActionMenu(true);
@@ -332,6 +341,7 @@ export default function App({ initialLevel = 'cryoroom' }: AppProps) {
           rects={levels[gameStateRef.current!.currentLevel].examine}
           onExit={() => setShowExamine(false)}
           onDialogue={handleDialogueFromExamine}
+          onInventory={handleInventoryPickup}
           debugMode={examineDebugMode}
         />
       )}

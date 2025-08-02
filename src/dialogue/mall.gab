@@ -41,3 +41,10 @@ tags: examine
 You: The food court is eerily quiet, with overturned chairs and dead screens.
 You: Looks like the last meal was served a long time ago.
 ===
+
+# ================= Pickups =================
+
+title: PickupGlassShards
+---
+You: Some glass shards. I suppose I can just grab these.
+===
