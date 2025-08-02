@@ -113,11 +113,10 @@ interface AppProps {
 
 export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const viewportSize = useViewportSize();
-  const gameStateRef = useRef<GameState>();
+  const gameStateRef = useRef<GameState>(null);
   if (!gameStateRef.current) {
     gameStateRef.current = new GameState(levels, initialLevel);
   }
-  const [manager, setManager] = useState<DialogueManager>(() => gameStateRef.current!.getManager());
   const [dialogueGenerator, setDialogueGenerator] = useState<Generator<DialogueEvent, void, DialogueAdvanceParam> | null>(null);
   const [currentEvent, setCurrentEvent] = useState<DialogueEvent | null>(null);
   const [displayLines, setDisplayLines] = useState<string[]>([]);
@@ -131,7 +130,10 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleDialogueAction = (command: string, args: string[]) => {
-    if (command === 'loadPuzzle' && args[0] === 'TowerOfHanoi') {
+    if (command === 'loadPuzzle') {
+      if(args[0] !== 'TowerOfHanoi') {
+        throw new Error(`Unknown puzzle type: ${args[0]}`);
+      }
       setShowPuzzle(true);
       
       setTimeout(() => {
@@ -148,35 +150,44 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
     } else if (command === 'loadLevel') {
       const gs = gameStateRef.current!;
       gs.gotoLevel(args[0]);
-      setManager(gs.getManager());
       setBackground(gs.getBackground());
       const gen = gs.getManager().advance();
       setDialogueGenerator(gen);
-      const first = gen.next();
-      handleGeneratorResult(first);
     }
     // Auto-advance after processing action
     else {
-      processNextEvent();
+      throw new Error(`Unknown command: ${command}`);
     }
   };
 
-  const processNextEvent = () => {
+  const processNextEvent = (param?: DialogueAdvanceParam) => {
     if (!dialogueGenerator) return;
     
-    const result = dialogueGenerator.next();
-    handleGeneratorResult(result);    
-  };
+    const result = param ?
+      dialogueGenerator.next(param) :
+      dialogueGenerator.next();
 
-  const handleGeneratorResult = (result: IteratorResult<DialogueEvent, void>) => {
     if (result.done) {
+      console.error('Dialogue generator reached done state unexpectedly');
       setCurrentEvent(null);
+      setDialogueGenerator(null);
+      setDisplayLines([]);
+      
+      // Check if we were in an examine dialogue and should return to examine mode
+      const manager = gameStateRef.current!.getManager();
+      if (manager && manager.isCurrentNodeExamine()) {
+        setShowExamine(true);
+      } else {
+        // Fallback to action menu
+        setShowActionMenu(true);
+      }
       return;
     }
 
     const event = result.value;
     setCurrentEvent(event);
     
+    const manager = gameStateRef.current!.getManager();
     switch (event.type) {
       case 'line':
         setDisplayLines([event.text]);
@@ -198,9 +209,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
     
   const handleOptionSelect = (optionIndex: number) => {
     if (!dialogueGenerator) return;
-    
-    const result = dialogueGenerator.next({ type: 'choice', optionIndex });
-    handleGeneratorResult(result);
+    processNextEvent({ type: 'choice', optionIndex }); 
   };
 
   const handleMenuAction = (action: ActionType) => {
@@ -223,11 +232,10 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   };
 
   const handleDialogueFromExamine = (dialogueId: string) => {
+    const manager = gameStateRef.current!.getManager();
     manager.start(dialogueId);
     const generator = manager.advance();
     setDialogueGenerator(generator);
-    const first = generator.next();
-    handleGeneratorResult(first);
   };
 
   const handleOptionsEscape = () => {
@@ -238,7 +246,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
     setShowActionMenu(true);
   };
 
-  const handleNext = () => {
+  const handleNextLine = () => {
     if (currentEvent?.type === 'line') {
       processNextEvent();
     }
@@ -248,16 +256,13 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
   useEffect(() => {
     const gs = gameStateRef.current!;
     const m = gs.getManager();
-    const generator = m.advance();
-    setManager(m);
-    setDialogueGenerator(generator);
+    setDialogueGenerator(m.advance());
   }, []);
 
   // call this one time once we have the dialogue manager and generator set up
+  // to pump the state forward
   useEffect(() => {
-    if (!dialogueGenerator) return;
-    const first = dialogueGenerator.next();
-    handleGeneratorResult(first);
+    processNextEvent(); 
   }, [dialogueGenerator]);
 
   useEffect(() => {
@@ -316,7 +321,7 @@ export default function App({ initialLevel = 'CryoRoom' }: AppProps) {
           <DialogueWidget
             lines={displayLines}
             showNextButton={currentEvent?.type === 'line'}
-            onNext={handleNext}
+            onNext={handleNextLine}
           />
           <OptionsWidget
             options={showActionMenu ? [] : (currentEvent?.type === 'choice' ? currentEvent.options : [])}

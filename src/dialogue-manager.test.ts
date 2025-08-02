@@ -169,4 +169,34 @@ Bob: I'm doing well, thanks.
       expect(dm.getAnimationForSpeaker('Bob')).toBe('bobTalk');
     });
   });
+
+  describe('examine node detection', () => {
+    const examineDialogue = `title: RegularNode
+---
+Alice: This is a regular dialogue node.
+===
+title: ExamineNode
+tags: examine
+---
+Alice: This is an examine dialogue node.
+===`;
+
+    it('detects examine tagged nodes correctly', () => {
+      const dm = new DialogueManager(examineDialogue, noopHandlers);
+      
+      // Regular node should not be marked as examine
+      dm.start('RegularNode');
+      expect(dm.isCurrentNodeExamine()).toBe(false);
+      
+      // Examine tagged node should be marked as examine
+      dm.start('ExamineNode');
+      expect(dm.isCurrentNodeExamine()).toBe(true);
+    });
+
+    it('returns false for non-existent current node', () => {
+      const dm = new DialogueManager(examineDialogue, noopHandlers);
+      // Before starting any dialogue
+      expect(dm.isCurrentNodeExamine()).toBe(false);
+    });
+  });
 });

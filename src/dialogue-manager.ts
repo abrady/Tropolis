@@ -85,6 +85,14 @@ export class DialogueManager {
     return anim;
   }
 
+  isCurrentNodeExamine(): boolean {
+    if (!this.state.currentNode) return false;
+    const node = this.nodes[this.state.currentNode];
+    if (!node) return false;
+    const tags = node.metadata['tags']?.split(',').map(s => s.trim()) ?? [];
+    return tags.includes('examine');
+  }
+
   start(startNode: string): void {
     this.goto(startNode); // set the initial state
   }
